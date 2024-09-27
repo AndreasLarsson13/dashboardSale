@@ -81,7 +81,7 @@ const ProductItem = ({ product, onDelete }) => {
         >
           Ta bort
         </button>
-         <button
+         {/* <button
           onClick={handleEdit}
           style={{
             backgroundColor: "#4CAF50",
@@ -93,7 +93,7 @@ const ProductItem = ({ product, onDelete }) => {
           }}
         >
           Edit
-        </button> 
+        </button> */} 
       </div>
     </div>
   );

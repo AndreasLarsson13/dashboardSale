@@ -20,20 +20,22 @@ const ProductList = () => {
       }
 
       try {
-        const token = await user.getIdToken(); // Get the user's ID token
-
+        const token = await user.getIdToken(); // Få användarens ID-token
+      
         const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products', {
           headers: {
-            Authorization: `Bearer ${token}`, // Send the token in the header
+            Authorization: `Bearer ${token}`, // Skicka token i header
           },
           params: {
-            uid: user.uid, // Optional: you can send the uid as a query parameter if needed
-            uidEmail: user.email, // Optional: you can send the email if needed
+            uid: user.uid, // Valfritt: skicka uid som query parameter
+            uidEmail: user.email, // Valfritt: skicka e-post om det behövs
           },
+          withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
         });
-
-        setProducts(response.data);
-      } catch (error) {
+      
+        console.log(response.data);
+      } 
+      catch (error) {
         setError(error.message);
       } finally {
         setLoading(false);
@@ -55,7 +57,7 @@ const ProductList = () => {
 
       const token = await user.getIdToken(); // Get the user's ID token
 
-      await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, {
+      await axios.delete(`http://localhost:8080/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token in the header
         },
