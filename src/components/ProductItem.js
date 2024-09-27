@@ -25,6 +25,8 @@ const ProductItem = ({ product, onDelete }) => {
     return plainText.length > maxLength ? plainText.substring(0, maxLength) + '...' : plainText;
   };
 
+  console.log(product)
+
   return (
     <div
       className="product-card"
@@ -81,7 +83,7 @@ const ProductItem = ({ product, onDelete }) => {
         >
           Ta bort
         </button>
-         {/* <button
+    {/*      <button
           onClick={handleEdit}
           style={{
             backgroundColor: "#4CAF50",
@@ -92,8 +94,8 @@ const ProductItem = ({ product, onDelete }) => {
             cursor: "pointer",
           }}
         >
-          Edit
-        </button> */} 
+          Editera
+        </button>  */}
       </div>
     </div>
   );

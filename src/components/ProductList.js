@@ -33,7 +33,7 @@ const ProductList = () => {
           withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
         });
       
-        console.log(response.data);
+        setProducts(response.data);
       } 
       catch (error) {
         setError(error.message);
@@ -75,7 +75,7 @@ const ProductList = () => {
 
   return (
     <div className="product-list">
-      {products.map((product) => (
+      {products && products.map((product) => (
         <ProductItem key={product.id} product={product} onDelete={handleDelete} />
       ))}
     </div>
