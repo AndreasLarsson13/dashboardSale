@@ -150,7 +150,7 @@ const AddBrandPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:4011/addBrand', {
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addBrand', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

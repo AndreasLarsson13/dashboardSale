@@ -32,7 +32,7 @@ const GeneralInfo = ({ product, setProduct }) => {
       }
 
       try {
-        const response = await axios.get('http://localhost:4011/brands', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
           params: { uid: user.uid, uidEmail: user.email }, // Send the uid and email as query parameters
         });
 

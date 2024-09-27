@@ -19,7 +19,7 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
   useEffect(() => {
     const fetchVariations = async () => {
       try {
-        const response = await fetch('http://localhost:4011/productsoptions');
+        const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions');
         const data = await response.json();
         setVariationOptions(data);
       } catch (error) {

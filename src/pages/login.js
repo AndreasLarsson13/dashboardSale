@@ -22,7 +22,7 @@ const LoginPage = () => {
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Logga in </h2>
       {error && <p>{error}</p>}
       <form onSubmit={handleLogin}>
         <div>
@@ -35,7 +35,7 @@ const LoginPage = () => {
           />
         </div>
         <div>
-          <label>Password:</label>
+          <label>Lösenord:</label>
           <input
             type="password"
             value={password}
@@ -43,7 +43,7 @@ const LoginPage = () => {
             required
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">Logga in</button>
       </form>
     </div>
   );

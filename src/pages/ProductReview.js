@@ -47,7 +47,7 @@ const ReviewProductsPage = () => {
 
   const fetchPendingProducts = async () => {
     try {
-      const response = await fetch('http://localhost:4011/pendingProducts');
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/pendingProducts');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -63,7 +63,7 @@ const ReviewProductsPage = () => {
   const compareProduct = async (product) => {
     setIsComparing(true);
     try {
-      const response = await fetch('http://localhost:4011/compareProduct', {
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/compareProduct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const ReviewProductsPage = () => {
 
     setIsApproving(true);
     try {
-      const response = await fetch('http://localhost:4011/addproducts', {
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addproducts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
