@@ -157,7 +157,7 @@ const AddProductPage = () => {
             onRelatedProductsUpdate={handleRelatedProductsUpdate}
             onRelatedProductRemove={handleRelatedProductRemove}
           />
-          <button type="submit">Submit</button>
+          <button type="submit">Lägg till</button>
         </form>
       ) : (
         <div>Please log in to add products.</div>
