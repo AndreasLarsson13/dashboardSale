@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronDown, FaChevronUp, FaCheckCircle, FaExclamationCircle, FaTrash } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaTrash, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { storage } from './firebaseConfig'; // Adjust the path to your Firebase config
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
-
 
 const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove, product }) => {
   const [selectedVariations, setSelectedVariations] = useState([]);
   const [variationOptions, setVariationOptions] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
-  const [newVariation, setNewVariation] = useState('');
+  const [newPrice, setNewPrice] = useState('');
   const [imageFiles, setImageFiles] = useState({});
   const [imagePreviews, setImagePreviews] = useState({});
   const [uploadStatus, setUploadStatus] = useState({});
@@ -19,7 +18,7 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
   useEffect(() => {
     const fetchVariations = async () => {
       try {
-        const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions');
+        const response = await fetch('http://localhost:8080/productsoptions');
         const data = await response.json();
         setVariationOptions(data);
       } catch (error) {
@@ -32,41 +31,44 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
 
   useEffect(() => {
     if (product.variations) {
-      setSelectedVariations(product.variations.map(v => ({
-        ...v,
-        gallery: v.gallery || []
-      })));
+      setSelectedVariations(
+        product.variations.map((v) => ({
+          ...v,
+          gallery: v.gallery || [],
+          price: v.price || 0, // Ensure price exists
+        }))
+      );
     }
   }, [product.variations]);
 
   const handleVariationSelect = (event) => {
-    const selectedId = parseInt(event.target.value, 10);
-    if (selectedId) {
-      const selectedOptionData = variationOptions.find(option => option.id === selectedId);
-      if (selectedOptionData) {
-        setSelectedVariations(prev => {
-          const exists = prev.find(v => v.id === selectedOptionData.id);
-          if (!exists) {
-            const updatedVariations = [...prev, selectedOptionData];
-            const transformedVariations = updatedVariations.map(selected => {
-              const option = variationOptions.find(v => v.id === selected.id);
-              if (option && option.price === selected.price) {
-                return { id: option.id };
-              }
-              return { id: option.id, price: selected.price };
-            });
-            onVariationsUpdate(transformedVariations);
-            return updatedVariations;
-          }
-          return prev;
-        });
-      }
+    const selectedId = event.target.value;
+    const selectedOption = variationOptions.find((option) => option._id === selectedId);
+
+    if (selectedOption && !selectedVariations.some((v) => v.id === selectedOption._id)) {
+      const newVariation = { id: selectedOption._id, name: selectedOption.namn, price: 0 };
+      setSelectedVariations((prev) => [...prev, newVariation]);
+      onVariationsUpdate([...selectedVariations, newVariation]);
     }
   };
 
+  const handlePriceChange = (index, price) => {
+    setSelectedVariations((prev) => {
+      const updatedVariations = [...prev];
+      updatedVariations[index].price = parseFloat(price) || 0;
+      return updatedVariations;
+    });
+  };
+
+  const savePriceChange = () => {
+    onVariationsUpdate(selectedVariations);
+    setEditingIndex(null);
+    setNewPrice('');
+  };
+
   const handleVariationRemove = (id) => {
-    const filteredVariations = selectedVariations.filter(v => v.id !== id);
-    setSelectedVariations(filteredVariations);
+    const updatedVariations = selectedVariations.filter((v) => v.id !== id);
+    setSelectedVariations(updatedVariations);
     onVariationRemove(id);
   };
 
@@ -102,13 +104,13 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
   const handleImageUploadChange = (e, variationId) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFiles(prev => ({ ...prev, [variationId]: file }));
+      setImageFiles((prev) => ({ ...prev, [variationId]: file }));
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews(prev => ({ ...prev, [variationId]: reader.result }));
+        setImagePreviews((prev) => ({ ...prev, [variationId]: reader.result }));
       };
       reader.readAsDataURL(file);
-      setShowImageUploadInput(prev => ({ ...prev, [variationId]: false }));
+      setShowImageUploadInput((prev) => ({ ...prev, [variationId]: false }));
     }
   };
 
@@ -140,16 +142,20 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
 
         await Promise.all([
           new Promise((resolve, reject) => {
-            originalUploadTask.on('state_changed', (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadStatus(prev => ({ ...prev, [variationId]: progress }));
-            }, reject, resolve);
+            originalUploadTask.on(
+              'state_changed',
+              null,
+              reject,
+              resolve
+            );
           }),
           new Promise((resolve, reject) => {
-            thumbnailUploadTask.on('state_changed', (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadStatus(prev => ({ ...prev, [variationId]: progress }));
-            }, reject, resolve);
+            thumbnailUploadTask.on(
+              'state_changed',
+              null,
+              reject,
+              resolve
+            );
           }),
         ]);
 
@@ -157,48 +163,12 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
         const thumbnailURL = await getDownloadURL(thumbnailStorageRef);
 
         onImageLinkAdd(variationId, { thumbnail: thumbnailURL, original: originalURL });
-        setImageFiles(prev => ({ ...prev, [variationId]: null }));
-        setImagePreviews(prev => ({ ...prev, [variationId]: '' }));
-        setUploadStatus(prev => ({ ...prev, [variationId]: null }));
+        setImageFiles((prev) => ({ ...prev, [variationId]: null }));
+        setImagePreviews((prev) => ({ ...prev, [variationId]: '' }));
+        setUploadStatus((prev) => ({ ...prev, [variationId]: null }));
       } catch (error) {
         console.error('Error uploading image:', error);
       }
-    }
-  };
-
-  const deleteImageFromFirebase = async (filePath) => {
-    const imageRef = ref(storage, `${filePath}`);
-    try {
-      await deleteObject(imageRef);
-      console.log('Image deleted successfully');
-    } catch (error) {
-      console.error('Error deleting image:', error);
-    }
-  };
-
-  const handleExtraColorRemove = async (variationId, color) => {
-    const galleryItem = product.gallery.find(g => g.extraColor && g.extraColor[color]);
-    if (galleryItem && galleryItem.extraColor[color]) {
-      try {
-        const url = galleryItem.extraColor[color];
-        const filePath = decodeURIComponent(url.split('/o/')[1].split('?')[0]);
-        await deleteImageFromFirebase(filePath);
-
-        const updatedGallery = product.gallery.map(g => {
-          if (g === galleryItem) {
-            const updatedExtraColor = { ...g.extraColor };
-            delete updatedExtraColor[color];
-            return { ...g, extraColor: updatedExtraColor };
-          }
-          return g;
-        });
-
-        onImageLinkAdd(variationId, updatedGallery);
-      } catch (error) {
-        console.error('Error removing extra color image:', error);
-      }
-    } else {
-      console.log('No extra color image found for this variation.');
     }
   };
 
@@ -207,46 +177,47 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
       <select onChange={handleVariationSelect} defaultValue="">
         <option value="">Select Variation</option>
         {variationOptions.map((option) => (
-          <option key={option.id} value={option.id} style={{backgroundColor: option.meta}}>
-            {option.value}
+          <option key={option._id} value={option._id} style={{ backgroundColor: option.meta }}>
+            {option.namn}
           </option>
         ))}
       </select>
 
       <div className="variations-list">
-        {selectedVariations && selectedVariations.map(variation => (
+        {selectedVariations.map((variation, index) => (
           <div key={variation.id} className="variation-item">
-            {variationOptions.map((option) => (
-              option.id === variation.id ? (
-                <div key={option.id}>
-                  <h4>{option.value}</h4>
-                  {product.gallery && product.gallery.length > 0 && product.gallery.map((galleryItem, index) => (
-                    galleryItem.extraColor && galleryItem.extraColor[option.value] ? (
-                      <div key={index} className="extra-color-item">
-                        <img
-                          src={galleryItem.extraColor[option.value]}
-                          alt={`Extra color ${option.value}`}
-                          width="100"
-                        />
-                        <button
-                          onClick={() => handleExtraColorRemove(variation.id, option.value)}
-                        >
-                          <FaTrash /> Remove Extra Color Image
-                        </button>
-                      </div>
-                    ) : null
-                  ))}
-                </div>
-              ) : null
-            ))}
-
+            <h4>{variation.name}</h4>
+            {editingIndex === index ? (
+              <div>
+                <input
+                  type="number"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                  placeholder="Set price"
+                />
+                <button onClick={savePriceChange}>Save</button>
+                <button onClick={() => setEditingIndex(null)}>Cancel</button>
+              </div>
+            ) : (
+              <div>
+                <p>Price: {variation.price} kr</p>
+                <button
+                  onClick={() => {
+                    setEditingIndex(index);
+                    setNewPrice(variation.price);
+                  }}
+                >
+                  Edit Price
+                </button>
+              </div>
+            )}
             <button onClick={() => handleVariationRemove(variation.id)}>
-              Remove Variation
+              <FaTrash /> Remove
             </button>
 
             <div className="image-upload-container">
               <button
-                onClick={() => setShowImageUploadInput(prev => ({ ...prev, [variation.id]: !prev[variation.id] }))}
+                onClick={() => setShowImageUploadInput((prev) => ({ ...prev, [variation.id]: !prev[variation.id] }))}
               >
                 {showImageUploadInput[variation.id] ? <FaChevronUp /> : <FaChevronDown />} Upload Image
               </button>

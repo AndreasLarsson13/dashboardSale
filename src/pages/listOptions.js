@@ -3,6 +3,7 @@ import axios from 'axios';
 import { storage } from '../components/form/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { styles } from '../components/form/styleCart';
+import { getAuth } from 'firebase/auth';
 
 const colorOptions = [
   { sv: 'Röd', en: 'red' },
@@ -31,26 +32,52 @@ const ListAccessoriesPage = () => {
   });
   const [uploadStatus, setUploadStatus] = useState('');
 
+  
+
+
   useEffect(() => {
     const fetchAccessories = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+/*         setError('User not logged in');
+ */        setIsLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/options');
+        const token = await user.getIdToken(); // Få användarens ID-token
+      
+        const response = await axios.get('http://localhost:8080/options', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Skicka token i header
+          },
+          params: {
+            uid: user.uid, // Valfritt: skicka uid som query parameter
+            uidEmail: user.email, // Valfritt: skicka e-post om det behövs
+          },
+          withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
+        });
+      
         setAccessories(response.data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching accessories:', error);
-        setMessage('Error fetching accessories.');
+      } 
+      catch (error) {
+/*         setError(error.message);
+ */      } finally {
         setIsLoading(false);
       }
     };
+
     fetchAccessories();
   }, []);
+  
 
   const handleDeleteAccessory = async (accessoryId) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this accessory?');
     if (!confirmDelete) return;
     try {
-      const response = await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/deleteAccessory/${accessoryId}`);
+      const response = await axios.delete(`http://localhost:8080/deleteAccessory/${accessoryId}`);
       if (response.status === 200) {
         setAccessories(accessories.filter((accessory) => accessory._id !== accessoryId));
         setMessage('Accessory deleted successfully.');
@@ -108,7 +135,7 @@ const ListAccessoriesPage = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/updateAccessory/${editingAccessory}`, {
+      const response = await axios.put(`http://localhost:8080/updateAccessory/${editingAccessory}`, {
         namn: editForm.namn,
         price: editForm.price,
         color: editForm.color,
@@ -262,7 +289,7 @@ const ListAccessoriesPage = () => {
               </li>
             ))
           ) : (
-            <p>No accessories available.</p>
+            <p>Inga tillbehör aktiva</p>
           )}
         </ul>
       )}

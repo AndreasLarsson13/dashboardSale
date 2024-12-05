@@ -150,7 +150,7 @@ const AddBrandPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addBrand', {
+      const response = await fetch('http://localhost:8080/addBrand', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ const AddBrandPage = () => {
         setMessage('Brand added successfully!');
         setBrand({ name: '', slug: '', image: { thumbnail: '', original: '' } }); // Reset the form
       } else {
-        setMessage('Failed to add brand.');
+        setMessage('Varumärket las till!.');
       }
     } catch (error) {
       console.error('Error adding brand:', error);
@@ -198,8 +198,8 @@ const AddBrandPage = () => {
           />
         </div>
 
-        <div>
-          <label htmlFor="image">Ladda upp eller uppdatera bild:</label>
+        <div style={{display: "flex", gap: "10px"}}>
+          <label htmlFor="image">Ladda upp eller uppdatera varumärkets logga:</label>
           <input type="file" id="image" onChange={handleImageUpload} />
           {brand.image.thumbnail && (
             <img
@@ -210,7 +210,7 @@ const AddBrandPage = () => {
           )}
         </div>
         <button type="submit" disabled={isSubmitting} style={{ justifyContent: 'flex-start' }}>
-          {isSubmitting ? 'Submitting...' : 'Lägg till varumärke'}
+          {isSubmitting ? 'Läggs till...' : 'Lägg till varumärke'}
         </button>
       </form>
     </div>

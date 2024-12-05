@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronDown, FaChevronUp, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import categoriesData from '../../data/categoriesData'; // Adjust path as needed
+import categoriesData from '../../data/categoriesData'; // Justera sökvägen efter behov
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
-const currencyOptions = ['EUR', 'USD', 'SEK', 'NOK', 'GBP']; // Currency options
+const currencyOptions = ['EUR', 'USD', 'SEK', 'NOK', 'GBP']; // Valutaval
 
-const GeneralInfo = ({ setProduct }) => {
+const GeneralInfo = ({ product, setProduct }) => {
   const [isGeneralInfoOpen, setIsGeneralInfoOpen] = useState(false);
-  const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedCountries, setSelectedCountries] = useState(product?.countries || []);
   const [mainCategory, setMainCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
   const [subSubCategory, setSubSubCategory] = useState('');
   const [brands, setBrands] = useState([]);
-  const [currency, setCurrency] = useState('EUR'); // Default currency
+  const [currency, setCurrency] = useState(product?.currency || 'EUR');
+  const [deliveryTime, setDeliveryTime] = useState(product?.deliveryTime || 0); // Nytt state för leveranstid
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const [deliveryTime, setDeliveryTime] = useState(''); // Delivery time in days
 
-  // Fetch brands when component mounts
+  // Hämta varumärken när komponenten mountas
   useEffect(() => {
     const fetchBrands = async () => {
       const auth = getAuth();
@@ -47,7 +47,28 @@ const GeneralInfo = ({ setProduct }) => {
     fetchBrands();
   }, []);
 
-  // Build category structure based on selected categories
+  // Förinställning av kategorier från produkten när komponenten mountas
+  useEffect(() => {
+    if (product?.category && product.category.length > 0) {
+      setMainCategory(product.category[0]?.name || '');
+      if (product.category[0]?.child?.length > 0) {
+        setSubCategory(product.category[0].child[0]?.name || '');
+        if (product.category[0].child[0]?.child?.length > 0) {
+          setSubSubCategory(product.category[0].child[0].child[0]?.name || '');
+        }
+      }
+    }
+
+    if (product?.countries) {
+      setSelectedCountries(product.countries);
+    }
+
+    if (product?.deliveryTime) {
+      setDeliveryTime(product.deliveryTime);
+    }
+  }, [product]);
+
+  // Skapa kategoristruktur
   const buildCategoryStructure = () => {
     const structure = [
       {
@@ -74,30 +95,28 @@ const GeneralInfo = ({ setProduct }) => {
     return structure;
   };
 
-  // Update the product data based on user input
   useEffect(() => {
     setProduct((prev) => ({
       ...prev,
       countries: selectedCountries,
       category: buildCategoryStructure(),
       currency,
-      deliveryTime, // Add delivery time to product data
+      deliveryTime, // Lägg till leveranstid i produkten
     }));
   }, [selectedCountries, mainCategory, subCategory, subSubCategory, currency, deliveryTime, setProduct]);
-  
 
   const countryOptions = ['Alla', 'Sverige', 'Finland', 'Åland'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const updatedValue =
+    let updatedValue =
       ['price', 'sale_price', 'quantity', 'weightPack', 'widthPack', 'heightPack', 'lengthPack'].includes(name)
         ? Math.max(0, Number(value))
         : value;
-    setProduct((prev) => ({ ...prev, [name]: updatedValue }));
+    setProduct({ ...product, [name]: updatedValue });
   };
 
-  // Handle checkbox changes for countries
+  // Hantera checkbox-ändringar för länder
   const handleCountryCheckboxChange = (e) => {
     const { value, checked } = e.target;
 
@@ -105,30 +124,37 @@ const GeneralInfo = ({ setProduct }) => {
       if (value === 'Alla') {
         setSelectedCountries(['Alla']);
       } else {
-        setSelectedCountries((prev) => (prev.includes('Alla') ? [value] : [...prev, value]));
+        setSelectedCountries((prev) =>
+          prev.includes('Alla') ? [value] : [...prev, value]
+        );
       }
     } else {
       if (value === 'Alla') {
         setSelectedCountries([]);
       } else {
-        setSelectedCountries((prev) => prev.filter((country) => country !== value));
+        setSelectedCountries((prev) =>
+          prev.filter((country) => country !== value)
+        );
       }
     }
   };
 
   const handleMainCategoryChange = (e) => {
-    setMainCategory(e.target.value);
+    const selectedCategory = e.target.value;
+    setMainCategory(selectedCategory);
     setSubCategory('');
     setSubSubCategory('');
   };
 
   const handleSubCategoryChange = (e) => {
-    setSubCategory(e.target.value);
+    const selectedSubCategory = e.target.value;
+    setSubCategory(selectedSubCategory);
     setSubSubCategory('');
   };
 
   const handleSubSubCategoryChange = (e) => {
-    setSubSubCategory(e.target.value);
+    const selectedSubSubCategory = e.target.value;
+    setSubSubCategory(selectedSubSubCategory);
   };
 
   const handleCurrencyChange = (e) => {
@@ -136,12 +162,9 @@ const GeneralInfo = ({ setProduct }) => {
   };
 
   const handleDeliveryTimeChange = (e) => {
-    const value = Math.max(0, Number(e.target.value)); // Ensure it's a non-negative number
+    const value = Math.max(0, Number(e.target.value));
     setDeliveryTime(value);
   };
-  
-
-  // Extract subcategories and sub-subcategories based on selected categories
   const selectedMainCategory = categoriesData[Object.keys(categoriesData).find(category => categoriesData[category].value === mainCategory)];
   const subcategories = selectedMainCategory ? selectedMainCategory.child : [];
   
@@ -149,11 +172,16 @@ const GeneralInfo = ({ setProduct }) => {
   const subSubcategories = selectedSubCategory ? selectedSubCategory.child : [];
 
   const isFormCompleted =
-    mainCategory &&
-    currency &&
-    ['price', 'sale_price', 'quantity', 'weightPack', 'widthPack', 'heightPack', 'lengthPack'].every(
-      (key) => Number.isFinite(setProduct[key])
-    );
+    product?.name &&
+    product?.sku &&
+    product?.price >= 0 &&
+    product?.quantity >= 0 &&
+    product?.brand &&
+    product?.weightPack >= 0 &&
+    product?.widthPack >= 0 &&
+    product?.heightPack >= 0 &&
+    product?.lengthPack >= 0 &&
+    deliveryTime >= 0;
 
   return (
     <div style={{ marginBottom: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
@@ -165,12 +193,15 @@ const GeneralInfo = ({ setProduct }) => {
           cursor: 'pointer',
           background: '#f1f1f1',
           borderBottom: '1px solid #ddd',
-          fontWeight: 'bold',
+          fontWeight: 'bold'
         }}
         onClick={() => setIsGeneralInfoOpen(!isGeneralInfoOpen)}
       >
-        <span style={{ marginRight: '10px' }}>{isGeneralInfoOpen ? <FaChevronUp /> : <FaChevronDown />}</span>
+        <span style={{ marginRight: '10px' }}>
+          {isGeneralInfoOpen ? <FaChevronUp /> : <FaChevronDown />}
+        </span>
         <span>Produktinformation</span>
+
         <span style={{ marginLeft: 'auto', color: isFormCompleted ? 'green' : 'red' }}>
           {isFormCompleted ? <FaCheckCircle /> : <FaExclamationCircle />}
         </span>
@@ -178,20 +209,13 @@ const GeneralInfo = ({ setProduct }) => {
 
       {isGeneralInfoOpen && (
         <div>
-          <div
-            style={{
-              padding: '10px',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: '10px 20px',
-              backgroundColor: '#eaeaea',
-            }}
-          >
+          <div style={{ padding: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 20px', backgroundColor: '#eaeaea' }}>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
               <label>Namn:</label>
               <input
                 type="text"
                 name="name"
+                value={product?.name || ''}
                 onChange={handleInputChange}
                 required
                 style={{ width: '226px' }}
@@ -203,6 +227,7 @@ const GeneralInfo = ({ setProduct }) => {
               <input
                 type="text"
                 name="sku"
+                value={product?.sku || ''}
                 onChange={handleInputChange}
                 required
                 style={{ width: '226px' }}
@@ -212,7 +237,13 @@ const GeneralInfo = ({ setProduct }) => {
             {/* Brand Dropdown */}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
               <label>Varumärke:</label>
-              <select name="brand" onChange={handleInputChange} required style={{ width: '226px' }}>
+              <select
+                name="brand"
+                value={product?.brand || ''}
+                onChange={handleInputChange}
+                required
+                style={{ width: '226px' }}
+              >
                 <option value="">Välj ett varumärke</option>
                 {brands.map((brand) => (
                   <option key={brand.slug} value={brand.slug}>
@@ -225,7 +256,13 @@ const GeneralInfo = ({ setProduct }) => {
             {/* Currency Dropdown */}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
               <label>Valuta:</label>
-              <select name="currency" value={currency} onChange={handleCurrencyChange} required style={{ width: '226px' }}>
+              <select
+                name="currency"
+                value={currency}
+                onChange={handleCurrencyChange}
+                required
+                style={{ width: '226px' }}
+              >
                 {currencyOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -239,6 +276,7 @@ const GeneralInfo = ({ setProduct }) => {
               <input
                 type="number"
                 name="price"
+                value={product?.price || 0}
                 onChange={handleInputChange}
                 style={{ width: '226px', fontSize: '19px', textAlign: 'right' }}
                 min="0"
@@ -251,6 +289,7 @@ const GeneralInfo = ({ setProduct }) => {
               <input
                 type="number"
                 name="sale_price"
+                value={product?.sale_price || 0}
                 onChange={handleInputChange}
                 style={{ width: '226px', fontSize: '19px', textAlign: 'right' }}
                 min="0"
@@ -262,37 +301,26 @@ const GeneralInfo = ({ setProduct }) => {
               <input
                 type="number"
                 name="quantity"
+                value={product?.quantity || 0}
                 onChange={handleInputChange}
                 style={{ width: '226px', fontSize: '19px', textAlign: 'right' }}
                 min="0"
                 required
               />
             </div>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
-  <label>Är det en produktvariation?:</label>
-  <input
-    type="checkbox"
-    name="produktvariation"
-    onChange={(e) =>
-      setProduct((prev) => ({ ...prev, produktvariation: e.target.checked }))
-    }
-    style={{ width: '20px', height: '20px' }}
-  />
-</div>
 
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
-  <label>Ungefärlig leveranstid (dagar):</label>
-  <input
-    type="number"
-    name="deliveryTime"
-    value={deliveryTime}
-    onChange={handleDeliveryTimeChange}
-    style={{ width: '226px', fontSize: '19px', textAlign: 'right' }}
-    min="0"
-    required
-  />
-</div>
-
+              <label>Ungefärlig leveranstid (dagar):</label>
+              <input
+                type="number"
+                name="deliveryTime"
+                value={deliveryTime}
+                onChange={handleDeliveryTimeChange}
+                style={{ width: '226px', fontSize: '19px', textAlign: 'right' }}
+                min="0"
+                required
+              />
+            </div>
           </div>
 
           <div style={{ padding: '10px' }}>
@@ -303,6 +331,7 @@ const GeneralInfo = ({ setProduct }) => {
                 <input
                   type="number"
                   name="weightPack"
+                  value={product?.weightPack || 0}
                   onChange={handleInputChange}
                   required
                   style={{ width: '120px', fontSize: '19px', textAlign: 'right' }}
@@ -314,6 +343,7 @@ const GeneralInfo = ({ setProduct }) => {
                 <input
                   type="number"
                   name="lengthPack"
+                  value={product?.lengthPack || 0}
                   onChange={handleInputChange}
                   required
                   style={{ width: '120px', fontSize: '19px', textAlign: 'right' }}
@@ -324,6 +354,7 @@ const GeneralInfo = ({ setProduct }) => {
                 <input
                   type="number"
                   name="widthPack"
+                  value={product?.widthPack || 0}
                   onChange={handleInputChange}
                   required
                   style={{ width: '120px', fontSize: '19px', textAlign: 'right' }}
@@ -335,6 +366,7 @@ const GeneralInfo = ({ setProduct }) => {
                 <input
                   type="number"
                   name="heightPack"
+                  value={product?.heightPack || 0}
                   onChange={handleInputChange}
                   required
                   style={{ width: '120px', fontSize: '19px', textAlign: 'right' }}
@@ -351,6 +383,7 @@ const GeneralInfo = ({ setProduct }) => {
                   <input
                     type="checkbox"
                     value={option}
+                    checked={selectedCountries.includes(option)}
                     onChange={handleCountryCheckboxChange}
                   />
                   <label style={{ marginLeft: '8px' }}>{option}</label>

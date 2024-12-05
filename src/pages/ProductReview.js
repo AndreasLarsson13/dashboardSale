@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import './ProductReview.css'; // Importera CSS för styling
+import './ProductReview.css'; // Import the CSS for styling
 
 const ReviewProductsPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
-  const [isApproving, setIsApproving] = useState(false); // För att hantera godkännande-laddning
-  const [isComparing, setIsComparing] = useState(false); // För att hantera jämförelse-laddning
-  const [differences, setDifferences] = useState({}); // För att lagra skillnaderna
+  const [isApproving, setIsApproving] = useState(false);
+  const [isComparing, setIsComparing] = useState(false);
+  const [differences, setDifferences] = useState({});
+  const [showRejectPopup, setShowRejectPopup] = useState(false);
+  const [rejectComment, setRejectComment] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,16 +28,16 @@ const ReviewProductsPage = () => {
           if (idTokenResult.claims.admin) {
             setIsAdmin(true);
           } else {
-            navigate('/'); // Om inte admin, navigera till startsidan
+            navigate('/');
           }
         } catch (error) {
           console.error('Error checking admin status:', error);
           setError('Error checking admin status');
         }
       } else {
-        navigate('/login'); // Om användaren inte är inloggad, navigera till inloggningssidan
+        navigate('/login');
       }
-      setLoading(false); // Laddningen är klar efter admin-kontroll
+      setLoading(false);
     };
 
     checkAdmin();
@@ -41,13 +45,13 @@ const ReviewProductsPage = () => {
 
   useEffect(() => {
     if (isAdmin) {
-      fetchPendingProducts(); // Hämta produkter endast om användaren är admin
+      fetchPendingProducts();
     }
   }, [isAdmin]);
 
   const fetchPendingProducts = async () => {
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/pendingProducts');
+      const response = await fetch('http://localhost:8080/pendingProducts');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -63,7 +67,7 @@ const ReviewProductsPage = () => {
   const compareProduct = async (product) => {
     setIsComparing(true);
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/compareProduct', {
+      const response = await fetch('http://localhost:8080/compareProduct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,17 +97,17 @@ const ReviewProductsPage = () => {
 
     setIsApproving(true);
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addproducts', {
+      const response = await fetch('http://localhost:8080/addproducts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(product), // Skicka produkten till backend
+        body: JSON.stringify(product),
       });
 
       if (response.ok) {
-        alert('Product approved and added!');
-        setProducts(products.filter((p) => p._id !== product._id)); // Ta bort den från listan
+        alert('Produkten är godkännd och tillagd');
+        setProducts(products.filter((p) => p._id !== product._id));
       } else {
         console.error('Failed to approve product');
       }
@@ -114,12 +118,42 @@ const ReviewProductsPage = () => {
     }
   };
 
-  const handleReject = (productId) => {
-    const confirmReject = window.confirm('Are you sure you want to reject this product?');
+  const handleReject = async (productId) => {
+    setShowRejectPopup(true);
+    setSelectedProductId(productId);
+  };
+
+  const submitReject = async () => {
+    const confirmReject = window.confirm('Är du säker att du vill?');
     if (!confirmReject) return;
 
-    setProducts(products.filter((p) => p._id !== productId)); // Ta bort från listan vid avslag
-    alert('Product rejected');
+    try {
+      const response = await fetch(`http://localhost:8080/rejectproduct/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment: rejectComment, id: selectedProductId, status: "rejected" }),
+      });
+
+      if (response.ok) {
+        alert('Product rejected and comment added!');
+        setProducts(products.filter((p) => p._id !== selectedProductId));
+      } else {
+        console.error('Failed to reject product');
+      }
+    } catch (error) {
+      console.error('Error rejecting product:', error);
+    }
+
+    setShowRejectPopup(false);
+    setRejectComment('');
+    setSelectedProductId(null);
+  };
+
+  const closePopup = () => {
+    setShowRejectPopup(false);
+    setRejectComment('');
   };
 
   const getComparisonField = (field, originalValue, newValue) => {
@@ -150,19 +184,20 @@ const ReviewProductsPage = () => {
               </div>
               <div className="product-horizontal-info">
                 <h3>{product.name}</h3>
-                <p><strong>Brand:</strong> {product.brand}</p>
-                <p><strong>Price:</strong> {product.price} €</p>
-                <p><strong>Sale Price:</strong> {product.sale_price} €</p>
+                <p><strong>Varumärke:</strong> {product.brand}</p>
+                <p><strong>Pris:</strong> {product.price} €</p>
+                <p><strong>Försäljningspris:</strong> {product.sale_price} €</p>
                 <p><strong>SKU:</strong> {product.sku}</p>
-                <p><strong>Quantity:</strong> {product.quantity}</p>
+                <p><strong>Antal:</strong> {product.quantity}</p>
                 <p><strong>Status:</strong> {product.status}</p>
-                <p><strong>Description:</strong> {product.description?.se || 'No description available'}</p>
-                <p><strong>Dimensions:</strong> {product.lengthPack} x {product.widthPack} x {product.heightPack} mm</p>
+                <span>
+  <strong>Beskrivning:</strong> 
+  <span dangerouslySetInnerHTML={{ __html: product.description?.se || 'No description available' }} />
+</span>                <p><strong>Packstorlek:</strong> {product.lengthPack} x {product.widthPack} x {product.heightPack} mm</p>
 
-                {/* Visa skillnader om de finns */}
                 {differences[product._id] && (
                   <div className="product-differences">
-                    <h4>Differences:</h4>
+                    <h4>Skillnader:</h4>
                     {Object.keys(differences[product._id]).map((field) =>
                       getComparisonField(
                         field,
@@ -175,18 +210,36 @@ const ReviewProductsPage = () => {
               </div>
               <div className="product-horizontal-actions">
                 <button className="compare-button" onClick={() => compareProduct(product)} disabled={isComparing}>
-                  {isComparing ? 'Comparing...' : 'Compare'}
+                  {isComparing ? 'Jämför...' : 'Jämför med tidigare'}
                 </button>
                 <button className="approve-button" onClick={() => handleApprove(product)} disabled={isApproving}>
-                  {isApproving ? 'Approving...' : 'Approve'}
+                  {isApproving ? 'Godkänns...' : 'Godkänn'}
                 </button>
-                <button className="reject-button" onClick={() => handleReject(product._id)}>Reject</button>
+                <button className="reject-button" onClick={() => handleReject(product._id)}>Neka produkt</button>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <p>Inga produkter till gransking</p>
+      )}
+
+      {showRejectPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <h3>Kommentera avslag på produkten</h3>
+            <textarea
+              value={rejectComment}
+              onChange={(e) => setRejectComment(e.target.value)}
+              placeholder="Skriv kommentaren här"
+              rows="5"
+            />
+            <div className="popup-actions">
+              <button className="cancel-button" onClick={closePopup}>Avbryt</button>
+              <button className="submit-button" onClick={submitReject}>Skicka</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

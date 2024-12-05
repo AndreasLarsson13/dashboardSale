@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import imageCompression from 'browser-image-compression';
-import { storage } from './firebaseConfig'; // Your Firebase configuration
+import { storage } from './firebaseConfig'; // Din Firebase-konfiguration
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { FaChevronDown, FaChevronUp, FaCheckCircle,FaTrash } from 'react-icons/fa';
-
+import { FaChevronDown, FaChevronUp, FaCheckCircle, FaTrash } from 'react-icons/fa';
 
 const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd }) => {
   const [singleImagePreview, setSingleImagePreview] = useState(null);
@@ -12,41 +10,6 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
   const [uploadStatus, setUploadStatus] = useState({ single: false, gallery: [] });
   const [isSectionOpen, setIsSectionOpen] = useState(false);
 
-  const resizeImage = (file, maxHeight) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-
-      img.onload = () => {
-        const aspectRatio = img.width / img.height;
-
-        // Calculate the new dimensions
-        const newHeight = Math.min(img.height, maxHeight);
-        const newWidth = newHeight * aspectRatio;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Failed to convert image to blob'));
-          }
-        }, 'image/webp', 0.8);
-      };
-
-      img.onerror = () => {
-        reject(new Error('Failed to load the image'));
-      };
-
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   const handleSingleFileSelection = (e) => {
     if (!product.name || !product.brand) {
       setWarning('Please fill in the product name and brand before selecting images.');
@@ -54,7 +17,6 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
     }
 
     setWarning('');
-
     const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
@@ -70,7 +32,6 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
     }
 
     setWarning('');
-
     const files = Array.from(e.target.files);
     const newPreviews = files.map((file) => ({
       file,
@@ -106,56 +67,29 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
 
     try {
       const { file } = singleImagePreview;
-      const compressedOriginal = await imageCompression(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 800,
-        useWebWorker: true,
-      });
 
-      const compressedThumbnail = await imageCompression(file, {
-        maxSizeMB: 0.1,
-        maxWidthOrHeight: 120,
-        useWebWorker: true,
-      });
-
-      // Resize both original and thumbnail to maintain aspect ratio
-      const originalWebP = await resizeImage(compressedOriginal, 800);
-      const thumbnailWebP = await resizeImage(compressedThumbnail, 120);
-
-      const originalStorageRef = ref(
+      const storageRef = ref(
         storage,
-        `images/${product.brand}/${product.name}/${file.name}.webp`
-      );
-      const thumbnailStorageRef = ref(
-        storage,
-        `images/${product.brand}/${product.name}/${file.name}_thumb.webp`
+        `images/${product.brand}/${product.name}/${file.name}`
       );
 
-      const originalUploadTask = uploadBytesResumable(originalStorageRef, originalWebP);
-      const thumbnailUploadTask = uploadBytesResumable(thumbnailStorageRef, thumbnailWebP);
+      const uploadTask = uploadBytesResumable(storageRef, file);
 
-      await Promise.all([
-        new Promise((resolve, reject) => {
-          originalUploadTask.on('state_changed', null, reject, resolve);
-        }),
-        new Promise((resolve, reject) => {
-          thumbnailUploadTask.on('state_changed', null, reject, resolve);
-        }),
-      ]);
+      await new Promise((resolve, reject) => {
+        uploadTask.on('state_changed', null, reject, resolve);
+      });
 
-      const originalURL = await getDownloadURL(originalStorageRef);
-      const thumbnailURL = await getDownloadURL(thumbnailStorageRef);
+      const imageUrl = await getDownloadURL(storageRef);
 
       onSingleImageUpload({
-        thumbnail: thumbnailURL,
-        original: originalURL,
+        original: imageUrl,
       });
 
       setUploadStatus((prev) => ({ ...prev, single: true }));
 
       setProduct((prevProduct) => ({
         ...prevProduct,
-        gallery: [{ thumbnail: thumbnailURL, original: originalURL }, ...prevProduct.gallery],
+        gallery: [{ original: imageUrl }, ...prevProduct.gallery],
       }));
     } catch (error) {
       console.error('Error uploading single image:', error);
@@ -174,49 +108,21 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
         const preview = galleryImagePreviews[i];
         const { file } = preview;
 
-        const compressedOriginal = await imageCompression(file, {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 800,
-          useWebWorker: true,
-        });
-
-        const compressedThumbnail = await imageCompression(file, {
-          maxSizeMB: 0.1,
-          maxWidthOrHeight: 120,
-          useWebWorker: true,
-        });
-
-        // Resize both original and thumbnail to maintain aspect ratio
-        const originalWebP = await resizeImage(compressedOriginal, 800);
-        const thumbnailWebP = await resizeImage(compressedThumbnail, 120);
-
-        const originalStorageRef = ref(
+        const storageRef = ref(
           storage,
-          `images/${product.brand}/${product.name}/gallery/${i}.webp`
-        );
-        const thumbnailStorageRef = ref(
-          storage,
-          `images/${product.brand}/${product.name}/gallery/${i}_thumb.webp`
+          `images/${product.brand}/${product.name}/gallery/${file.name}`
         );
 
-        const originalUploadTask = uploadBytesResumable(originalStorageRef, originalWebP);
-        const thumbnailUploadTask = uploadBytesResumable(thumbnailStorageRef, thumbnailWebP);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-        await Promise.all([
-          new Promise((resolve, reject) => {
-            originalUploadTask.on('state_changed', null, reject, resolve);
-          }),
-          new Promise((resolve, reject) => {
-            thumbnailUploadTask.on('state_changed', null, reject, resolve);
-          }),
-        ]);
+        await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed', null, reject, resolve);
+        });
 
-        const originalURL = await getDownloadURL(originalStorageRef);
-        const thumbnailURL = await getDownloadURL(thumbnailStorageRef);
+        const imageUrl = await getDownloadURL(storageRef);
 
         onGalleryImageAdd({
-          thumbnail: thumbnailURL,
-          original: originalURL,
+          original: imageUrl,
         });
 
         setUploadStatus((prev) => ({
@@ -240,7 +146,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
             cursor: 'pointer',
             background: '#f1f1f1',
             borderBottom: '1px solid #ddd',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
           onClick={() => setIsSectionOpen((prev) => !prev)}
         >
@@ -267,10 +173,10 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
                 accept="image/*"
                 onChange={handleSingleFileSelection}
                 disabled={!product.name || !product.brand}
-                style={{marginBottom: '10px'}}
+                style={{ marginBottom: '10px' }}
               />
               {singleImagePreview && (
-                <div style={{ display: 'flex', gap: '10px'}}>
+                <div style={{ display: 'flex', gap: '10px' }}>
                   <img
                     src={singleImagePreview.url}
                     alt="Single Preview"
@@ -278,17 +184,28 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
                       width: '100px',
                       height: '100px',
                       border: uploadStatus.single ? '2px solid green' : '2px solid black',
-                      
                     }}
                   />
-                  <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', justifyContent: 'flex-end'}}>
-                  <button onClick={handleRemoveSinglePreview} className='btnRed'>Ta bort</button>
-                  <button
-                    onClick={handleSingleImageUpload}
-                    style={{ backgroundColor: uploadStatus.single ? 'green' : 'gray', color: 'white' }}
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '10px',
+                      flexDirection: 'column',
+                      justifyContent: 'flex-end',
+                    }}
                   >
-                    {uploadStatus.single ? 'Uppladdad' : 'Ladda upp'}
-                  </button>
+                    <button onClick={handleRemoveSinglePreview} className="btnRed">
+                      Ta bort
+                    </button>
+                    <button
+                      onClick={handleSingleImageUpload}
+                      style={{
+                        backgroundColor: uploadStatus.single ? 'green' : 'gray',
+                        color: 'white',
+                      }}
+                    >
+                      {uploadStatus.single ? 'Uppladdad' : 'Ladda upp'}
+                    </button>
                   </div>
                 </div>
               )}
@@ -308,28 +225,42 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
                   <h5>Förhandsgranska galleribilder:</h5>
                   <div style={{ display: 'flex', gap: '30px' }}>
                     {galleryImagePreviews.map((preview, index) => (
-                      <div key={index} style={{display: 'flex', gap: '5px', alignItems: "flex-end"}}>
+                      <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
                         <img
                           src={preview.url}
                           alt={`Preview ${index}`}
                           style={{
                             width: '100px',
                             height: '100px',
-                            border: uploadStatus.gallery[index] ? '2px solid green' : '2px solid black',
+                            border: uploadStatus.gallery[index]
+                              ? '2px solid green'
+                              : '2px solid black',
                           }}
                         />
-                        <button type="button" onClick={() => handleRemoveGalleryPreview(index)} className='btnRed'>
-                        <FaTrash /> Ta bort
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryPreview(index)}
+                          className="btnRed"
+                        >
+                          <FaTrash /> Ta bort
+                        </button>
                       </div>
                     ))}
                   </div>
-                  
+
                   <button
                     onClick={handleGalleryImageUpload}
-                    style={{ backgroundColor: uploadStatus.gallery.every(status => status) ? 'green' : 'gray', color: 'white', marginTop: '10px' }}
+                    style={{
+                      backgroundColor: uploadStatus.gallery.every((status) => status)
+                        ? 'green'
+                        : 'gray',
+                      color: 'white',
+                      marginTop: '10px',
+                    }}
                   >
-                    {uploadStatus.gallery.every(status => status) ? 'Uppladdade' : 'Ladda upp alla bilder'}
+                    {uploadStatus.gallery.every((status) => status)
+                      ? 'Uppladdade'
+                      : 'Ladda upp alla bilder'}
                   </button>
                 </div>
               )}

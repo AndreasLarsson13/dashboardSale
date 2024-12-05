@@ -42,6 +42,7 @@ const Sidebar = () => {
         position: 'sticky',
         top: 0,
         height: '100vh',
+        minWidth: '200px',
       }}
     >
       <ul style={{ listStyleType: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '55px' }}>

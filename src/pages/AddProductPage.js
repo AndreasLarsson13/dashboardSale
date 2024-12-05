@@ -30,6 +30,8 @@ const AddProductPage = () => {
     widthPack: 0,
     heightPack: 0,
     lengthPack: 0,
+    vat: 0.255,
+    produktvariation: false,
     relatedProducts: [], // Add related products state
     createdDate: new Date().toISOString()
   });
@@ -115,7 +117,7 @@ const AddProductPage = () => {
     }
 
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/reviewProducts`, {
+      const response = await fetch(`http://localhost:8080/reviewProducts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +125,7 @@ const AddProductPage = () => {
         body: JSON.stringify(product), // Submit product data including countries and related products
       });
       if (response.ok) {
-        alert('Product added successfully!');
+        alert('Produkten las till utan problem!');
       } else {
         console.error('Failed to add product:', await response.text());
       }

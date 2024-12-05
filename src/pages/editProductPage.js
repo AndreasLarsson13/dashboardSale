@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // Import useParams to get the product ID from the URL
-import GeneralInfo from '../components/form/GeneralInfo';
-import Description from '../components/form/Description';
+import EditGeneralInfo from '../components/form/EditGeneralInfo';
+import Description from '../components/form/editDescription';
 import VariationsDropdown from '../components/form/EditVariations';
 import Meta from '../components/form/Meta';
 import Images from '../components/form/editImage';
 
 const EditProductPage = () => {
   const { id } = useParams(); // Get the product ID from the URL parameter
-      console.log(id)
+
   const [product, setProduct] = useState({
     name: '',
     sku: '',
@@ -36,10 +36,10 @@ const EditProductPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`); // Use id from useParams
+        const response = await fetch(`http://localhost:8080/products/${id}`);
         if (response.ok) {
           const data = await response.json();
-          setProduct(data);
+          setProduct(data); // Load the product data into state
         } else {
           console.error('Failed to fetch product:', await response.text());
         }
@@ -49,7 +49,7 @@ const EditProductPage = () => {
     };
 
     fetchProduct();
-  }, [id]); // Depend on the id so it fetches the product when the ID changes
+  }, [id]);
 
   // Handlers for country change and variation updates
   const handleCountryChange = (countries) => {
@@ -125,7 +125,7 @@ const EditProductPage = () => {
     }
 
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, {
+      const response = await fetch(`http://localhost:8080/products/${id}`, {
         method: 'PUT', // Use PUT to update the existing product
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ const EditProductPage = () => {
         body: JSON.stringify(product),
       });
       if (response.ok) {
-        alert('Product updated successfully!');
+        alert('Produkten uppdaterades utan problem!');
       } else {
         console.error('Failed to update product:', await response.text());
       }
@@ -144,7 +144,7 @@ const EditProductPage = () => {
 
   return (
     <form onSubmit={handleSubmit} className="form">
-      <GeneralInfo 
+      <EditGeneralInfo 
         product={product} 
         setProduct={setProduct} 
         onCountryChange={handleCountryChange} 

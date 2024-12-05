@@ -15,7 +15,7 @@ const LogoutButton = () => {
 
   return (
     <button onClick={logoutUser} style={{ padding: '10px', backgroundColor: '#ff6666', color: '#fff', border: 'none', cursor: 'pointer' }}>
-      Logout
+      Logga ut
     </button>
   );
 };

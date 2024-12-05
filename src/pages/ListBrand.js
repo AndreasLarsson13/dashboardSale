@@ -10,9 +10,11 @@ const ListBrandPage = () => {
   const [brands, setBrands] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const [editingBrand, setEditingBrand] = useState(null); // State to manage the brand being edited
+  const [editingBrand, setEditingBrand] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', slug: '', image: { thumbnail: '', original: '' } });
-  const [uploadStatus, setUploadStatus] = useState(''); // State to track upload status
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [modifiedBrands, setModifiedBrands] = useState({});
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -26,11 +28,14 @@ const ListBrandPage = () => {
       }
 
       try {
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
+        const tokenResult = await user.getIdTokenResult();
+        setIsAdmin(tokenResult.claims.admin || false);
+
+        const response = await axios.get('http://localhost:8080/brands', {
           params: { uid: user.uid, uidEmail: user.email },
         });
 
-        setBrands(response.data); // Ensure you access data property of the response
+        setBrands(response.data);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching brands:', error);
@@ -42,7 +47,10 @@ const ListBrandPage = () => {
     fetchBrands();
   }, []);
 
-  // Helper function to resize image to 198x198 pixels
+  const generateSlug = (name) => {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  };
+
   const resizeImage = (file, maxSize) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -58,15 +66,52 @@ const ListBrandPage = () => {
 
         canvas.toBlob((blob) => {
           resolve(blob);
-        }, 'image/webp', 0.8); // Compress to WebP format
+        }, 'image/webp', 0.8);
       };
 
       img.onerror = (err) => reject(err);
     });
   };
 
-  const generateSlug = (name) => {
-    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const handlePopularChange = (brandId, isPopular) => {
+    setModifiedBrands((prevState) => ({
+      ...prevState,
+      [brandId]: isPopular,
+    }));
+  };
+
+  const handleSubmitChanges = async () => {
+    const updates = Object.keys(modifiedBrands).map((brandId) => ({
+      id: brandId,
+      popular: modifiedBrands[brandId],
+    }));
+
+    try {
+      const response = await fetch('http://localhost:8080/updatebrands', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.ok) {
+        setBrands(
+          brands.map((brand) =>
+            modifiedBrands.hasOwnProperty(brand._id)
+              ? { ...brand, popular: modifiedBrands[brand._id] }
+              : brand
+          )
+        );
+        setMessage('Brands updated successfully.');
+        setModifiedBrands({});
+      } else {
+        setMessage('Failed to update brands.');
+      }
+    } catch (error) {
+      console.error('Error updating brands:', error);
+      setMessage('Error updating brands.');
+    }
   };
 
   const handleDeleteBrand = async (brandId) => {
@@ -74,7 +119,7 @@ const ListBrandPage = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/deletebrand/${brandId}`, {
+      const response = await fetch(`http://localhost:8080/deletebrand/${brandId}`, {
         method: 'DELETE',
       });
 
@@ -94,7 +139,7 @@ const ListBrandPage = () => {
     setEditingBrand(brand._id);
     setEditForm({
       name: brand.name,
-      slug: brand.slug, // Include slug in edit form
+      slug: brand.slug,
       image: brand.image,
     });
   };
@@ -104,7 +149,7 @@ const ListBrandPage = () => {
     setEditForm((prevForm) => ({
       ...prevForm,
       [name]: value,
-      slug: generateSlug(value), // Automatically update slug based on name input
+      slug: generateSlug(value),
     }));
   };
 
@@ -115,10 +160,9 @@ const ListBrandPage = () => {
     setUploadStatus('Uploading...');
 
     try {
-      const resizedImage = await resizeImage(file, 198); // Resize the image to 198x198 pixels
+      const resizedImage = await resizeImage(file, 198);
       const brandSlug = generateSlug(editForm.name);
 
-      // If there's already an image, delete the old one
       if (editForm.image.original) {
         const oldOriginalRef = ref(storage, `brands/${brandSlug}/${brandSlug}.webp`);
         const oldThumbnailRef = ref(storage, `brands/${brandSlug}/${brandSlug}_thumb.webp`);
@@ -127,7 +171,6 @@ const ListBrandPage = () => {
         await deleteObject(oldThumbnailRef).catch((error) => console.error('Error deleting old thumbnail:', error));
       }
 
-      // Upload new resized image
       const originalStorageRef = ref(storage, `brands/${brandSlug}/${brandSlug}.webp`);
       const thumbnailStorageRef = ref(storage, `brands/${brandSlug}/${brandSlug}_thumb.webp`);
 
@@ -146,7 +189,6 @@ const ListBrandPage = () => {
       const originalURL = await getDownloadURL(originalStorageRef);
       const thumbnailURL = await getDownloadURL(thumbnailStorageRef);
 
-      // Update the form state with the new image URLs
       setEditForm((prevForm) => ({
         ...prevForm,
         image: {
@@ -165,7 +207,7 @@ const ListBrandPage = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/updatebrand/${editingBrand}`, {
+      const response = await fetch(`http://localhost:8080/updatebrand/${editingBrand}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -229,7 +271,7 @@ const ListBrandPage = () => {
                           />
                         )}
                       </div>
-                      {uploadStatus && <p>{uploadStatus}</p>} {/* Upload status */}
+                      {uploadStatus && <p>{uploadStatus}</p>}
                     </div>
                     <div style={{ display: "flex", gap: "10px" }}>
                       <button type="submit" className='btnGreen'>Spara</button>
@@ -254,8 +296,8 @@ const ListBrandPage = () => {
             ))
           ) : (
             <div style={{display: "flex", flexDirection: "column", textAlign: "center", justifyContent: "center"}}>
-            <p>Inga tillgängliga varumärken.</p>
-            <Link to="/add-brand" style={{ color: "black"}}>Klicka här för att lägga till</Link>
+              <p>Inga tillgängliga varumärken.</p>
+              <Link to="/add-brand" style={{ color: "black"}}>Klicka här för att lägga till</Link>
             </div>
           )}
         </ul>
