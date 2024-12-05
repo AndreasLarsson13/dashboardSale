@@ -4,6 +4,9 @@ import imageCompression from 'browser-image-compression';
 import { storage } from './firebaseConfig'; // Adjust the path to your Firebase config
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { styles } from './styleCart';
+import { getAuth } from 'firebase/auth'; // Import Firebase auth
+import axios from 'axios';
+
 
 const VariationsDropdown = ({ 
   onVariationsUpdate, 
@@ -21,6 +24,49 @@ const VariationsDropdown = ({
   const [uploadStatus, setUploadStatus] = useState({});
   const [showImageUploadInput, setShowImageUploadInput] = useState({});
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [productsVariations, setproductsVariations] = useState([]);
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        setError('User not logged in');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = await user.getIdToken(); // Få användarens ID-token
+      
+        const response = await axios.get('http://localhost:8080/products', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Skicka token i header
+          },
+          params: {
+            uid: user.uid, // Valfritt: skicka uid som query parameter
+            uidEmail: user.email, // Valfritt: skicka e-post om det behövs
+          },
+          withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
+        });
+        console.log(response.data)
+        setproductsVariations(response.data);
+      } 
+      catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
 
   useEffect(() => {
     const fetchVariations = async () => {
@@ -32,7 +78,7 @@ const VariationsDropdown = ({
         console.error('Error fetching variations:', error);
       }
     };
-
+    
     fetchVariations();
   }, []);
 
@@ -74,27 +120,48 @@ const VariationsDropdown = ({
     console.log(selectedId)
     if (selectedId) {
       
-      const selectedOptionData = variationOptions.find(option => option._id === selectedId);
-      console.log(selectedOptionData)
-      if (selectedOptionData) {
-        setSelectedVariations(prev => {
-          const exists = prev.find(v => v._id === selectedOptionData._id);
-          if (!exists) {
-            const updatedVariations = [...prev, selectedOptionData];
-            const transformedVariations = updatedVariations.map(selected => {
-              const option = variationOptions.find(v => v._id === selected._id);
-              // Only add price if it has changed
-              if (option && option.price === selected.price) {
-                return { id: option._id };
-              }
-              return { id: option._id, price: selected.price };
-            });
-            onVariationsUpdate(transformedVariations);
-            return updatedVariations;
-          }
-          return prev;
-        });
-      }
+const selectedOptionData = 
+  variationOptions.find(option => option._id === selectedId)
+    ? { ...variationOptions.find(option => option._id === selectedId), source: 'variationOptions' }
+    : { ...productsVariations.find(option => option._id === selectedId), source: 'productsVariations'};
+
+console.log(selectedOptionData);
+
+if (selectedOptionData) {
+  setSelectedVariations(prev => {
+    const exists = prev.find(v => v._id === selectedOptionData._id);
+    if (!exists) {
+      const updatedVariations = [...prev, selectedOptionData];
+      const transformedVariations = updatedVariations.map(selected => {
+        // Find the option once
+        const option = variationOptions.find(v => v._id === selected._id)
+  ? { ...variationOptions.find(v => v._id === selected._id), source: 'variationOptions' }
+  : { ...productsVariations.find(v => v._id === selected._id), source: 'productsVariations' };
+
+        // Ensure `option` exists
+        if (!option) {
+          console.error(`Option not found for ID: ${selected._id}`);
+          return null; // Skip if no match is found
+        }
+
+        // Construct the transformed object
+        const isProduct = option.source === 'productsVariations';
+        console.log(option.source)
+        return {
+          id: option._id,
+          ...(selected.price !== undefined && option.price !== selected.price && { price: selected.price }),
+          ...(isProduct && { product: true }),
+        };
+      }).filter(Boolean); // Remove any null values
+
+      onVariationsUpdate(transformedVariations);
+      return updatedVariations;
+    }
+    return prev;
+  });
+}
+
+
     }
   };
 
@@ -105,7 +172,7 @@ const VariationsDropdown = ({
 
         const compressedOriginal = await imageCompression(file, {
           maxSizeMB: 1,
-          maxWidthOrHeight: 800,
+          maxWidthOrHeight: 1000,
           useWebWorker: true,
         });
 
@@ -115,7 +182,7 @@ const VariationsDropdown = ({
           useWebWorker: true,
         });
 
-        const originalWebP = await resizeImage(compressedOriginal, 800);
+        const originalWebP = await resizeImage(compressedOriginal, 1000);
         const thumbnailWebP = await resizeImage(compressedThumbnail, 120);
 
         const originalStorageRef = ref(
@@ -244,6 +311,8 @@ const VariationsDropdown = ({
   const hasImages = Object.keys(imageFiles).length > 0;
   const areVariationsValid = selectedVariations.every(variation => variation.price && variation.value);
 
+console.log(productsVariations)
+
   return (
     <div style={{ marginBottom: '20px' }}>
       <div
@@ -282,7 +351,18 @@ const VariationsDropdown = ({
               </option>
             ))}
           </select>
-
+          <label>Välj produkt (inte ett krav):</label>
+          <select onChange={handleVariationSelect}>
+            <option value="">-- Select --</option>
+            {productsVariations.map((option) => (
+              <option
+                key={option.id}
+                value={option._id}
+                style={{ backgroundColor: option.meta }}>
+                {option.name}
+              </option>
+            ))}
+          </select>
           <h3>Valda variationer:</h3>
           <ul>
             {selectedVariations.map((variation, index) => (
@@ -307,7 +387,7 @@ const VariationsDropdown = ({
                     <div style={styles.variationInfo}>
                       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <p style={styles.variationText}>
-                          {variation.attribute.name.se} {variation.value} - Pris: {variation.price} kr
+                          {/* {variation.attribute.name.se ? variation.attribute.name.se : variation.name} {variation.value}  */} {variation.name}{variation.price} - Pris: {variation.price} kr
                         </p>
                         <div style={styles.buttonGroup}>
                           <button
