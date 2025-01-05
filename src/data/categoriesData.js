@@ -10,12 +10,12 @@ const categoriesData = {
           {
             label: "Täljstenskaminer",
             value: "taljstenskaminer",
-            child: [{ label: "Tillbehör", value: "tillbehor" }],
+            child: [{ label: "Tillbehör", value: "tillbehor-taljstenskaminer" }],
           },
           {
             label: "Kaminer",
             value: "kaminer",
-            child: [{ label: "Tillbehör", value: "tillbehor" }],
+            child: [{ label: "Tillbehör", value: "tillbehor-kamin" }],
           },
           {
             label: "Eldstäder/Murspis",

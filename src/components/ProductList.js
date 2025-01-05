@@ -10,40 +10,46 @@ const ProductList = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+  
       const auth = getAuth();
       const user = auth.currentUser;
-
+  
       if (!user) {
         setError('User not logged in');
         setLoading(false);
         return;
       }
-
+  
       try {
-        const token = await user.getIdToken(); // Få användarens ID-token
-      
+        // Get Firebase ID token
+        const token = await user.getIdToken();
+  
+        // Make the GET request to fetch products
         const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products', {
           headers: {
-            Authorization: `Bearer ${token}`, // Skicka token i header
+            Authorization: `Bearer ${token}`, // Include token in Authorization header
           },
           params: {
-            uid: user.uid, // Valfritt: skicka uid som query parameter
-            uidEmail: user.email, // Valfritt: skicka e-post om det behövs
+            uid: user.uid, // Optional: Pass user UID as query parameter
+            uidEmail: user.email, // Optional: Pass user email as query parameter
           },
-          withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
         });
-      
+  
+        // Update products state
         setProducts(response.data);
-      } 
-      catch (error) {
-        setError(error.message);
+      } catch (error) {
+        console.error('Error fetching products:', error.response || error.message);
+        setError(error.response?.data?.message || 'Failed to fetch products');
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchProducts();
   }, []);
+  
 
   const handleDelete = async (id) => {
     try {
