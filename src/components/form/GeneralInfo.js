@@ -4,7 +4,7 @@ import categoriesData from '../../data/categoriesData'; // Adjust path as needed
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
-const currencyOptions = ['EUR', 'USD', 'SEK', 'NOK', 'GBP']; // Currency options
+const currencyOptions = ['EUR', 'SEK']; // Currency options
 
 const GeneralInfo = ({ setProduct }) => {
   const [isGeneralInfoOpen, setIsGeneralInfoOpen] = useState(false);
@@ -12,6 +12,7 @@ const GeneralInfo = ({ setProduct }) => {
   const [mainCategory, setMainCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
   const [subSubCategory, setSubSubCategory] = useState('');
+  const [subSubSubCategory, setSubSubSubCategory] = useState(''); // New additional level
   const [brands, setBrands] = useState([]);
   const [currency, setCurrency] = useState('EUR'); // Default currency
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +32,7 @@ const GeneralInfo = ({ setProduct }) => {
       }
 
       try {
-        const response = await axios.get('http://localhost:8080/brands', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com', {
           params: { uid: user.uid, uidEmail: user.email },
         });
 
@@ -63,6 +64,14 @@ const GeneralInfo = ({ setProduct }) => {
                   {
                     name: subSubCategory,
                     slug: subSubCategory.toLowerCase(),
+                    ...(subSubSubCategory && {
+                      child: [
+                        {
+                          name: subSubSubCategory,
+                          slug: subSubSubCategory.toLowerCase(),
+                        },
+                      ],
+                    }),
                   },
                 ],
               }),
@@ -83,7 +92,7 @@ const GeneralInfo = ({ setProduct }) => {
       currency,
       deliveryTime, // Add delivery time to product data
     }));
-  }, [selectedCountries, mainCategory, subCategory, subSubCategory, currency, deliveryTime, setProduct]);
+  }, [selectedCountries, mainCategory, subCategory, subSubCategory, subSubSubCategory, currency, deliveryTime, setProduct]);
   
 
   const countryOptions = ['Alla', 'Sverige', 'Finland', 'Åland'];
@@ -131,6 +140,10 @@ const GeneralInfo = ({ setProduct }) => {
     setSubSubCategory(e.target.value);
   };
 
+  const handleSubSubSubCategoryChange = (e) => {
+    setSubSubSubCategory(e.target.value);
+  };
+
   const handleCurrencyChange = (e) => {
     setCurrency(e.target.value);
   };
@@ -147,6 +160,10 @@ const GeneralInfo = ({ setProduct }) => {
   
   const selectedSubCategory = subcategories.find(sub => sub.value === subCategory);
   const subSubcategories = selectedSubCategory ? selectedSubCategory.child : [];
+
+  const selectedSubSubCategory = subSubcategories.find((subSub) => subSub.value === subSubCategory);
+  const subSubSubcategories = selectedSubSubCategory ? selectedSubSubCategory.child : [];
+  
 
   const isFormCompleted =
     mainCategory &&
@@ -280,6 +297,19 @@ const GeneralInfo = ({ setProduct }) => {
   />
 </div>
 
+
+<div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
+  <label>Vill du dölja produkten?:</label>
+  <input
+    type="checkbox"
+    name="visaIgalleri"
+    onChange={(e) =>
+      setProduct((prev) => ({ ...prev, showingallery: e.target.checked }))
+    }
+    style={{ width: '20px', height: '20px' }}
+  />
+</div>
+
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
   <label>Ungefärlig leveranstid (dagar):</label>
   <input
@@ -399,6 +429,24 @@ const GeneralInfo = ({ setProduct }) => {
                 </select>
               </div>
             )}
+
+            
+
+
+{subSubSubcategories && subSubSubcategories.length > 0 && (
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <label>Underkategori 3:</label>
+    <select value={subSubSubCategory} onChange={handleSubSubSubCategoryChange} style={{ marginBottom: '10px' }}>
+      <option value="">Välj underkategori</option>
+      {subSubSubcategories.map((subSubSub) => (
+        <option key={subSubSub.value} value={subSubSub.value}>
+          {subSubSub.label}
+        </option>
+      ))}
+    </select>
+  </div>
+)}
+
           </div>
         </div>
       )}

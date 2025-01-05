@@ -31,7 +31,7 @@ const GeneralInfo = ({ product, setProduct }) => {
       }
 
       try {
-        const response = await axios.get('http://localhost:8080/brands', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
           params: { uid: user.uid, uidEmail: user.email },
         });
 

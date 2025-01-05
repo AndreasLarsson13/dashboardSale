@@ -117,7 +117,7 @@ const AddProductPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/reviewProducts`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/reviewProducts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,11 +154,11 @@ const AddProductPage = () => {
             product={product}
           />
           <Meta product={product} setProduct={setProduct} />
-          <RelatedProductsDropdown
+         {/*  <RelatedProductsDropdown
             product={product}
             onRelatedProductsUpdate={handleRelatedProductsUpdate}
             onRelatedProductRemove={handleRelatedProductRemove}
-          />
+          /> */}
           <button type="submit">Lägg till</button>
         </form>
       ) : (

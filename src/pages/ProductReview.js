@@ -48,10 +48,11 @@ const ReviewProductsPage = () => {
       fetchPendingProducts();
     }
   }, [isAdmin]);
-
-  const fetchPendingProducts = async () => {
+/*   https://serverkundportal-dot-natbutiken.lm.r.appspot.com
+http://localhost:8080
+ */  const fetchPendingProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/pendingProducts');
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/pendingProducts');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -67,7 +68,7 @@ const ReviewProductsPage = () => {
   const compareProduct = async (product) => {
     setIsComparing(true);
     try {
-      const response = await fetch('http://localhost:8080/compareProduct', {
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/compareProduct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ const ReviewProductsPage = () => {
 
     setIsApproving(true);
     try {
-      const response = await fetch('http://localhost:8080/addproducts', {
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addproducts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,13 +123,14 @@ const ReviewProductsPage = () => {
     setShowRejectPopup(true);
     setSelectedProductId(productId);
   };
-
+  
   const submitReject = async () => {
     const confirmReject = window.confirm('Är du säker att du vill?');
     if (!confirmReject) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/rejectproduct/`, {
+/*       http://localhost:8080/
+ */      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/rejectproduct/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

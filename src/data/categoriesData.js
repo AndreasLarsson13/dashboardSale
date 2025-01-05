@@ -1,74 +1,110 @@
 const categoriesData = {
-  'Hus': {
-    label: 'Hus',
-    value: 'hus',
+  Hushall: {
+    label: "Hushåll",
+    value: "hushall",
     child: [
       {
-        label: 'Kök',
-        value: 'kok',
+        label: "Braskaminer",
+        value: "braskaminer",
         child: [
-          { label: 'Värmekyl', value: 'varmekyl' },
-          { label: 'Diskmaskin', value: 'diskmaskin' },
-          { label: 'Kranar', value: 'kranar' },
+          {
+            label: "Täljstenskaminer",
+            value: "taljstenskaminer",
+            child: [{ label: "Tillbehör", value: "tillbehor" }],
+          },
+          {
+            label: "Kaminer",
+            value: "kaminer",
+            child: [{ label: "Tillbehör", value: "tillbehor" }],
+          },
+          {
+            label: "Eldstäder/Murspis",
+            value: "eldstader/murspis",
+          },
+          {
+            label: "Gjutjärnskaminer",
+            value: "gjutjarnskaminer",
+          },
         ],
       },
       {
-        label: 'Pizza-Ugn',
-        value: 'pizza-ugn',
+        label: "Värmepumpar",
+        value: "varmepumpar",
         child: [
-          { label: 'Portabel', value: 'portabel' },
+          { label: "Luftvärmepumpar", value: "luftvarmepumpar" },
+          { label: "Frånluftvärmepump", value: "franluftvarmepump" },
+          { label: "Bergvärmepumpar", value: "bergvarmepumpar" },
+          { label: "Jordvärmepump", value: "jordvarmepump" },
+          { label: "AC", value: "AC" },
         ],
       },
       {
-        label: 'Värme & Kyla',
-        value: 'varme-kyla',
+        label: "Ventilation",
+        value: "ventilation",
         child: [
-          { label: 'Braskamin', value: 'braskamin' },
-          { label: 'Luftvärmepump', value: 'luftvarmepump' },
-        ],
-      },
-    ],
-  },
-  'Fritid': {
-    label: 'Fritid',
-    value: 'fritid',
-    child: [
-      {
-        label: 'Camping',
-        value: 'camping',
-        child: [
-          { label: 'Tält', value: 'talt' },
-          { label: 'Sovsäck', value: 'sovsack' },
+          { label: "FTX-Aggregat", value: "ftx-aggregat" },
+          { label: "Mekanisk Ventilation", value: "mekaniskventilation" },
+          { label: "Friflöde/Självdrag", value: "friflode-sjalvdrag" },
         ],
       },
       {
-        label: 'Fiske',
-        value: 'fiske',
-        child: [
-          { label: 'Spö', value: 'spo' },
-          { label: 'Köpa', value: 'kopa' },
-        ],
+        label: "Golvvärme",
+        value: "golvvarme",
       },
-    ],
-  },
-  'Trädgård': {
-    label: 'Trädgård',
-    value: 'tradgard',
-    child: [
       {
-        label: 'Plantering',
-        value: 'plantering',
+        label: "VVS",
+        value: "vvs",
         child: [
-          { label: 'Blommor', value: 'blommor' },
-          { label: 'Grönsaker', value: 'gronsaker' },
+          { label: "Kranar/Blandare", value: "kranar/blandare" },
+          { label: "Handfat/Badkar", value: "handfat/badkar" },
+          { label: "Spabad/Badtunnor", value: "spabad/badtunnor" },
+          { label: "Toalstolar", value: "toastolar" },
         ],
       },
       {
-        label: 'Utemöbler',
-        value: 'utemobler',
+        label: "Sol/Lagring/Elbil",
+        value: "sol/lagring/elbil",
         child: [
-          { label: 'Soffa', value: 'soffa' },
-          { label: 'Stolar', value: 'stolar' },
+          { label: "Solsystem", value: "solsystem" },
+          { label: "Batterier", value: "batterier" },
+          { label: "Elbilsladdning", value: "elbilsladdning" },
+        ],
+      },
+      {
+        label: "Byggvaror",
+        value: "byggvaror",
+        child: [
+          { label: "Fönster", value: "fonster" },
+          { label: "Takstegar", value: "takstegar" },
+        ],
+      },
+      {
+        label: "Inredning",
+        value: "inredning",
+        child: [
+          { label: "Köksinredning", value: "koksinredning" },
+          { label: "Badrumsinredning", value: "badrumsinredning" },
+          { label: "Garderob/Förvaring", value: "garderob/forvaring" },
+          { label: "Hallinredning", value: "hallinredning" },
+          { label: "Vardagsrumsinredning", value: "vardagsrumsinrening" },
+        ],
+      },
+      {
+        label: "Vitvaror",
+        value: "vitvaror",
+        child: [
+          { label: "Kylar", value: "kylar" },
+          { label: "Frysar", value: "frysar" },
+          { label: "Vinkylar", value: "vinkylar" },
+          { label: "Diskmaskiner", value: "diskmaskiner" },
+          { label: "Frysboxar", value: "frysboxar" },
+          { label: "Kombinerad Kyl/Frys", value: "kombineradkyl/frys" },
+          { label: "Fläktar", value: "flaktar" },
+          { label: "Tvättmaskiner", value: "tvattmaskiner" },
+          { label: "Torktumlare", value: "torktumlare" },
+          { label: "Mikrougn", value: "microugn" },
+          { label: "Hällar", value: "hallar" },
+          { label: "Ugnar", value: "ugnar" },
         ],
       },
     ],

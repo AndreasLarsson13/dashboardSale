@@ -22,7 +22,7 @@ const ProductList = () => {
       try {
         const token = await user.getIdToken(); // Få användarens ID-token
       
-        const response = await axios.get('http://localhost:8080/products', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products', {
           headers: {
             Authorization: `Bearer ${token}`, // Skicka token i header
           },
@@ -57,7 +57,7 @@ const ProductList = () => {
 
       const token = await user.getIdToken(); // Get the user's ID token
 
-      await axios.delete(`http://localhost:8080/products/${id}`, {
+      await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token in the header
         },

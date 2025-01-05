@@ -31,7 +31,7 @@ const ListBrandPage = () => {
         const tokenResult = await user.getIdTokenResult();
         setIsAdmin(tokenResult.claims.admin || false);
 
-        const response = await axios.get('http://localhost:8080/brands', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
           params: { uid: user.uid, uidEmail: user.email },
         });
 
@@ -87,7 +87,7 @@ const ListBrandPage = () => {
     }));
 
     try {
-      const response = await fetch('http://localhost:8080/updatebrands', {
+      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/updatebrands', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const ListBrandPage = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/deletebrand/${brandId}`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/deletebrand/${brandId}`, {
         method: 'DELETE',
       });
 
@@ -207,7 +207,7 @@ const ListBrandPage = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8080/updatebrand/${editingBrand}`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/updatebrand/${editingBrand}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

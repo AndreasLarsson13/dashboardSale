@@ -36,7 +36,7 @@ const EditProductPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/products/${id}`);
+        const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`);
         if (response.ok) {
           const data = await response.json();
           setProduct(data); // Load the product data into state
@@ -125,7 +125,7 @@ const EditProductPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/products/${id}`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, {
         method: 'PUT', // Use PUT to update the existing product
         headers: {
           'Content-Type': 'application/json',

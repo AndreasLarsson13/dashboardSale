@@ -44,7 +44,7 @@ const VariationsDropdown = ({
       try {
         const token = await user.getIdToken(); // Få användarens ID-token
       
-        const response = await axios.get('http://localhost:8080/products', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products', {
           headers: {
             Authorization: `Bearer ${token}`, // Skicka token i header
           },
@@ -71,7 +71,7 @@ const VariationsDropdown = ({
   useEffect(() => {
     const fetchVariations = async () => {
       try {
-        const response = await fetch('http://localhost:8080/productsoptions');
+        const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions');
         const data = await response.json();
         setVariationOptions(data);
       } catch (error) {
