@@ -52,7 +52,7 @@ const VariationsDropdown = ({
             uid: user.uid, // Valfritt: skicka uid som query parameter
             uidEmail: user.email, // Valfritt: skicka e-post om det behövs
           },
-          withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
+          /* withCredentials: true */ // Lägg till detta om servern kräver autentiserade förfrågningar
         });
         console.log(response.data)
         setproductsVariations(response.data);
