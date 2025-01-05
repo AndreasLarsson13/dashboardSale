@@ -146,7 +146,7 @@ const AddBrandPage = () => {
 
     brand.uid = user.uid;
     brand.email = user.email;
-
+    console.log(user)
     setIsSubmitting(true);
 
     try {
