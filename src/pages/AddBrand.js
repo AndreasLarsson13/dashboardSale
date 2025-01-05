@@ -157,7 +157,7 @@ const AddBrandPage = () => {
         },
         body: JSON.stringify(brand), // Now includes slug and updated image
       });
-
+console.log(response)
       if (response.ok) {
         setMessage('Brand added successfully!');
         setBrand({ name: '', slug: '', image: { thumbnail: '', original: '' } }); // Reset the form
