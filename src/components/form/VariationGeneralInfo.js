@@ -6,16 +6,11 @@ import axios from 'axios';
 import SpecialShippingSelector from '../form/SpecialShippingSelector'
 
 const currencyOptions = ['EUR', 'SEK']; // Currency options
-const productOriginOptions = ['SV', 'AX', 'FI']; // Currency options
-
-const countryLabels = {
-  SV: 'Sverige',
-  FI: 'Finland',
-  AX: 'Åland',
-};
 
 
-const GeneralInfo = ({product, setProduct }) => {
+
+
+const GeneralInfo = ({product, setProduct, accessory }) => {
   const [isGeneralInfoOpen, setIsGeneralInfoOpen] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [mainCategory, setMainCategory] = useState('');
@@ -24,7 +19,6 @@ const GeneralInfo = ({product, setProduct }) => {
   const [subSubSubCategory, setSubSubSubCategory] = useState(''); // New additional level
   const [brands, setBrands] = useState([]);
   const [currency, setCurrency] = useState('SEK'); // Default currency
-  const [productCountryOfOrigin, setProductCountryOfOrgin] = useState('AX')
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
 const [deliveryTime, setDeliveryTime] = useState({});
@@ -92,57 +86,24 @@ const handleRemoveKeyword = (keyword) => {
 };
 
   
-  // Build category structure based on selected categories
-  const buildCategoryStructure = () => {
-    const structure = [
-      {
-        name: mainCategory,
-        slug: mainCategory.toLowerCase(),
-        ...(subCategory && {
-          child: [
-            {
-              name: subCategory,
-              slug: subCategory.toLowerCase(),
-              ...(subSubCategory && {
-                child: [
-                  {
-                    name: subSubCategory,
-                    slug: subSubCategory.toLowerCase(),
-                    ...(subSubSubCategory && {
-                      child: [
-                        {
-                          name: subSubSubCategory,
-                          slug: subSubSubCategory.toLowerCase(),
-                        },
-                      ],
-                    }),
-                  },
-                ],
-              }),
-            },
-          ],
-        }),
-      },
-    ];
-    return structure;
-  };
+ 
 
   // Update the product data based on user input
   useEffect(() => {
     setProduct((prev) => ({
       ...prev,
       sellInCountries : selectedCountries,
-      category: buildCategoryStructure(),
-      currency,
+/*       category: buildCategoryStructure(),
+ */      currency,
       deliveryTime, // Add delivery time to product data
       searchKeywords,
       shippingCosts,
       shippingCurrency,
-      productCountryOfOrigin,
+    
       shippingSpecial,
       categoryPath : [mainCategory, subCategory, subSubCategory].filter(Boolean)
     }));
-  }, [selectedCountries, shippingSpecial, mainCategory, subCategory, subSubCategory,productCountryOfOrigin,  subSubSubCategory, currency, deliveryTime,searchKeywords, setProduct, shippingCosts, shippingCurrency]);
+  }, [selectedCountries, shippingSpecial, mainCategory, subCategory, subSubCategory,  subSubSubCategory, currency, deliveryTime,searchKeywords, setProduct, shippingCosts, shippingCurrency]);
   
 
   const countryOptions = ['SV', 'FI', 'AX'];
@@ -155,10 +116,7 @@ const handleRemoveKeyword = (keyword) => {
         ? Math.max(0, Number(value))
         : value;
   
-       
-
-
-   setProduct((prev) => ({
+        setProduct((prev) => ({
           ...prev,
           [name]: 
             (name === 'price' || name === 'sale_price'|| name === 'buying_price' )
@@ -172,10 +130,7 @@ const handleRemoveKeyword = (keyword) => {
                 }
               : updatedValue
         }));
-
   };
-
-  
   
 
   // Handle checkbox changes for countries
@@ -195,9 +150,9 @@ const handleRemoveKeyword = (keyword) => {
   const handleShippingCostChange = (e, country, currency) => {
     const value = parseInt(e.target.value) || 0;
   
-    setShippingCosts(prev => ({
+   setShippingCosts(prev => ({
       ...prev,
-      [country]: { value, originalCurrency: true, currency: currency }, // Endast senaste valda valutan sparas
+      [country]: { value, originalCurrency: true,  currency: currency }, // Endast senaste valda valutan sparas
     }));
   };
   
@@ -236,12 +191,7 @@ const buyingpriceInput = document.getElementById('buying_price');
     buyingpriceInput.value= ""
   };
   
-  const handleProductCountryOfOrginChange = (e) => {
-    console.log(e.target.value)
-    
-    setProductCountryOfOrgin(e.target.value);
 
-  };
 
 
 
@@ -316,10 +266,31 @@ const handleUnitsChange = (e) => {
           >
 
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
+              <label>Gruppnamn:</label>
+              <input
+                type="text"
+                name="variationGroup"
+                onChange={handleInputChange}
+                required
+                value={accessory.type}
+                style={{ width: '226px' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
               <label>Namn:</label>
               <input
                 type="text"
                 name="name"
+                onChange={handleInputChange}
+                required
+                style={{ width: '226px' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
+              <label>Namn på huvudprodukt:</label>
+              <input
+                type="text"
+                name="name_parrent"
                 onChange={handleInputChange}
                 required
                 style={{ width: '226px' }}
@@ -331,17 +302,6 @@ const handleUnitsChange = (e) => {
               <input
                 type="text"
                 name="sku"
-                onChange={handleInputChange}
-                required
-                style={{ width: '226px' }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
-              <label>Artiekelnummer från leverantör:</label>
-              <input
-                type="text"
-                name="supplierArticleNumber"
                 onChange={handleInputChange}
                 required
                 style={{ width: '226px' }}
@@ -423,30 +383,10 @@ const handleUnitsChange = (e) => {
                 required
               />
             </div>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
-  <label>Är detta ett tillbehör?:</label>
-  <input
-    type="checkbox"
-    name="isProductOption"
-    onChange={(e) =>
-      setProduct((prev) => ({ ...prev, isProductOption: e.target.checked }))
-    }
-    style={{ width: '20px', height: '20px' }}
-  />
-</div>
+           
 
 
-<div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
-  <label>Vill du dölja produkten? (Från text filtersidan):</label>
-  <input
-    type="checkbox"
-    name="hideProductFromView"
-    onChange={(e) =>
-      setProduct((prev) => ({ ...prev, hideProductFromView: e.target.checked }))
-    }
-    style={{ width: '20px', height: '20px' }}
-  />
-</div>
+
 
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
  {/*  <label>Ungefärlig leveranstid (dagar):</label>
@@ -510,16 +450,7 @@ const handleUnitsChange = (e) => {
               </div>
             </div>
           </div>
-<div style={{ marginBottom: '10px' }}>
-  <label>
-    <input
-      type="checkbox"
-      checked={specialShippingEnabled}
-      onChange={(e) => setSpecialShippingEnabled(e.target.checked)}
-    />
-    {' '}Klicka här för speciell frakt logik
-  </label>
-</div>
+
 {/* {specialShippingEnabled && (
   <SpecialShippingSelector
     value={shippingSpecial.combinedWith}
@@ -529,27 +460,7 @@ const handleUnitsChange = (e) => {
   />
 )} */}
 
-{specialShippingEnabled && (
-        <div style={{ marginTop: '15px' }}>
-           <SpecialShippingSelector
-    value={shippingSpecial.combinedWith}
-    onChange={(newIds) =>
-      setShippingSpecial((prev) => ({ ...prev, combinedWith: newIds }))
-    }
-  />
 
-          <label style={{ marginTop: '10px' }}>
-            Antal enheter för fraktrabatt:{' '}
-            <input
-              type="number"
-              min="1"
-              value={shippingSpecial.units}
-              onChange={handleUnitsChange}
-              style={{ width: '80px' }}
-            />
-          </label>
-        </div>
-      )}
 
 
 
@@ -566,24 +477,9 @@ const handleUnitsChange = (e) => {
 
           
 
-            {/* Currency Dropdown */}
-           <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
-  <label>Vilket land utgår produkten från:</label>
-  <select
-  name="countryOfOrigin"
-  value={productCountryOfOrigin}
-  onChange={handleProductCountryOfOrginChange}
-  required
-  style={{ width: '226px' }}
->
-  {productOriginOptions.map((code) => (
-    <option key={code} value={code}>
-      {countryLabels[code] || 'Okänt land'}
-    </option>
-  ))}
-</select>
+           
 
-</div>
+
 
 
 
@@ -614,7 +510,7 @@ const handleUnitsChange = (e) => {
           <input
             type="text"
             placeholder={`Frakt ${country}`}
-            value={shippingCosts[country]?.value || ''}
+            value={shippingCosts[country]?.[shippingCurrency]?.value || ''}
             onChange={(e) => handleShippingCostChange(e, country, shippingCurrency)}
           />
         )}
@@ -649,85 +545,18 @@ const handleUnitsChange = (e) => {
 </div>
 
 
-          <div style={{ padding: '10px', display: 'flex', gap: '40px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label>Huvudkategori:</label>
-              <select value={mainCategory} onChange={handleMainCategoryChange} style={{ marginBottom: '10px' }}>
-                <option value="">Välj huvudkategori</option>
-                {Object.keys(categoriesData).map((category) => (
-                  <option key={category} value={categoriesData[category].value}>
-                    {categoriesData[category].label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            
 
-            {subcategories.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label>Underkategori 1:</label>
-                <select value={subCategory} onChange={handleSubCategoryChange} style={{ marginBottom: '10px' }}>
-                  <option value="">Välj underkategori</option>
-                  {subcategories.map((sub) => (
-                    <option key={sub.value} value={sub.value}>
-                      {sub.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {subSubcategories.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label>Underkategori 2:</label>
-                <select value={subSubCategory} onChange={handleSubSubCategoryChange} style={{ marginBottom: '10px' }}>
-                  <option value="">Välj underkategori</option>
-                  {subSubcategories.map((subSub) => (
-                    <option key={subSub.value} value={subSub.value}>
-                      {subSub.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+           
 
             
 
 
-{subSubSubcategories && subSubSubcategories.length > 0 && (
-  <div style={{ display: 'flex', flexDirection: 'column' }}>
-    <label>Underkategori 3:</label>
-    <select value={subSubSubCategory} onChange={handleSubSubSubCategoryChange} style={{ marginBottom: '10px' }}>
-      <option value="">Välj underkategori</option>
-      {subSubSubcategories.map((subSubSub) => (
-        <option key={subSubSub.value} value={subSubSub.value}>
-          {subSubSub.label}
-        </option>
-      ))}
-    </select>
-  </div>
-)}
 
-<div className="keyword-section">
-            <label>Sökord:</label>
-            <div className="keyword-input-container">
-              <input
-                type="text"
-                value={keywordInput}
-                onChange={(e) => setKeywordInput(e.target.value)}
-                placeholder="Lägg till sökord"
-              />
-              <button onClick={handleAddKeyword} >Lägg till</button>
-            </div>
-            <div className="keyword-list">
-              {searchKeywords.map((keyword) => (
-                <span key={keyword} className="keyword-item">
-                  {keyword} <FaTimes onClick={() => handleRemoveKeyword(keyword)} />
-                </span>
-              ))}
-            </div>
-          </div>
+
+
         </div>
-          </div>
+         
        
       )}
 

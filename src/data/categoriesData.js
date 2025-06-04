@@ -4,18 +4,17 @@ const categoriesData = {
     value: "hushall",
     child: [
       {
-        label: "Braskaminer",
-        value: "braskaminer",
+        label: "Kaminer",
+        value: "kaminer",
         child: [
+          {
+            label: "Braskaminer",
+            value: "braskaminer",
+          },
           {
             label: "Täljstenskaminer",
             value: "taljstenskaminer",
-            child: [{ label: "Tillbehör", value: "tillbehor-taljstenskaminer" }],
-          },
-          {
-            label: "Kaminer",
-            value: "kaminer",
-            child: [{ label: "Tillbehör", value: "tillbehor-kamin" }],
+            
           },
           {
             label: "Eldstäder/Murspis",
@@ -25,6 +24,10 @@ const categoriesData = {
             label: "Gjutjärnskaminer",
             value: "gjutjarnskaminer",
           },
+          {
+            label: "Tillbehor",
+            value: "tillbehor-kamin",
+          }
         ],
       },
       {

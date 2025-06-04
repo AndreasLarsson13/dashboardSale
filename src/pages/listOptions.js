@@ -289,7 +289,7 @@ const ListAccessoriesPage = () => {
               </li>
             ))
           ) : (
-            <p>Inga tillbehör aktiva</p>
+            <p>Inga variationer aktiva</p>
           )}
         </ul>
       )}

@@ -3,6 +3,8 @@ import { getAuth } from 'firebase/auth'; // Import Firebase Auth to get the curr
 import GeneralInfo from '../components/form/GeneralInfo';
 import Description from '../components/form/Description';
 import VariationsDropdown from '../components/form/Variations';
+import OptionsDropdown from '../components/form/Options';
+
 import Meta from '../components/form/Meta';
 import Images from '../components/form/Images';
 import RelatedProductsDropdown from '../components/form/Related'; // Ensure this import is correct
@@ -14,8 +16,10 @@ const AddProductPage = () => {
   const [product, setProduct] = useState({
     name: '',
     sku: '',
-    price: 0,
-    sale_price: 0,
+    supplierArticleNumber: '',
+    price: {},
+    buying_price: {},
+    sale_price: {},
     quantity: 0,
     description: { se: '' },
     variations: [],
@@ -25,15 +29,28 @@ const AddProductPage = () => {
     brand: '',
     featured: false,
     category: [],
-    countries: [],
+    categoryPath: [],
+   /*  countries: [], */
     weightPack: 0,
     widthPack: 0,
     heightPack: 0,
     lengthPack: 0,
-    vat: 0.255,
-    produktvariation: false,
+    vat: {
+      "SE" : 0.25,
+      "AX" : 0.255,
+      "FI" : 0.255
+    },
+    isProductOption: false,
     relatedProducts: [], // Add related products state
-    createdDate: new Date().toISOString()
+    createdDate: new Date().toISOString(),
+    priceUpdateDate: new Date().toISOString(),
+    searchKeywords: [],
+    shippingCosts: { }, // Nytt fält
+    currency: "",
+    hideProductFromView: false,
+    shippingCurrency: 'EUR', // Nytt fält
+    productCountryOfOrigin: '',
+    campaigns: [],
   });
 
   const [isSingleImageUploaded, setIsSingleImageUploaded] = useState(false);
@@ -65,6 +82,14 @@ const AddProductPage = () => {
       variations: variations.map((v) => (v.isNew ? v : v)),
     }));
   };
+
+   const handleOptionsUpdate = (variations) => {
+    setProduct((prev) => ({
+      ...prev,
+      options: variations.map((v) => (v.isNew ? v : v)),
+    }));
+  };
+
 
   const handleImageLinkAdd = (variationId, link) => {
     setProduct((prev) => {
@@ -115,9 +140,16 @@ const AddProductPage = () => {
       alert('Please fill in the name and brand before submitting.');
       return;
     }
+  /*   product.originalPriceCurrencyAndDate = {
+      originalPrice: product.price[product.currency].value,
+      originalCurrency: product.currency, // Use the latest currency
+      originalShippingPrice: product.shippingCosts,
+      dateOfPrice: new Date().toISOString().split('T')[0],
+    } */
 
-    try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/reviewProducts`, {
+/*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
+ */    try {
+      const response = await fetch(`http://localhost:8088/reviewProducts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,6 +178,12 @@ const AddProductPage = () => {
             setProduct={setProduct}
             onSingleImageUpload={handleSingleImageUpload}
             onGalleryImageAdd={handleGalleryImageAdd}
+          />
+ <OptionsDropdown
+            onVariationsUpdate ={handleOptionsUpdate}
+           /*  onImageLinkAdd={handleImageLinkAdd} */
+            /* isSingleImageUploaded={isSingleImageUploaded} */
+            product={product}
           />
           <VariationsDropdown
             onVariationsUpdate={handleVariationsUpdate}

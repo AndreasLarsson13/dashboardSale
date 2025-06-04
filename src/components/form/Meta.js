@@ -6,9 +6,9 @@ const Meta = ({ product, setProduct }) => {
   const [isTechnicalDataOpen, setIsTechnicalDataOpen] = useState(false);
   const [isPdfDataOpen, setIsPdfDataOpen] = useState(false);
 
-  const predefinedTechnicalFields = [
+ /*  const predefinedTechnicalFields = [
     { value: 'height', label: 'Höjd (mm)' },
-    { value: 'weight', label: 'Nettovikt (g)' },
+    { value: 'weight', label: 'Nettovikt (kg)' },
     { value: 'width', label: 'Bredd (mm)' },
     { value: 'depth', label: 'Djup (mm)' },
     { value: 'vedlängd', label: 'Maximal vedlängd (cm)' },
@@ -22,7 +22,131 @@ const Meta = ({ product, setProduct }) => {
     { value: 'preheatingtime', label: 'Förvärmningstid' },
     { value: 'floor', label: 'Bakyta' },
     { value: 'custom', label: 'Anpassad' }, // Custom option
-  ];
+  ]; */
+
+  const predefinedTechnicalFields = [
+  {
+    key: 'height',
+    value: {
+      SE: 'Höjd (mm)',
+      EN: 'Height (mm)',
+      FI: 'Korkeus (mm)'
+    }
+  },
+  {
+    key: 'weight',
+    value: {
+      SE: 'Nettovikt (kg)',
+      EN: 'Net weight (kg)',
+      FI: 'Nettopaino (kg)'
+    }
+  },
+  {
+    key: 'width',
+    value: {
+      SE: 'Bredd (mm)',
+      EN: 'Width (mm)',
+      FI: 'Leveys (mm)'
+    }
+  },
+  {
+    key: 'depth',
+    value: {
+      SE: 'Djup (mm)',
+      EN: 'Depth (mm)',
+      FI: 'Syvyys (mm)'
+    }
+  },
+  {
+    key: 'vedlängd',
+    value: {
+      SE: 'Maximal vedlängd (cm)',
+      EN: 'Max log length (cm)',
+      FI: 'Suurin puun pituus (cm)'
+    }
+  },
+  {
+    key: 'effekt',
+    value: {
+      SE: 'Effekt (W)',
+      EN: 'Power (W)',
+      FI: 'Teho (W)'
+    }
+  },
+  {
+    key: 'color',
+    value: {
+      SE: 'Färg',
+      EN: 'Color',
+      FI: 'Väri'
+    }
+  },
+  {
+    key: 'uppvärmningsyta',
+    value: {
+      SE: 'Maximal uppvärmningsyta (m²)',
+      EN: 'Max heating area (m²)',
+      FI: 'Suurin lämmitettävä pinta-ala (m²)'
+    }
+  },
+  {
+    key: 'skorstensanslutning',
+    value: {
+      SE: 'Skorstensanslutning',
+      EN: 'Chimney connection',
+      FI: 'Savupiipun liitäntä'
+    }
+  },
+  {
+    key: 'skorstensanslutningValue',
+    value: {
+      SE: 'Upptill, Bak',
+      EN: 'Top, Back',
+      FI: 'Ylhäällä, Takana'
+    }
+  },
+  {
+    key: 'verkningsgrad',
+    value: {
+      SE: 'Verkningsgrad (%)',
+      EN: 'Efficiency (%)',
+      FI: 'Hyötysuhde (%)'
+    }
+  },
+  {
+    key: 'gasconsumption',
+    value: {
+      SE: 'Gaskonsumtion',
+      EN: 'Gas consumption',
+      FI: 'Kaasunkulutus'
+    }
+  },
+  {
+    key: 'preheatingtime',
+    value: {
+      SE: 'Förvärmningstid',
+      EN: 'Preheating time',
+      FI: 'Esilämmitysaika'
+    }
+  },
+  {
+    key: 'floor',
+    value: {
+      SE: 'Bakyta',
+      EN: 'Back surface',
+      FI: 'Takapinta'
+    }
+  },
+  {
+    key: 'custom',
+    value: {
+      SE: 'Anpassad',
+      EN: 'Custom',
+      FI: 'Mukautettu'
+    }
+  }
+];
+
 
   const colorOptions = [
     { label: "Vit", value: "white" },
@@ -65,6 +189,7 @@ const Meta = ({ product, setProduct }) => {
 
   const handleTechnicalDataChange = (index, field, value) => {
     const updatedData = [...technicalData];
+    console.log(field)
     updatedData[index] = { ...updatedData[index], [field]: value };
     setTechnicalData(updatedData);
     setProduct(prev => ({
@@ -211,18 +336,19 @@ const Meta = ({ product, setProduct }) => {
                     <div key={index} style={{ marginBottom: '10px', display: 'flex', gap: "10px"}}>
                       <div style={{display: 'flex', flexDirection: 'column'}}>
                       <label>Titel:</label>
-                      <select
-                        value={item.title}
-                        onChange={(e) => handleTechnicalDataChange(index, 'title', e.target.value)}
-                      >
-                        <option value="">Välj teknisk data</option>
-                        {predefinedTechnicalFields.map((field) => (
-                          <option key={field.value} value={field.value}>
-                            {field.label}
-                          </option>
-                        ))}
-                        <option value="custom">Anpassad</option>
-                      </select>
+                     <select
+  value={item.title}
+  onChange={(e) => handleTechnicalDataChange(index, 'title', e.target.value)}
+>
+  <option value="">Välj teknisk data</option>
+  {predefinedTechnicalFields.map((field) => (
+    <option key={field.key} value={field.key}>
+      {field.value.SE} {/* or use a language prop */}
+    </option>
+  ))}
+  <option value="custom">Anpassad</option>
+</select>
+
                       </div>
                       {item.title === 'custom' && (
                         <div style={{display: 'flex', flexDirection: 'column'}}>                          

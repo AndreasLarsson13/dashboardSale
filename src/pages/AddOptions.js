@@ -4,6 +4,11 @@ import { storage } from '../components/form/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { styles } from '../components/form/styleCart';
 
+import VariationGeneralInfo from '../components/form/VariationGeneralInfo';
+import Description from '../components/form/Description';
+import Meta from '../components/form/Meta';
+import VariationImages from '../components/form/VariationImages';
+
 const colorOptions = [
   { sv: 'Röd', en: 'red' },
   { sv: 'Blå', en: 'blue' },
@@ -19,70 +24,76 @@ const colorOptions = [
 
 const AddAccessoryPage = () => {
   const [accessory, setAccessory] = useState({
-    value: '',
-    img: { url: '' },
-    attribute: { name: '', slug: '' },
-    price: 0,
-    color: '',
-    meta: '',
+   
+    color: false,
+    meta: false,
     type: '',
-    namn: ''
+   
   });
+
+
+
+
+
+const [product, setProduct] = useState({
+    name: '',
+    sku: '',
+    price: {},
+
+      buying_price: {},
+      sale_price: {},
+    quantity: 0,
+    description: { se: '' },
+    meta: [],
+    image: { thumbnail: '', original: '' },
+    brand: '',
+    featured: false,
+    weightPack: 0,
+    widthPack: 0,
+    heightPack: 0,
+    lengthPack: 0,
+    vat: 0.255,
+    produktvariation: true,
+    variationGroup: {
+      se: accessory.type},
+    colorAndOtherVariationData: {"color": accessory.color, "meta": accessory.meta},
+    createdDate: new Date().toISOString(),
+     isProductOption: false,
+    name_parrent: ""
+  
+
+  });
+
+
+
+
+ const [isSingleImageUploaded, setIsSingleImageUploaded] = useState(false);
+
+  const handleSingleImageUpload = (image) => {
+    setProduct((prev) => ({
+      ...prev,
+      image,
+    }));
+    setIsSingleImageUploaded(true);
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [uploadStatus, setUploadStatus] = useState('');
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'attributeName') {
-      const slug = value.toLowerCase().replace(/\s+/g, '-');
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        attribute: {
-          ...prevAccessory.attribute,
-          name: value,
-          slug,
-        },
-      }));
-    } else if (name === 'price') {
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        price: parseFloat(value),
-      }));
-    } else if (name === 'type') {
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        type: value,
-        img: { url: '' },
-        meta: '',
-        value: '',
-      }));
-      if (value === 'color') {
-        setAccessory((prevAccessory) => ({
-          ...prevAccessory,
-          attribute: { name: 'color', slug: 'color' },
-        }));
-      }
-    } else if (name === 'color') {
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        color: value,
-        value: value,
-      }));
-    } else if (name === 'meta') {
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        meta: value,
-      }));
-    } else {
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        [name]: value,
-      }));
-    }
-  };
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
 
-  const handleImageUpload = async (e) => {
+  setAccessory((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+console.log(accessory)
+
+
+  /* const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -106,9 +117,9 @@ const AddAccessoryPage = () => {
       console.error('Error uploading image:', error);
       setUploadStatus('Failed to upload image.');
     }
-  };
+  }; */
 
-  const handleSubmit = async (e) => {
+  /* const handleSubmit = async (e) => {
     e.preventDefault();
     const auth = getAuth();
     const user = auth.currentUser;
@@ -153,28 +164,63 @@ const AddAccessoryPage = () => {
       setMessage('Error adding accessory.');
     }
     setIsSubmitting(false);
+  }; */
+
+  const handleSubmitDetailed = async (e) => {
+    e.preventDefault();
+
+const updatedProduct = {
+    ...product,
+    variationGroup:{se: accessory.type},
+    colorAndOtherVariationData: {
+      color: accessory.color,
+      meta: accessory.meta,
+    },
+  };
+
+
+   /*  if (!user) {
+      alert('User is not logged in');
+      return;
+    } */
+
+ /*    product.uid = user.uid;
+    product.email = user.email; */
+
+    if (!product.name || !product.brand) {
+      alert('Please fill in the name and brand before submitting.');
+      return;
+    }
+
+/*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
+ */    
+    try {
+      const response = await fetch(`http://localhost:8088/addVariation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedProduct), // Submit product data including countries and related products
+      });
+      if (response.ok) {
+        alert('Produkten las till utan problem!');
+      } else {
+        console.error('Failed to add product:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
   };
 
   return (
     <div>
-      <h2>Lägg till tillbehör</h2>
+      <h2>Lägg till variation</h2>
       {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit} style={{ ...styles.card, width: '100%' }}>
+     
         <div style={{ display: 'flex', gap: '80px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-              <label htmlFor="namn">Namn:</label>
-              <input
-                type="text"
-                name="namn"
-                id="namn"
-                value={accessory.namn}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-              <label htmlFor="type">Välj tillbehör:</label>
+          <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
+              <label htmlFor="type">Välj tillbehör (Gruppnamn för kunden):</label>
               <select
                 name="type"
                 id="type"
@@ -183,23 +229,18 @@ const AddAccessoryPage = () => {
                 required
                 style={{ flexGrow: 1 }}
               >
-                <option value="">Select Type</option>
-                <option value="color">Färg</option>
-                <option value="image">Bild</option>
-                <option value="other">Andra</option>
+                <option value="">Typ av variation (Namn på gruppering)</option>
+                <option value="färg">Färg</option>
+                <option value="storlek">Storlek</option>
+                <option value="variationer">Variation</option>
+                 <option value="version">Version</option>
+                <option value="detaljer">Eget gruppnamn</option>
               </select>
             </div>
-            <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-              <label htmlFor="price">Pris:</label>
-              <input
-                type="number"
-                name="price"
-                id="price"
-                value={accessory.price}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+
+           
+            
+            
           </div>
           {accessory.type === 'color' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -221,7 +262,7 @@ const AddAccessoryPage = () => {
                 </select>
               </div>
               <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-                <label htmlFor="meta">Meta (som synd för kund):</label>
+                <label htmlFor="meta">Meta (som syn för kund):</label>
                 <input
                   type="color"
                   name="meta"
@@ -233,66 +274,42 @@ const AddAccessoryPage = () => {
               </div>
             </div>
           )}
-          {accessory.type === 'image' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-                <label htmlFor="attributeName">Namn som kund ser:</label>
-                <input
-                  type="text"
-                  name="attributeName"
-                  id="attributeName"
-                  value={accessory.attribute.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div style={{ height: '80px', display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-                <label htmlFor="img">Ladda upp bild: </label>
-                <input
-                  type="file"
-                  id="img"
-                  onChange={handleImageUpload}
-                  required
-                  style={{ width: '220px' }}
-                />
-                {accessory.img.url && (
-                  <img src={accessory.img.url} alt="Accessory Thumbnail" style={{ width: '80px', height: '80px' }} />
-                )}
-              </div>
-              {uploadStatus && <p>{uploadStatus}</p>}
-            </div>
-          )}
-          {accessory.type === 'other' && (
+       
+          
+        </div>
+       
+        {accessory.type === 'details' && (
             <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <label htmlFor="value">Enhet/värde:</label>
-                <input
-                  type="text"
-                  name="value"
-                  id="value"
-                  value={accessory.value}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
+              
               <div style={{ display: 'flex', gap: '10px' }}>
                 <label htmlFor="attributeName">Gruppnamn:</label>
                 <input
                   type="text"
                   name="attributeName"
                   id="attributeName"
-                  value={accessory.attribute.name}
+                  value={accessory.name}
                   onChange={handleInputChange}
                   required
                 />
               </div>
             </div>
           )}
-        </div>
-        <button type="submit" disabled={isSubmitting} style={{ marginTop: '20px' }}>
-          {isSubmitting ? 'Läggs till...' : 'Lägg till variation'}
-        </button>
-      </form>
+   
+      <form onSubmit={handleSubmitDetailed} className='form'>
+     
+          <VariationGeneralInfo product={product} setProduct={setProduct} accessory={accessory} />
+          <Description product={product} setProduct={setProduct} />
+          <VariationImages
+            product={product}
+            setProduct={setProduct}
+            onSingleImageUpload={handleSingleImageUpload}
+            
+          />
+        
+          <Meta product={product} setProduct={setProduct} />
+        
+          <button type="submit">Lägg till Variation Detalj</button>
+        </form>
     </div>
   );
 };

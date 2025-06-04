@@ -57,8 +57,8 @@ const Sidebar = () => {
         </li>
 
         <li style={{ display: 'flex', gap: '17px', flexDirection: 'column' }}>
-          <Link to="/list-option" style={{ color: 'white', textDecoration: 'none' }}>Alla tillbehör</Link>
-          <Link to="/add-option" style={{ color: 'white', textDecoration: 'none' }}>Lägg till tillbehör</Link>
+          <Link to="/list-option" style={{ color: 'white', textDecoration: 'none' }}>Alla variationer</Link>
+          <Link to="/add-option" style={{ color: 'white', textDecoration: 'none' }}>Lägg till variationer</Link>
         </li>
 
         {/* Conditionally render the Admin link based on isAdmin state */}
