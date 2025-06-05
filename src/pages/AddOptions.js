@@ -195,7 +195,7 @@ const updatedProduct = {
 /*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
  */    
     try {
-      const response = await fetch(`http://localhost:8088/addVariation`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addVariation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

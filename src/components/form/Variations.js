@@ -61,7 +61,7 @@ const VariationsDropdown = ({
         const controller = new AbortController();
         const signal = controller.signal;
 
-        const res = await fetch('http://localhost:8088/productsoptions', { signal });
+        const res = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions', { signal });
         const data = await res.json();
 
         if (isMounted) {
