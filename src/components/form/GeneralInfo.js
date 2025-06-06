@@ -34,11 +34,21 @@ const [deliveryTime, setDeliveryTime] = useState({});
   const [shippingCurrency, setShippingCurrency] = useState('SEK');
   const [price, setPrice] = useState(""); // Pris state
 const [specialShippingEnabled, setSpecialShippingEnabled] = useState(false);
+const [sellInCountries, setSellInCountries] = useState({
+});
+const [specialProductData, setSpecialProductData] = useState(false);
+
+
+  const [showExtra, setShowExtra] = useState(false);
+  const [info, setInfo] = useState('');
+  const [salesOption, setSalesOption] = useState('direct');
 
 const [shippingSpecial, setShippingSpecial] = useState({
   combinedWith: [],
   units: 1,
+  enabled: false // kan ha med en flagga här om du vill
 });
+
 
 // Mockad lista över produkter att kombinera med
 const allProducts = [
@@ -129,6 +139,9 @@ const handleRemoveKeyword = (keyword) => {
 
   // Update the product data based on user input
   useEffect(() => {
+
+
+ 
     setProduct((prev) => ({
       ...prev,
       sellInCountries : selectedCountries,
@@ -140,9 +153,11 @@ const handleRemoveKeyword = (keyword) => {
       shippingCurrency,
       productCountryOfOrigin,
       shippingSpecial,
-      categoryPath : [mainCategory, subCategory, subSubCategory].filter(Boolean)
+      categoryPath : [mainCategory, subCategory, subSubCategory].filter(Boolean),
+      sellInCountries,
+      specialProductData
     }));
-  }, [selectedCountries, shippingSpecial, mainCategory, subCategory, subSubCategory,productCountryOfOrigin,  subSubSubCategory, currency, deliveryTime,searchKeywords, setProduct, shippingCosts, shippingCurrency]);
+  }, [sellInCountries,specialProductData, shippingSpecial, mainCategory, subCategory, subSubCategory,productCountryOfOrigin,  subSubSubCategory, currency, deliveryTime,searchKeywords, setProduct, shippingCosts, shippingCurrency]);
   
 
   const countryOptions = ['SV', 'FI', 'AX'];
@@ -174,32 +189,64 @@ const handleRemoveKeyword = (keyword) => {
         }));
 
   };
+//special produkt
+  useEffect(() => {
+  if (showExtra && specialProductData === false) {
+    setSpecialProductData({ info: {se: ""}, salesOption: 'direct' });
+  }
+  if (!showExtra) {
+    setSpecialProductData(false); // Nollställ om checkboxen avmarkeras
+  }
+}, [showExtra]);
+  
 
-  
-  
+
+
 
   // Handle checkbox changes for countries
-  const handleCountryCheckboxChange = (e) => {
-    const { value, checked } = e.target;
+ const handleCountryCheckboxChange = (e) => {
+  const country = e.target.value;
+  const checked = e.target.checked;
+
+  setSellInCountries((prev) => {
+    const newData = { ...prev };
 
     if (checked) {
-      
-        setSelectedCountries((prev) => ([...prev, value]));
-      
+      // Lägg till landet med defaultvärden om det inte finns
+      if (!newData[country]) {
+        newData[country] = { shippingCost: '', deliveryTime: '' };
+      }
     } else {
-        setSelectedCountries((prev) => prev.filter((country) => country !== value));
-      
+      // Ta bort landet
+      delete newData[country];
     }
-  };
 
-  const handleShippingCostChange = (e, country, currency) => {
-    const value = parseInt(e.target.value) || 0;
-  
-    setShippingCosts(prev => ({
-      ...prev,
-      [country]: { value, originalCurrency: true, currency: currency }, // Endast senaste valda valutan sparas
-    }));
-  };
+    return newData;
+  });
+};
+
+
+ const handleShippingCostChange = (e, country) => {
+  const value = e.target.value;
+  setSellInCountries((prev) => ({
+    ...prev,
+    [country]: {
+      ...prev[country],
+      shippingCost: parseInt(value),
+      currency: shippingCurrency
+    },
+  }));
+};
+const handleDeliveryTimeChange = (e, country) => {
+  const value = e.target.value;
+  setSellInCountries((prev) => ({
+    ...prev,
+    [country]: {
+      ...prev[country],
+      deliveryTime: parseInt(value),
+    },
+  }));
+};
   
 
   const handleShippingCurrencyChange = (e) => {
@@ -257,11 +304,11 @@ const handleUnitsChange = (e) => {
   setShippingSpecial(prev => ({ ...prev, units: isNaN(value) ? 1 : value }));
 };
 
-
+/* 
   const handleDeliveryTimeChange = (e) => {
     const value = Math.max(0, Number(e.target.value)); // Ensure it's a non-negative number
     setDeliveryTime(value);
-  };
+  }; */
   
 
   // Extract subcategories and sub-subcategories based on selected categories
@@ -423,6 +470,7 @@ const handleUnitsChange = (e) => {
                 required
               />
             </div>
+            
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
   <label>Är detta ett tillbehör?:</label>
   <input
@@ -447,6 +495,49 @@ const handleUnitsChange = (e) => {
     style={{ width: '20px', height: '20px' }}
   />
 </div>
+<div className="space-y-4">
+  <label className="flex items-center space-x-2">
+    <input
+      type="checkbox"
+      checked={showExtra}
+      onChange={() => setShowExtra(!showExtra)}
+    />
+    <span>Är detta en specialprodukt?</span>
+  </label>
+
+ {showExtra && specialProductData && (
+  <div className="space-y-4 bg-gray-100 p-4 rounded-lg">
+    <div>
+      <label className="block mb-1 text-sm font-medium">Info</label>
+      <textarea
+        value={specialProductData.info.se}
+        onChange={(e) =>
+          setSpecialProductData({ ...specialProductData, info: {se: e.target.value}  })
+        }
+        placeholder="Ange extra information"
+        className="w-full border px-3 py-2 rounded-md"
+      />
+    </div>
+
+    <div>
+      <label className="block mb-1 text-sm font-medium">Försäljningsalternativ</label>
+      <select
+        value={specialProductData.salesOption}
+        onChange={(e) =>
+          setSpecialProductData({ ...specialProductData, salesOption: e.target.value })
+        }
+        className="w-full border px-3 py-2 rounded-md"
+      >
+        <option value="direct">Sälj direkt</option>
+        <option value="offer">Bara offert</option>
+      </select>
+    </div>
+  </div>
+)}
+
+</div>
+
+
 
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
  {/*  <label>Ungefärlig leveranstid (dagar):</label>
@@ -515,7 +606,10 @@ const handleUnitsChange = (e) => {
     <input
       type="checkbox"
       checked={specialShippingEnabled}
-      onChange={(e) => setSpecialShippingEnabled(e.target.checked)}
+      onChange={(e) => {
+    setSpecialShippingEnabled(e.target.checked);
+    setShippingSpecial(prev => ({ ...prev, enabled: e.target.checked }));
+  }}
     />
     {' '}Klicka här för speciell frakt logik
   </label>
@@ -601,27 +695,41 @@ const handleUnitsChange = (e) => {
   <div>
   <label>Vilka länder får den säljas?</label>
   <div style={{ display: 'flex', flexDirection: 'column' }}>
-    {countryOptions.map((country) => (
-      <div key={country}>
+    {countryOptions.map((country) => {
+  const isSelected = sellInCountries.hasOwnProperty(country);
+  return (
+    <div key={country}>
+      <label>
         <input
           type="checkbox"
           value={country}
-          checked={selectedCountries.includes(country)}
+          checked={isSelected}
           onChange={handleCountryCheckboxChange}
         />
         {country}
-        {selectedCountries.includes(country) && (
+      </label>
+      {isSelected && (
+        <div style={{ marginLeft: '20px' }}>
           <input
-            type="text"
-            placeholder={`Frakt ${country}`}
-            value={shippingCosts[country]?.value || ''}
-            onChange={(e) => handleShippingCostChange(e, country, shippingCurrency)}
+            type="number"
+            placeholder={`Fraktpris för ${country}`}
+            value={sellInCountries[country].shippingCost}
+            onChange={(e) => handleShippingCostChange(e, country)}
           />
-        )}
-      </div>
-    ))}
+          <input
+            type="number"
+            placeholder={`Leveranstid (dagar) för ${country}`}
+            value={sellInCountries[country].deliveryTime}
+            onChange={(e) => handleDeliveryTimeChange(e, country)}
+          />
+        </div>
+      )}
+    </div>
+  );
+})}
+
   </div>
-  {selectedCountries.length > 0 && (
+ {/*  {selectedCountries.length > 0 && (
   <div>
     <h4>Leveranstid per land (dagar)</h4>
     {selectedCountries.map((countryCode) => (
@@ -643,7 +751,7 @@ const handleUnitsChange = (e) => {
       </div>
     ))}
   </div>
-)}
+)} */}
   </div>
   
 </div>

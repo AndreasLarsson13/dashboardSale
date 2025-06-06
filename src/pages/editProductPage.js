@@ -12,6 +12,7 @@ const EditProductPage = () => {
   const [product, setProduct] = useState({
     name: '',
     sku: '',
+    supplierArticleNumber: '',
     price: 0,
     sale_price: 0,
     quantity: 0,

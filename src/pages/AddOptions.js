@@ -44,6 +44,7 @@ const [product, setProduct] = useState({
       sale_price: {},
     quantity: 0,
     description: { se: '' },
+    specialProductData: false,
     meta: [],
     image: { thumbnail: '', original: '' },
     brand: '',
