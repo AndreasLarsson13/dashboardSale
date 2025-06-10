@@ -39,7 +39,7 @@ const [product, setProduct] = useState({
     name: '',
     sku: '',
     price: {},
-
+    supplierArticleNumber: '',
       buying_price: {},
       sale_price: {},
     quantity: 0,
@@ -61,7 +61,7 @@ const [product, setProduct] = useState({
     createdDate: new Date().toISOString(),
      isProductOption: false,
     name_parrent: ""
-  
+      
 
   });
 

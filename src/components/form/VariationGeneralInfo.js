@@ -307,6 +307,16 @@ const handleUnitsChange = (e) => {
                 style={{ width: '226px' }}
               />
             </div>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
+              <label>Artikelnummer:</label>
+              <input
+                type="text"
+                name="supplierArticleNumber"
+                onChange={handleInputChange}
+                required
+                style={{ width: '226px' }}
+              />
+            </div>
 
             {/* Brand Dropdown */}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
