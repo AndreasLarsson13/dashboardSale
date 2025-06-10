@@ -423,7 +423,7 @@ const GeneralInfo = ({ product, setProduct }) => {
             />
 
             <LabeledInput
-              label="Produktpris (ex moms)"
+              label="Kundpris (ex moms)"
               name="price"
               value={product.price?.value ?? ''} 
               onChange={handleInputChange}
