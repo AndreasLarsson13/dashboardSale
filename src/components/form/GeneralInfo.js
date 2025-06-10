@@ -423,7 +423,7 @@ const GeneralInfo = ({ product, setProduct }) => {
             />
 
             <LabeledInput
-              label="Pris"
+              label="Produktpris (ex moms)"
               name="price"
               value={product.price?.value ?? ''} 
               onChange={handleInputChange}
@@ -446,7 +446,7 @@ const GeneralInfo = ({ product, setProduct }) => {
             <LabeledInput label="SKU" name="sku" value={product.sku || ''} onChange={handleInputChange} required />
 
             <LabeledInput
-              label="Försäljningspris"
+              label="Rabatterat pris (ex moms)"
               name="sale_price"
               value={product.sale_price?.value ?? ''}
               onChange={handleInputChange}
@@ -466,14 +466,14 @@ const GeneralInfo = ({ product, setProduct }) => {
             </div>
 
             <LabeledInput
-              label="Artikelnummer"
+              label="Artikelnummer (hos kund)"
               name="supplierArticleNumber"
               value={product.supplierArticleNumber || ''}
               onChange={handleInputChange}
             />
 
             <LabeledInput
-              label="Inköpspris"
+              label="Inköpspris (ex moms)"
               name="buying_price"
               value={product.buying_price?.value ?? ''}
               onChange={handleInputChange}
