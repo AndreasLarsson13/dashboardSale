@@ -364,7 +364,8 @@ console.log(selectedCategoryPath)
     });
   }, []);
 
-  const addCategoryPath = useCallback(() => {
+  const addCategoryPath = useCallback((e) => {
+    e.preventDefault()
     setCategoryPaths(prevPaths => [...prevPaths, []]);
   }, []);
 
@@ -707,7 +708,8 @@ console.log(selectedCategoryPath)
     />
     {/* Ta bort-knapp */}
     {categoryPaths.length > 0 && <button
-      onClick={() => {
+      onClick={(e) => {
+        e.preventDefault();
         setCategoryPaths(prev => prev.filter((_, i) => i !== index));
       }}
       style={{ marginTop: "10px", backgroundColor: "red", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}

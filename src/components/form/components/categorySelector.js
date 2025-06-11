@@ -70,6 +70,7 @@ console.log(selectedPath)
 
   return (
     <div>
+      <div style={{display: 'flex', gap: '10px'}}>
       {dropdownOptions.map((options, level) => {
         const selectedValue = selectedPath[level] || "";
         return (
@@ -92,6 +93,7 @@ console.log(selectedPath)
           </div>
         );
       })}
+      </div>
       <div style={{ marginTop: "1rem" }}>
         <strong>Vald kategori:</strong> {selectedPath.map(item => (<> <span>{ `${item} >`}</span></>))}
       </div>

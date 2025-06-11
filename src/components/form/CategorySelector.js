@@ -696,7 +696,7 @@ const GeneralInfo = ({ product, setProduct }) => {
           />
 
           {/* --- KATEGORIHANTERING MED FLERA TRÄD --- */}
-          <div style={{ padding: '10px' }}>
+          <div style={{ padding: '10px', display: 'flex'}}>
             <h2>Produktkategorier</h2>
             {categoryPaths.map((path, index) => (
               <div key={index} style={{ border: '1px dashed #ccc', padding: '10px', marginBottom: '15px', borderRadius: '5px' }}>
