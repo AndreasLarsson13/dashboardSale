@@ -511,7 +511,7 @@ console.log(selectedCategoryPath)
             />
 
             <LabeledInput
-              label="Pris"
+              label="Produktpris (ex moms)"
               name="price"
               value={product.price?.value ?? ''}
               onChange={handleInputChange}
@@ -534,7 +534,7 @@ console.log(selectedCategoryPath)
             <LabeledInput label="SKU" name="sku" value={product.sku || ''} onChange={handleInputChange} required />
 
             <LabeledInput
-              label="Försäljningspris"
+              label="Rabbaterat pris (ex moms)"
               name="sale_price"
               value={product.sale_price?.value ?? ''}
               onChange={handleInputChange}
@@ -561,7 +561,7 @@ console.log(selectedCategoryPath)
             />
 
             <LabeledInput
-              label="Inköpspris"
+              label="Inköpspris (ex moms)"
               name="buying_price"
               value={product.buying_price?.value ?? ''}
               onChange={handleInputChange}
