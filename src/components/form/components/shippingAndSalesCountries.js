@@ -10,6 +10,8 @@ const ShippingAndSalesCountries = ({
   handleCountryCheckboxChange,
   handleShippingCostChange,
   handleDeliveryTimeChange,
+  deliveryTimeOptions, // NY PROP: Leveransalternativ med översättningar
+  currentLanguage = 'se', // NY PROP: Aktuellt språk (default 'se' om inget skickas)
 }) => {
   return (
     <div style={{ padding: '10px', backgroundColor: '#eaeaea' }}>
@@ -50,24 +52,34 @@ const ShippingAndSalesCountries = ({
                 </label>
                 {isSelected && (
                   <div style={{ marginLeft: '25px', marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                   <div style={{display: 'flex', gap: '20px'}}><input
-                      type="number"
-                      placeholder={`Fraktpris för ${country}`}
-                      // Hämtar värdet från sellInCountries[country].shippingCost
-                      // Använder optional chaining (?.) för att undvika fel om sellInCountries[country] är undefined
-                      // Använder || '' för att visa tom sträng om värdet är null, undefined eller 0 (beroende på preferens)
-                      value={sellInCountries[country]?.shippingCost ?? ''} 
-                      onChange={(e) => handleShippingCostChange(e, country)}
-                      style={{ padding: '5px', fontSize: '16px' }}
-                    /><span>Valuta : {sellInCountries[country]?.currency}</span></div>
-                    <input
-                      type="number"
-                      placeholder={`Leveranstid (dagar) för ${country}`}
-                      // Hämtar värdet från sellInCountries[country].deliveryTime
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <span>Frakpris (ex moms)</span><input
+                        type="number"
+                        placeholder={`Fraktpris för ${country}`}
+                        // Hämtar värdet från sellInCountries[country].shippingCost
+                        value={sellInCountries[country]?.shippingCost ?? ''}
+                        onChange={(e) => handleShippingCostChange(e, country)}
+                        style={{ padding: '5px', fontSize: '16px' }}
+                      />
+                      <span>Valuta : {sellInCountries[country]?.currency}</span>
+                    </div>
+
+                    {/* NYTT: Select-dropdown för leveranstid */}
+                    <select
+                      // `value` för select-elementet ska matcha `value` för <option>.
+                      // `sellInCountries[country]?.deliveryTime` förväntas nu vara en sträng (t.ex. '3-5_days')
                       value={sellInCountries[country]?.deliveryTime ?? ''}
                       onChange={(e) => handleDeliveryTimeChange(e, country)}
                       style={{ width: 'calc(100% - 10px)', padding: '5px', fontSize: '16px' }}
-                    />
+                    >
+                      <option value="">Välj leveranstid</option> {/* Standard/placeholder */}
+                      {/* Kontrollera att deliveryTimeOptions är en array innan .map() */}
+                      {Array.isArray(deliveryTimeOptions) && deliveryTimeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label[currentLanguage] || option.label.se} {/* Visar översatt text */}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
               </div>

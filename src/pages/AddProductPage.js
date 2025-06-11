@@ -29,12 +29,14 @@ const AddProductPage = () => {
     brand: '',
     featured: false,
     category: [],
-    categoryPath: [],
+     categoryPaths: [],
    /*  countries: [], */
-    weightPack: 0,
-    widthPack: 0,
-    heightPack: 0,
-    lengthPack: 0,
+    packaging: { // Initialize packaging as an object with default numeric values
+     weightPack: 0,
+       lengthPack: 0,
+     widthPack: 0,
+     heightPack: 0,
+    },
     vat: {
       "SE" : 0.25,
       "AX" : 0.255,

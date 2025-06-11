@@ -1,88 +1,100 @@
-// components/FormElements/CategorySelector.jsx
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import categoriesData from '../../../data/categoriesData';
 
-function CategorySelector({
-  mainCategory,
-  subCategory,
-  subSubCategory,
-  subSubSubCategory,
-  handleMainCategoryChange,
-  handleSubCategoryChange,
-  handleSubSubCategoryChange,
-  handleSubSubSubCategoryChange,
-  categoriesData, // Vi behöver skicka in hela kategoridatan
-}) {
-  // Dessa beräkningar behöver utföras här i komponenten
-  const selectedMainCategory = categoriesData[Object.keys(categoriesData).find(category => categoriesData[category].value === mainCategory)];
-  const subcategories = selectedMainCategory ? selectedMainCategory.child : [];
+function CategorySelector({ onChange }) {
+  const [selectedPath, setSelectedPath] = useState([]);
+  const [dropdownOptions, setDropdownOptions] = useState([]);
+console.log(selectedPath)
+  const getOptionsAtLevel = (level, path) => {
+    if (level === 0) {
+      return Object.values(categoriesData);
+    }
 
-  const selectedSubCategory = subcategories.find(sub => sub.value === subCategory);
-  const subSubcategories = selectedSubCategory ? selectedSubCategory.child : [];
+    let currentLevelNodes = Object.values(categoriesData);
+    for (let i = 0; i < level; i++) {
+      const selectedValue = path[i];
+      if (!selectedValue) return [];
+      const foundNode = currentLevelNodes.find(node => node.value === selectedValue);
+      if (!foundNode || !foundNode.child) return [];
+      currentLevelNodes = foundNode.child;
+    }
+    return currentLevelNodes || [];
+  };
 
-  // Korrigering: Definiera selectedSubSubSubCategory här
-  const selectedSubSubSubCategory = subSubcategories.find((subSub) => subSub.value === subSubCategory);
-  // Och se till att subSubSubcategories hämtas korrekt från den definierade variabeln
-  const subSubSubcategories = selectedSubSubSubCategory ? selectedSubSubSubCategory.child : [];
+  useEffect(() => {
+    let options = [];
+    let level = 0;
+
+    while (true) {
+      const opts = getOptionsAtLevel(level, selectedPath);
+      if (!opts.length) break;
+      options[level] = opts;
+
+      const selectedValue = selectedPath[level];
+      if (!selectedValue) break;
+      const selectedNode = opts.find(opt => opt.value === selectedValue);
+      if (!selectedNode || !selectedNode.child) break;
+
+      level++;
+    }
+
+    setDropdownOptions(options);
+  }, [selectedPath]);
+
+  const handleChange = (level, value) => {
+    const newPath = selectedPath.slice(0, level);
+    if (value) {
+      newPath[level] = value;
+    }
+    setSelectedPath(newPath);
+    if (onChange) onChange(newPath); // om du vill skicka vidare vald path
+  };
+
+  // Visar vald kategori som text (kan användas i föräldrakomponent)
+  const getSelectedCategoryText = (path) => {
+    if (path.length === 0) return "Ingen kategori vald";
+
+    let currentNode = categoriesData[path[0]];
+    if (!currentNode) return "Ingen kategori vald";
+
+    let labels = [currentNode.label];
+
+    for (let i = 1; i < path.length; i++) {
+      if (!currentNode.child) break;
+      currentNode = currentNode.child.find(c => c.value === path[i]);
+      if (!currentNode) break;
+      labels.push(currentNode.label);
+    }
+    return labels.join(" > ");
+  };
 
   return (
-    <div style={{ padding: '10px', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
-      {/* Huvudkategori */}
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <label>Huvudkategori:</label>
-        <select value={mainCategory} onChange={handleMainCategoryChange} style={{ marginBottom: '10px', width: '226px', fontSize: '19px', height: '28px' }}>
-          <option value="">Välj huvudkategori</option>
-          {Object.keys(categoriesData).map((category) => (
-            <option key={categoriesData[category].value} value={categoriesData[category].value}>
-              {categoriesData[category].label}
-            </option>
-          ))}
-        </select>
+    <div>
+      {dropdownOptions.map((options, level) => {
+        const selectedValue = selectedPath[level] || "";
+        return (
+          <div key={level} style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.3rem" }}>
+              {level === 0 ? "Huvudkategori:" : `Underkategori ${level + 1}:`}
+            </label>
+            <select
+              value={selectedValue}
+              onChange={(e) => handleChange(level, e.target.value)}
+              style={{ width: "226px", fontSize: "16px", height: "30px" }}
+            >
+              <option value="">Välj...</option>
+              {options.map(opt => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      })}
+      <div style={{ marginTop: "1rem" }}>
+        <strong>Vald kategori:</strong> {selectedPath.map(item => (<> <span>{ `${item} >`}</span></>))}
       </div>
-
-      {/* Underkategori 1 */}
-      {subcategories.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label>Underkategori 1:</label>
-          <select value={subCategory} onChange={handleSubCategoryChange} style={{ marginBottom: '10px', width: '226px', fontSize: '19px', height: '28px' }}>
-            <option value="">Välj underkategori</option>
-            {subcategories.map((sub) => (
-              <option key={sub.value} value={sub.value}>
-                {sub.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Underkategori 2 */}
-      {subSubcategories.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label>Underkategori 2:</label>
-          <select value={subSubCategory} onChange={handleSubSubCategoryChange} style={{ marginBottom: '10px', width: '226px', fontSize: '19px', height: '28px' }}>
-            <option value="">Välj underkategori</option>
-            {subSubcategories.map((subSub) => (
-              <option key={subSub.value} value={subSub.value}>
-                {subSub.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Underkategori 3 */}
-      {subSubSubcategories && subSubSubcategories.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label>Underkategori 3:</label>
-          <select value={subSubSubCategory} onChange={handleSubSubSubCategoryChange} style={{ marginBottom: '10px', width: '226px', fontSize: '19px', height: '28px' }}>
-            <option value="">Välj underkategori</option>
-            {subSubSubcategories.map((subSubSub) => (
-              <option key={subSubSub.value} value={subSubSub.value}>
-                {subSubSub.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
     </div>
   );
 }
