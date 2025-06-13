@@ -24,6 +24,37 @@ const Meta = ({ product, setProduct }) => {
     { value: 'custom', label: 'Anpassad' }, // Custom option
   ]; */
 
+  const materialOptions = [
+  { label: "Stål", value: "steel" },
+  { label: "Rostfritt stål", value: "stainless steel" },
+  { label: "Järn", value: "iron" },
+  { label: "Gjutjärn", value: "cast iron" },
+  { label: "Aluminium", value: "aluminum" },
+  { label: "Koppar", value: "copper" },
+  { label: "Mässing", value: "brass" },
+  { label: "Brons", value: "bronze" },
+  { label: "Zink", value: "zinc" },
+  { label: "Plast", value: "plastic" },
+  { label: "Keramik", value: "ceramic" },
+  { label: "Glas", value: "glass" },
+  { label: "Trä", value: "wood" },
+  { label: "Komposit", value: "composite" },
+  { label: "Betong", value: "concrete" },
+  { label: "Titan", value: "titanium" },
+   { label: "Matt Svart", value: "matte black" },
+    { label: "Krom", value: "chrome" },
+    { label: "Mässing", value: "brass" },
+    { label: "Koppar", value: "copper" },
+    { label: "Brons", value: "bronze" },
+    { label: "Svart Krom", value: "black chrome" },
+    { label: "Honungsguld", value: "honey gold" },
+    { label: "Borstad Svart Krom", value: "brushed black chrome" },
+    { label: "Borstad Honungsguld", value: "brushed honey gold" },
+    { label: "Borstad Nickel", value: "brushed nickel" },
+    { label: "Ascot Grå", value: "ascot grey" },
+    { label: "Grafit", value: "graphite" },
+];
+
   const predefinedTechnicalFields = [
   {
     key: 'height',
@@ -81,6 +112,15 @@ const Meta = ({ product, setProduct }) => {
       FI: 'Väri'
     }
   },
+   {
+  key: 'material',
+  value: {
+    SE: 'Material',
+    EN: 'Material',
+    FI: 'Materiaali'
+  }
+},
+
   {
     key: 'uppvärmningsyta',
     value: {
@@ -160,18 +200,7 @@ const Meta = ({ product, setProduct }) => {
     { label: "Orange", value: "orange" },
     { label: "Brun", value: "brown" },
     { label: "Rosa", value: "pink" },
-    { label: "Matt Svart", value: "matte black" },
-    { label: "Krom", value: "chrome" },
-    { label: "Mässing", value: "brass" },
-    { label: "Koppar", value: "copper" },
-    { label: "Brons", value: "bronze" },
-    { label: "Svart Krom", value: "black chrome" },
-    { label: "Honungsguld", value: "honey gold" },
-    { label: "Borstad Svart Krom", value: "brushed black chrome" },
-    { label: "Borstad Honungsguld", value: "brushed honey gold" },
-    { label: "Borstad Nickel", value: "brushed nickel" },
-    { label: "Ascot Grå", value: "ascot grey" },
-    { label: "Grafit", value: "graphite" },
+   
     { label: "Svart", value: "black" }
   ];
 
@@ -268,6 +297,30 @@ const Meta = ({ product, setProduct }) => {
     }));
   };
 
+const handleMaterialChange = (index, selectedMaterial) => {
+  const updatedData = [...technicalData];
+  const currentMaterials = updatedData[index]?.data || [];
+  const materialIndex = currentMaterials.indexOf(selectedMaterial);
+
+  if (materialIndex > -1) {
+    currentMaterials.splice(materialIndex, 1); // ta bort
+  } else {
+    currentMaterials.push(selectedMaterial); // lägg till
+  }
+
+  updatedData[index] = { ...updatedData[index], data: currentMaterials };
+  setTechnicalData(updatedData);
+  setProduct(prev => ({
+    ...prev,
+    meta: [
+      ...prev.meta.filter(meta => meta.title !== 'TecnicalData'),
+      { title: 'TecnicalData', tecnical: updatedData }
+    ]
+  }));
+};
+
+
+
   const isTechnicalDataCompleted =
     technicalData.length > 0 && technicalData.every(item => item.title && item.data.length > 0);
   const isPdfDataCompleted = pdfData.length > 0 && pdfData.every(item => item.title && item.url);
@@ -361,8 +414,22 @@ const Meta = ({ product, setProduct }) => {
                           />
                         </div>
                       )}
-
-                      {item.title === 'color' ? (
+ {item.title === 'material' ? (
+      <div>
+        <h4>Välj material:</h4>
+        {materialOptions.map((material) => (
+          <label key={material.value}>
+            <input
+              type="checkbox"
+              checked={item.data?.includes(material.value)}
+              onChange={() => handleMaterialChange(index, material.value)}
+            />
+            {material.label}
+          </label>
+        ))}
+      </div>
+    ) :
+                      item.title === 'color' ? (
                         <>
                           <label>Färg:</label>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>

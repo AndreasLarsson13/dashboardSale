@@ -1,5 +1,3 @@
-// src/components/form/GeneralInfo.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaChevronDown, FaChevronUp, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import categoriesData from '../../data/categoriesData'; // Din kapslade categoriesData
@@ -9,10 +7,12 @@ import axios from 'axios';
 // Importera dina formulärelement-komponenter. DUBBELKOLLA SÖKVÄGARNA!
 import SpecialShippingSelector from '../form/SpecialShippingSelector';
 import KeywordInput from './components/keyWordInput';
-import PackagingInfo from './components/packagingInfo'; // Din PackagingInfo-komponent
+import CompadibleWithProduct from './components/compadableWithProduct';
+
+import PackagingInfo from './components/packagingInfo';
 import LabeledInput from './components/FormElements/LabeledInput';
 import LabeledSelect from './components/FormElements/LabeledSelect';
-import CategorySelector from './components/categorySelector'; // Din dynamiska CategorySelector
+import CategorySelector from './components/categorySelector'; // NY! Den dynamiska CategorySelector
 import ShippingAndSalesCountries from './components/shippingAndSalesCountries'; // Den uppdaterade fraktkomponenten
 
 // --- Globala konstanter (kan flyttas till egen fil om de används på fler ställen) ---
@@ -27,28 +27,30 @@ const sellableCountryOptions = ['SV', 'FI', 'AX'];
 
 // NY: Leveransalternativ med översättningar
 const deliveryTimeOptions = [
-  { value: '3-5_days', label: { se: '3-5 dagar', en: '5-10 days', fi: '3-5 päivää' } }, // Korrigerad fi label
+  { value: '3-5_days', label: { se: '3-5 dagar', en: '3-5 days', fi: '3-5 päivää' } },
   { value: '5-10_days', label: { se: '5-10 dagar', en: '5-10 days', fi: '5-10 viikkoa' } },
   { value: '2-3_weeks', label: { se: '2-3 veckor', en: '2-3 weeks', fi: '2-3 viikkoa' } },
   { value: '+3_weeks', label: { se: '+ 3 veckor', en: '+3 weeks', fi: '+3 viikkoa' } },
 ];
 
 // --- GeneralInfo Komponent ---
-// product och setProduct är de props som används för att hantera produktens övergripande tillstånd
 const GeneralInfo = ({ product, setProduct }) => {
   // --- Lokal UI-state (initialiseras från 'product' prop vid första rendering) ---
   const [isGeneralInfoOpen, setIsGeneralInfoOpen] = useState(false);
-
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState([]);
+console.log(selectedCategoryPath)
   // --- Kategori State Hantering ---
-  // categoryPaths hanterar en array av arrayer för att stödja flera kategorivägar per produkt
+  // Initialiseras från 'product' prop för att ladda existerande kategorier
   const [categoryPaths, setCategoryPaths] = useState(() => {
     const normalizePath = (path) => Array.isArray(path) ? path.filter(Boolean) : [];
     let initialPaths = [];
 
-    if (Array.isArray(product.categoryPaths) && product.categoryPaths.length > 0) {
+    // Prioritera product.categoryPaths om det redan är i det önskade formatet (array av arrayer)
+ /*    if (Array.isArray(product.categoryPaths) && product.categoryPaths.length > 0) {
       initialPaths = product.categoryPaths.map(path => normalizePath(path));
     }
-    else if (Array.isArray(product.category) && product.category.length > 0) {
+    // Fallback för äldre/annat product.category-format (kapslade objekt)
+    else  */if (Array.isArray(product.category) && product.category.length > 0) {
       const convertNestedToFlatPath = (nestedCat) => {
         const path = [];
         let current = nestedCat;
@@ -60,9 +62,10 @@ const GeneralInfo = ({ product, setProduct }) => {
       };
       initialPaths = product.category.map(cat => normalizePath(convertNestedToFlatPath(cat)));
     }
-    else if (Array.isArray(product.categoryPath) && product.categoryPath.length > 0) {
+    // Fallback för product.categoryPath (singular, en enda array-väg)
+ /*    else if (Array.isArray(product.categoryPath) && product.categoryPath.length > 0) {
       initialPaths = [normalizePath(product.categoryPath)];
-    }
+    } */
 
     if (initialPaths.length === 0) {
       initialPaths.push([]); // Se till att det alltid finns minst en tom sökväg att börja med
@@ -115,6 +118,7 @@ const GeneralInfo = ({ product, setProduct }) => {
   });
 
   const [searchKeywords, setSearchKeywords] = useState(product.searchKeywords || []);
+   const [compadibleWithProduct, setcompadibleWithProduct] = useState(product.compadibleWithProduct || []);
   const [showExtra, setShowExtra] = useState(specialProductData.enabled);
 
   const [shippingSpecial, setShippingSpecial] = useState(() => {
@@ -186,6 +190,9 @@ const GeneralInfo = ({ product, setProduct }) => {
 
   // --- useEffect för att uppdatera den överordnade 'product' prop:en ---
   useEffect(() => {
+
+    const stringPaths = categoryPaths.map(pathArray => pathArray.join('/'));
+
     const cleanedCategoryPaths = categoryPaths
       .map(path => path.filter(Boolean))
       .filter(path => path.length > 0);
@@ -221,9 +228,10 @@ const GeneralInfo = ({ product, setProduct }) => {
 
     const updatedFields = {
       category: nestedCategoriesForProduct,
-      categoryPaths: cleanedCategoryPaths, // <--- Här skickas de valda sökvägarna (array av arrayer av slugs)
+      categoryPaths: [stringPaths], // <--- Här skickas de valda sökvägarna (array av arrayer av slugs)
       currency,
       searchKeywords,
+      compadibleWithProduct,
       shippingCurrency,
       specialProductData,
       shippingSpecial: { ...shippingSpecial, enabled: specialShippingEnabled },
@@ -243,28 +251,25 @@ const GeneralInfo = ({ product, setProduct }) => {
     currency, shippingCurrency,
     specialShippingEnabled, shippingSpecial,
     sellInCountries,
-    specialProductData, searchKeywords,
+    specialProductData, searchKeywords, compadibleWithProduct
   ]);
 
 
   // --- Generell hanterare för input-fält (text och nummer) ---
-  // Denna hanterare är utformad för att hantera många olika fält, inklusive de nya
   const handleInputChange = useCallback((e) => {
     const { name, value, type } = e.target;
 
     setProduct((prev) => {
-      // Hantera pris-relaterade fält (pris, försäljningspris, inköpspris)
       if (['price', 'sale_price', 'buying_price'].includes(name)) {
         return {
           ...prev,
           [name]: {
             ...prev[name],
             value: Math.max(0, Number(value)),
-            currency: currency, // Använd aktuell valuta
+            currency: currency,
           },
         };
       }
-      // Hantera förpackningsmått och kvantitet som nummer
       else if (['weightPack', 'lengthPack', 'widthPack', 'heightPack'].includes(name)) {
         return {
           ...prev,
@@ -274,13 +279,12 @@ const GeneralInfo = ({ product, setProduct }) => {
           },
         };
       }
-      else if (name === 'quantity') { // Kvantitet hanteras som nummer
+      else if (type === 'number') {
         return {
           ...prev,
           [name]: Math.max(0, parseFloat(value)),
         };
       }
-      // Hantera övriga textfält direkt (Namn, SKU, Gruppnamn, Namn på huvudprodukt, Artikelnummer)
       else {
         return {
           ...prev,
@@ -288,7 +292,7 @@ const GeneralInfo = ({ product, setProduct }) => {
         };
       }
     });
-  }, [setProduct, currency]); // Beroende på setProduct och currency
+  }, [setProduct, currency]);
 
   // --- Hanterare för specialprodukt-information ---
   const handleSpecialProductDataChange = useCallback((field, value) => {
@@ -353,20 +357,26 @@ const GeneralInfo = ({ product, setProduct }) => {
 
 
   // --- HANTERING AV KATEGORIVÄGAR (FÖR FLERA TRÄD) ---
-  // Denna callback tar nu emot den HELA uppdaterade sökvägen från CategorySelector
-  const handleCategoryPathSelected = useCallback((pathIndex, newPath) => {
+  /* const handleCategoryPathChange = useCallback((pathIndex, level, value) => {
     setCategoryPaths(prevPaths => {
-      const updatedPaths = [...prevPaths];
-      updatedPaths[pathIndex] = newPath; // Ersätt hela sökvägen på rätt index
-      return updatedPaths;
-    });
-  }, []);
+      const newPaths = [...prevPaths];
+      const currentPath = [...newPaths[pathIndex]]; // Kopiera den specifika sökvägen
 
-  const addCategoryPath = useCallback(() => {
+      currentPath[level] = value; // Uppdatera värdet på den aktuella nivån
+      // Tronka sökvägen från nästa nivå och framåt för att rensa underliggande val
+      const updatedPath = currentPath.slice(0, level + 1);
+
+      newPaths[pathIndex] = updatedPath; // Uppdatera den specifika sökvägen i arrayen
+      return newPaths;
+    });
+  }, []); */
+
+  const addCategoryPath = useCallback((e) => {
+    e.preventDefault()
     setCategoryPaths(prevPaths => [...prevPaths, []]);
   }, []);
 
-  const removeCategoryPath = useCallback((indexToRemove) => {
+ /*  const removeCategoryPath = useCallback((indexToRemove) => {
     setCategoryPaths(prevPaths => {
       const filteredPaths = prevPaths.filter((_, index) => index !== indexToRemove);
       if (filteredPaths.length === 0) {
@@ -374,14 +384,13 @@ const GeneralInfo = ({ product, setProduct }) => {
       }
       return filteredPaths;
     });
-  }, []);
+  }, []); */
 
 
   // --- Hanterare för valutaändring (och nollställning av priser) ---
   const handleCurrencyChange = useCallback((event) => {
     const newCurrency = event.target.value;
     setCurrency(newCurrency);
-    // Nollställ priser när valutan ändras för att undvika valuta-mixup vid omvandling
     setProduct((prev) => ({
       ...prev,
       price: { ...prev.price, value: 0, currency: newCurrency },
@@ -439,9 +448,7 @@ const GeneralInfo = ({ product, setProduct }) => {
     product.packaging?.weightPack !== undefined && Number.isFinite(product.packaging.weightPack) && product.packaging.weightPack >= 0 &&
     product.packaging?.widthPack !== undefined && Number.isFinite(product.packaging.widthPack) && product.packaging.widthPack >= 0 &&
     product.packaging?.heightPack !== undefined && Number.isFinite(product.packaging.heightPack) && product.packaging.heightPack >= 0 &&
-    product.packaging?.lengthPack !== undefined && Number.isFinite(product.packaging.lengthPack) && product.packaging.lengthPack >= 0 &&
-    product.variationGroup && product.variationGroup.trim() !== '' && // NY VALIDERING
-    product.name_parrent && product.name_parrent.trim() !== ''; // NY VALIDERING
+    product.packaging?.lengthPack !== undefined && Number.isFinite(product.packaging.lengthPack) && product.packaging.lengthPack >= 0;
 
 
   // --- Renderingslogik ---
@@ -478,28 +485,14 @@ const GeneralInfo = ({ product, setProduct }) => {
               backgroundColor: '#eaeaea',
             }}
           >
-            {/* NYTT: Gruppnamn för kunden (variationGroup) */}
-           {/*  <LabeledInput
-              label="Välj tillbehör (Gruppnamn för kunden):"
-              name="variationGroup"
-              value={product.variationGroup || ''} // Hämta från product.variationGroup
-              onChange={handleInputChange}
-              required
-            /> */}
-
-            {/* NYTT: Namn på huvudprodukt (name_parrent) */}
-            <LabeledInput
+            <LabeledInput label="Namn" name="name" value={product.name || ''} onChange={handleInputChange} required />
+  <LabeledInput
               label="Namn på huvudprodukt:"
               name="name_parrent"
               value={product.name_parrent || ''} // Hämta från product.name_parrent
               onChange={handleInputChange}
               required
             />
-
-            {/* Befintligt: Namn på produkten */}
-            <LabeledInput label="Namn" name="name" value={product.name || ''} onChange={handleInputChange} required />
-
-            {/* Befintligt: Valuta på produkt */}
             <LabeledSelect
               label="Original valuta på produkt"
               name="currency"
@@ -510,7 +503,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               required
             />
 
-            {/* Befintligt: Antal produkter i lager */}
             <LabeledInput
               label="Antal produkter i lager"
               name="quantity"
@@ -521,7 +513,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               required
             />
 
-            {/* Befintligt: Varumärke */}
             <LabeledSelect
               label="Varumärke"
               name="brand"
@@ -532,7 +523,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               required
             />
 
-            {/* Befintligt: Pris */}
             <LabeledInput
               label="Kundpris (ex moms)"
               name="price"
@@ -543,7 +533,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               required
             />
 
-            {/* Befintligt: Är detta ett tillbehör? */}
             <div style={{ display: 'flex', gap: '10px' }}>
               <label>Är detta ett tillbehör?:</label>
               <input
@@ -555,10 +544,8 @@ const GeneralInfo = ({ product, setProduct }) => {
               />
             </div>
 
-            {/* Befintligt: SKU */}
             <LabeledInput label="SKU" name="sku" value={product.sku || ''} onChange={handleInputChange} required />
 
-            {/* Befintligt: Försäljningspris */}
             <LabeledInput
               label="Rabbaterat pris (ex moms)"
               name="sale_price"
@@ -568,7 +555,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               min="0"
             />
 
-            {/* Befintligt: Dölj produkt från vy */}
             <div style={{ display: 'flex', gap: '10px' }}>
               <label>Vill du dölja produkten? (Från text filtersidan):</label>
               <input
@@ -580,7 +566,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               />
             </div>
 
-            {/* Befintligt: Artikelnummer */}
             <LabeledInput
               label="Artikelnummer"
               name="supplierArticleNumber"
@@ -588,7 +573,6 @@ const GeneralInfo = ({ product, setProduct }) => {
               onChange={handleInputChange}
             />
 
-            {/* Befintligt: Inköpspris */}
             <LabeledInput
               label="Inköpspris (ex moms)"
               name="buying_price"
@@ -598,12 +582,10 @@ const GeneralInfo = ({ product, setProduct }) => {
               min="0"
               required
             />
-          </div>
 
-          {/* --- Specialproduktsektion --- */}
-          <div style={{ padding: '10px' }}>
+            {/* --- Specialproduktsektion --- */}
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 <label>Är detta en specialprodukt?</label>
                 <input
                   type="checkbox"
@@ -620,14 +602,14 @@ const GeneralInfo = ({ product, setProduct }) => {
               </div>
 
               {showExtra && specialProductData.enabled && (
-                <div style={{ marginTop: '10px', backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px', width: '100%' }}>
+                <div style={{ marginTop: '10px', backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
                   <div style={{ marginBottom: '12px' }}>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.875rem', fontWeight: '500' }}>Info</label>
                     <textarea
                       value={specialProductData.info?.se || ''}
                       onChange={handleSpecialProductInfoChange}
                       placeholder="Ange extra information"
-                      style={{ width: '100%', border: '1px solid #d1d5db', padding: '8px 12px', borderRadius: '6px', fontSize: '1rem', minHeight: '60px' }}
+                      style={{ width: '100%', border: '1px solid #d1d5db', padding: '8px 12px', borderRadius: '6px', fontSize: '1rem' }}
                     />
                   </div>
                   <div>
@@ -647,11 +629,14 @@ const GeneralInfo = ({ product, setProduct }) => {
               )}
             </div>
           </div>
-
+ <CompadibleWithProduct
+            compadibleWith={compadibleWithProduct}
+            setcompadibleWith={setcompadibleWithProduct}
+          /> 
           {/* --- Förpackningsinformation (egen komponent) --- */}
           <PackagingInfo
-            packaging={product.packaging} // Skickar hela packaging-objektet
-            onChange={handleInputChange} // Skickar den generella hanteraren
+            packaging={product.packaging}
+            onChange={handleInputChange}
           />
 
           {/* --- Specialfrakt Logik --- */}
@@ -722,46 +707,43 @@ const GeneralInfo = ({ product, setProduct }) => {
           />
 
           {/* --- KATEGORIHANTERING MED FLERA TRÄD --- */}
-          <div style={{ padding: '10px' }}>
-            <h2>Produktkategorier</h2>
-            {/* Itererar över categoryPaths för att rendera en CategorySelector för varje sökväg */}
-            {categoryPaths.map((path, index) => (
-              <div
-                key={`cat-path-container-${index}`} // Använd index som key här
-                style={{
-                  border: '1px dashed #ccc',
-                  padding: '10px',
-                  marginBottom: '15px',
-                  borderRadius: '5px',
-                }}
-              >
-                <div style={{ padding: 20 }}>
-                  {/* Skicka den specifika sökvägen och en callback för att uppdatera den */}
-                  <CategorySelector
-                    initialPath={path} // Skicka den aktuella sökvägen till CategorySelector
-                    // När CategorySelector skickar tillbaka en ny sökväg, uppdatera rätt plats i categoryPaths
-                    onPathSelected={(newPath) => handleCategoryPathSelected(index, newPath)}
-                  />
-                  {/* Visar den valda sökvägen för just denna CategorySelector-instans */}
-                  <div style={{ marginTop: 20 }}>
-                    <b>Vald kategori:</b> {path.join(' > ')}
-                  </div>
-                </div>
-                {/* Knapp för att ta bort denna kategoriväg, visas om det finns fler än en */}
-                {categoryPaths.length > 1 && (
-                  <button onClick={() => removeCategoryPath(index)} style={{background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontSize: '1.2rem'}}>Ta bort &times;</button>
-                )}
-              </div>
-            ))}
+           <div style={{ padding: '10px' }}>
+            <h2>Produktkategorier</h2>
+            {/* Itererar över categoryPaths för att rendera en CategorySelector för varje sökväg */}
+     {categoryPaths.map((path, index) => (
+  <div key={index} style={{ border: "1px dashed #ccc", padding: "10px", marginBottom: "15px", borderRadius: "5px" }}>
+    <CategorySelector
+      selectedPath={path} // <-- HÄR: Skicka 'path' direkt, den är redan en array av strängar
+      onChange={(newPathArray) => { // <-- HÄR: Förvänta dig att 'newPathArray' är en array av strängar
+        setCategoryPaths(prev => {
+          const copy = [...prev];
+          copy[index] = newPathArray; // <-- HÄR: Spara den nya arrayen direkt
+          return copy;
+        });
+      }}
+    />
+    {/* Ta bort-knapp */}
+    {categoryPaths.length > 0 && <button
+      onClick={(e) => {
+        e.preventDefault();
+        setCategoryPaths(prev => prev.filter((_, i) => i !== index));
+      }}
+      style={{ marginTop: "10px", backgroundColor: "red", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
+    >
+      Ta bort
+    </button>}
+  </div>
+))}
 
-            {/* Knapp för att lägga till en ny tom kategoriväg */}
-            <button
-              onClick={addCategoryPath}
-              style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-            >
-              Lägg till ytterligare kategoriväg
-            </button>
-          </div>
+
+            {/* Knapp för att lägga till en ny tom kategoriväg */}
+            <button
+              onClick={addCategoryPath}
+              style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Lägg till ytterligare kategoriväg
+            </button>
+          </div>
 
           {/* --- Nyckelord (egen komponent) --- */}
           <KeywordInput

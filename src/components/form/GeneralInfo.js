@@ -228,7 +228,7 @@ console.log(selectedCategoryPath)
 
     const updatedFields = {
       category: nestedCategoriesForProduct,
-      categoryPaths: stringPaths, // <--- Här skickas de valda sökvägarna (array av arrayer av slugs)
+      categoryPaths: [stringPaths], // <--- Här skickas de valda sökvägarna (array av arrayer av slugs)
       currency,
       searchKeywords,
       compadibleWithProduct,

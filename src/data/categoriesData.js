@@ -58,7 +58,7 @@ const categoriesData = {
         label: "VVS",
         value: "vvs",
         child: [
-          { label: "Kranar/Blandare", value: "kranar/blandare" },
+          { label: "Kranar", value: "kranar" },
           { label: "Handfat/Badkar", value: "handfat/badkar" },
           { label: "Spabad/Badtunnor", value: "spabad/badtunnor" },
           { label: "Toalstolar", value: "toastolar" },
@@ -108,6 +108,15 @@ const categoriesData = {
           { label: "Mikrougn", value: "microugn" },
           { label: "Hällar", value: "hallar" },
           { label: "Ugnar", value: "ugnar" },
+        ],
+      },
+      {
+        label: "Kök",
+        value: "kok",
+        child: [
+          { label: "Kökskranar", value: "kokskranar" },
+          { label: "Diskho", value: "diskho" },
+          { label: "Tillbehör", value: "tillbehor" }
         ],
       },
     ],
