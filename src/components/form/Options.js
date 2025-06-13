@@ -177,8 +177,8 @@ console.log(selectedVariations)
           {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
         </span>
         <span>Tillbehör</span>
-        <span style={{ marginLeft: 'auto', color: selectedVariations.length > 0 ? 'green' : 'red' }}>
-          {selectedVariations.length > 0 ? <FaCheckCircle /> : <FaExclamationCircle />}
+        <span style={{ marginLeft: 'auto', color: selectedVariations.length ? 'green' : 'red' }}>
+          {selectedVariations.length ? <FaCheckCircle /> : <FaExclamationCircle />}
         </span>
       </div>
 

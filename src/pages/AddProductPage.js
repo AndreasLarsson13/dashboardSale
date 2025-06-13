@@ -183,12 +183,14 @@ const AddProductPage = () => {
             onSingleImageUpload={handleSingleImageUpload}
             onGalleryImageAdd={handleGalleryImageAdd}
           />
+
  <OptionsDropdown
-            onVariationsUpdate ={handleOptionsUpdate}
-           /*  onImageLinkAdd={handleImageLinkAdd} */
-            /* isSingleImageUploaded={isSingleImageUploaded} */
-            product={product}
-          />
+      
+        onVariationsUpdate={handleOptionsUpdate}
+        initialSelectedVariations={product.options || []}
+      />  
+
+
           <VariationsDropdown
             onVariationsUpdate={handleVariationsUpdate}
             onImageLinkAdd={handleImageLinkAdd}

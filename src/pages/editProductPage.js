@@ -235,6 +235,7 @@ const EditProductPage = () => {
 
       {/* OptionsDropdown - Tillbehör (skickar product.options till den) */}
       <OptionsDropdown
+      
         onVariationsUpdate={handleOptionsUpdate}
         initialSelectedVariations={product.options || []}
       />  
