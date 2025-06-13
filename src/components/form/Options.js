@@ -4,25 +4,33 @@ import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
 const VariationsDropdown = ({
+  product,
+  initialSelectedVariations,
   onVariationsUpdate,
   onVariationRemove = () => {},
+
 }) => {
-  const [selectedVariations, setSelectedVariations] = useState([]);
-  const [variationOptions, setVariationOptions] = useState([]);
+  const [selectedVariations, setSelectedVariations] = useState(initialSelectedVariations);
   const [productVariations, setProductVariations] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Fetch protected product variations with auth token
+console.log(selectedVariations)
+  // Hämta variationer en gång vid mount
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const fetchProductVariations = async () => {
+      setLoading(true);
       const auth = getAuth();
       const user = auth.currentUser;
 
       if (!user) {
-        setError('User not logged in');
-        setLoading(false);
+        if (isMounted) {
+          setError('User not logged in');
+          setLoading(false);
+        }
         return;
       }
 
@@ -33,73 +41,123 @@ const VariationsDropdown = ({
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { uid: user.uid, uidEmail: user.email },
+            signal: controller.signal,
           }
         );
-        setProductVariations(response.data);
+        if (isMounted) {
+          setProductVariations(response.data);
+          setError(null);
+        }
       } catch (err) {
-        setError(err.message || 'Failed to fetch product variations');
+        if (isMounted) {
+          if (axios.isCancel(err)) {
+            console.log('Fetch avbröts');
+          } else {
+            setError(err.message || 'Failed to fetch product variations');
+          }
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchProductVariations();
-  }, []);
 
-  // Fetch public variation options
-  useEffect(() => {
-    const fetchVariationOptions = async () => {
-      try {
-        const response = await fetch(
-          'https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions'
-        );
-        if (!response.ok) throw new Error('Failed to fetch variation options');
-        const data = await response.json();
-        setVariationOptions(data);
-      } catch (err) {
-        console.error('Error fetching variation options:', err);
-      }
+    return () => {
+      isMounted = false;
+      controller.abort();
     };
-
-    fetchVariationOptions();
   }, []);
 
-  // Add a variation or product when selected, avoid duplicates
-  const handleVariationSelect = (event) => {
-    const selectedId = event.target.value;
+  // Synca selectedVariations när productVariations, initialVariations eller product ändras
+ 
+/*  useEffect(() => {
+  if (!productVariations.length) return;
+
+  const variationsToUse = initialSelectedVariations.length > 0
+    ? initialSelectedVariations
+    : (initialSelectedVariations?.options || []);
+
+  const resolved = variationsToUse.map((item) => {
+    const match = productVariations.find((p) => p._id === item.id);
+    if (!match) return null;
+
+    return {
+      ...match,
+      price: typeof item.price === 'object' ? item.price.value : item.price,
+    };
+  }).filter(Boolean);
+
+  setSelectedVariations(resolved);
+
+  onVariationsUpdate(resolved.map((v) => ({
+    id: v._id,
+    price: { value: v.price, currency: 'SEK' },
+    product: true,
+  })));
+}, []); */
+ 
+  // Hantera val i dropdown
+  const handleVariationSelect = (e) => {
+    const selectedId = e.target.value;
     if (!selectedId) return;
 
-    const foundOption =
-      variationOptions.find((opt) => opt._id === selectedId) ||
-      productVariations.find((opt) => opt._id === selectedId);
+    if (selectedVariations.some((v) => v._id === selectedId)) return;
 
-    if (!foundOption) {
-      console.warn(`Selected option with id ${selectedId} not found`);
-      return;
+    const variation = productVariations.find((v) => v._id === selectedId);
+    if (!variation) return;
+
+    const updated = [...selectedVariations, variation];
+    setSelectedVariations(updated);
+
+    if (typeof onVariationsUpdate === 'function') {
+      onVariationsUpdate(updated.map((v) => ({
+        id: v._id,
+        price: { value: v.price, currency: 'SEK' },
+        product: true,
+      })));
     }
-
-    setSelectedVariations((prev) => {
-      if (prev.some((v) => v._id === foundOption._id)) return prev;
-
-      const updated = [...prev, foundOption];
-
-      // Transform selected variations for parent callback
-      const transformed = updated.map((item) => {
-        const isProduct = productVariations.some((p) => p._id === item._id);
-        return {
-          id: item._id,
-          ...(item.price !== undefined ? { price: item.price } : {}),
-          ...(isProduct ? { product: true } : {}),
-        };
-      });
-
-      onVariationsUpdate(transformed);
-      return updated;
-    });
   };
 
-  // Validate if variations selected
-  const areVariationsValid = selectedVariations.length > 0;
+  // Ta bort variation
+ const handleRemove = (e,rawId) => {
+  e.preventDefault()
+  // Rensa bort eventuellt e.preventDefault – du vill inte ha event här
+  // Identifiera id-strängen, oavsett om rawId är ett objekt eller en sträng
+  const idToRemove = rawId && typeof rawId === 'object' && rawId._id
+    ? rawId._id
+    : rawId;
+
+  // Filtrera bort alla variationer vars _id eller id matchar
+  const filtered = selectedVariations.filter(v => {
+    // v._id är din primära nyckel, men om du har v.id i vissa fall, kolla det också
+    return v._id !== idToRemove && v.id !== idToRemove;
+  });
+
+  // Logga före/efter om du vill debugga
+  console.log('Före:', selectedVariations.map(v => v._id));
+  console.log('Efter:', filtered.map(v => v._id));
+
+  // Uppdatera local state
+  setSelectedVariations(filtered);
+
+  // Bubblar upp via onVariationsUpdate, om funktionen finns
+  if (typeof onVariationsUpdate === 'function') {
+    onVariationsUpdate(
+      filtered.map(v => ({
+        id: v._id,
+        price: { value: v.price, currency: 'SEK' },
+        product: true,
+      }))
+    );
+  }
+
+  // Bubblar upp remove-kallbacken
+  if (typeof onVariationRemove === 'function') {
+    onVariationRemove(idToRemove);
+  }
+};
+
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -113,66 +171,44 @@ const VariationsDropdown = ({
           borderBottom: '1px solid #ddd',
           fontWeight: 'bold',
         }}
-        onClick={() => setIsDropdownOpen((open) => !open)}
+        onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
         <span style={{ marginRight: 10 }}>
           {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
         </span>
         <span>Tillbehör</span>
-        <span style={{ marginLeft: 'auto', color: areVariationsValid ? 'green' : 'red' }}>
-          {areVariationsValid ? <FaCheckCircle /> : <FaExclamationCircle />}
+        <span style={{ marginLeft: 'auto', color: selectedVariations.length > 0 ? 'green' : 'red' }}>
+          {selectedVariations.length > 0 ? <FaCheckCircle /> : <FaExclamationCircle />}
         </span>
       </div>
 
       {isDropdownOpen && (
         <div style={{ padding: 10 }}>
           <label>
-            Välj tillbehör (inget krav):
+            Välj tillbehör:
             <select onChange={handleVariationSelect} defaultValue="">
-              <option value="" disabled>
-                -- Välj ett/flera --
-              </option>
-              
-            
-                {productVariations.map((prod) => (
-                  <option key={prod._id} value={prod._id}>
-                    {prod.name || prod.title || 'Unnamed Product'}
-                  </option>
-                ))}
-            
+              <option value="" disabled>-- Välj ett tillbehör --</option>
+              {productVariations.map((v) => (
+                <option key={v._id} value={v._id}>
+                  {v.name || v.title || 'Namnlös'}
+                </option>
+              ))}
             </select>
           </label>
 
-          <ul>
+          <ul style={{ marginTop: 10 }}>
             {selectedVariations.map((v) => (
               <li key={v._id}>
-                {v.name || v.title || 'Unnamed Variation'}{' '}
-                <button
-                  onClick={() => {
-                    setSelectedVariations((prev) => {
-                      const filtered = prev.filter((item) => item._id !== v._id);
-                      onVariationsUpdate(
-                        filtered.map((item) => ({
-                          id: item._id,
-                          price: item.price,
-                          product: productVariations.some((p) => p._id === item._id),
-                        }))
-                      );
-                      return filtered;
-                    });
-                    onVariationRemove(v._id);
-                  }}
-                >
-                  Remove
-                </button>
+                {v.name || v.title || 'Namnlös'} ({JSON.stringify(v.price.value)} SEK){' '}
+                <button onClick={(e) => handleRemove(v)}>Ta bort</button>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {loading && <p>Loading variations...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {loading && <p>Hämtar tillbehör...</p>}
+      {error && <p style={{ color: 'red' }}>Fel: {error}</p>}
     </div>
   );
 };

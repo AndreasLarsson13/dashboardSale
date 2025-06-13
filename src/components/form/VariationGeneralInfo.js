@@ -479,13 +479,13 @@ const GeneralInfo = ({ product, setProduct }) => {
             }}
           >
             {/* NYTT: Gruppnamn för kunden (variationGroup) */}
-            <LabeledInput
+           {/*  <LabeledInput
               label="Välj tillbehör (Gruppnamn för kunden):"
               name="variationGroup"
               value={product.variationGroup || ''} // Hämta från product.variationGroup
               onChange={handleInputChange}
               required
-            />
+            /> */}
 
             {/* NYTT: Namn på huvudprodukt (name_parrent) */}
             <LabeledInput

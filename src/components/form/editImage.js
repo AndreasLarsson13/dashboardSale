@@ -11,14 +11,21 @@ const EditImages = ({ product, setProduct }) => {
 
   // Delete an existing single image
   const handleRemoveSingleImage = async () => {
-    if (product.image.original) {
+    if (product.image && product.image.original) { // Added null check for product.image
       try {
+        // 1. Delete from Firebase
         await deleteImageFromFirebase(product.image.original);
-        await deleteImageFromFirebase(product.image.thumbnail);
+        // Assuming thumbnail is derived or same, delete it too if it's a separate file
+        if (product.image.thumbnail && product.image.thumbnail !== product.image.original) {
+          await deleteImageFromFirebase(product.image.thumbnail);
+        }
+
+        // 2. Update product state to reflect removal (MongoDB update will happen when product is saved)
         setProduct(prevProduct => ({
           ...prevProduct,
-          image: { thumbnail: '', original: '' }
+          image: { thumbnail: '', original: '' } // Sätt till tomma strängar
         }));
+        console.log('Single image removed from state and Firebase.');
       } catch (error) {
         console.error('Error deleting single image:', error);
       }
@@ -28,14 +35,21 @@ const EditImages = ({ product, setProduct }) => {
   // Delete a specific gallery image
   const handleRemoveGalleryImage = async (index) => {
     const imageToDelete = product.gallery[index];
-    if (imageToDelete) {
+    if (imageToDelete && imageToDelete.original) { // Added null check for imageToDelete.original
       try {
+        // 1. Delete from Firebase
         await deleteImageFromFirebase(imageToDelete.original);
-        await deleteImageFromFirebase(imageToDelete.thumbnail);
+        // Assuming thumbnail is derived or same, delete it too
+        if (imageToDelete.thumbnail && imageToDelete.thumbnail !== imageToDelete.original) {
+          await deleteImageFromFirebase(imageToDelete.thumbnail);
+        }
+
+        // 2. Update product state to reflect removal (MongoDB update will happen when product is saved)
         setProduct(prevProduct => ({
           ...prevProduct,
-          gallery: prevProduct.gallery.filter((_, i) => i !== index)
+          gallery: prevProduct.gallery.filter((_, i) => i !== index) // Filtrera bort den borttagna bilden
         }));
+        console.log(`Gallery image at index ${index} removed from state and Firebase.`);
       } catch (error) {
         console.error('Error deleting gallery image:', error);
       }
@@ -43,23 +57,41 @@ const EditImages = ({ product, setProduct }) => {
   };
 
   const deleteImageFromFirebase = async (imageUrl) => {
+    // Only attempt to delete if imageUrl is a valid string
+    if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+      console.warn('Skipping Firebase deletion: Invalid image URL provided:', imageUrl);
+      return;
+    }
     const imageRef = ref(storage, imageUrl);
     try {
       await deleteObject(imageRef);
-      console.log('Image deleted successfully');
+      console.log('Image deleted successfully from Firebase.');
     } catch (error) {
-      console.error('Error deleting image:', error);
+      // Catch "does not exist" errors silently, log others
+      if (error.code === 'storage/object-not-found') {
+        console.warn('Image not found in Firebase Storage (might have been deleted already):', imageUrl);
+      } else {
+        console.error('Error deleting image from Firebase:', error);
+      }
     }
   };
 
-  // Handle uploading a new single image with the same name
+  // Handle uploading a new single image (overwriting existing path)
   const handleSingleImageUpload = async () => {
-    if (!newSingleImage) return;
+    if (!newSingleImage || !newSingleImage.file) return;
+
+    // Ensure product.brand and product.name exist for path construction
+    if (!product.brand || !product.name) {
+      console.error('Error: Product brand or name is missing. Cannot upload image.');
+      // Optionally, provide user feedback here
+      return;
+    }
 
     try {
       const { file } = newSingleImage;
-      const oldFilePath = product.image.original; // Keep the same path as the old image
-      const storageRef = ref(storage, oldFilePath); // Use the same reference to overwrite the old image
+      // Construct a new, unique path if no old path exists, or use the old one to overwrite
+      let filePath = product.image?.original || `images/${product.brand}/${product.name}/main_image.webp`; // Fallback path
+      const storageRef = ref(storage, filePath);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       await new Promise((resolve, reject) => {
@@ -67,27 +99,36 @@ const EditImages = ({ product, setProduct }) => {
       });
 
       const originalURL = await getDownloadURL(storageRef);
+
+      // 2. Update product state with new URL (MongoDB update will happen when product is saved)
       setProduct(prevProduct => ({
         ...prevProduct,
-        image: { thumbnail: originalURL, original: originalURL }
+        image: { thumbnail: originalURL, original: originalURL } // Update with new URL
       }));
-
-      setNewSingleImage(null); // Clear uploaded image
+      setNewSingleImage(null); // Clear preview state
+      console.log('Single image uploaded to Firebase and updated in state.');
     } catch (error) {
       console.error('Error uploading single image:', error);
     }
   };
 
-  // Handle uploading a new gallery image (add a new image to the gallery)
+  // Handle uploading new gallery images (adding to gallery)
   const handleAddNewGalleryImages = async () => {
     if (newGalleryImages.length === 0) return;
 
+    if (!product.brand || !product.name) {
+      console.error('Error: Product brand or name is missing. Cannot upload gallery images.');
+      return;
+    }
+
     try {
-      const updatedGallery = [...product.gallery]; // Start with existing gallery
+      const updatedGallery = [...product.gallery]; // Create a mutable copy of the current gallery
 
       for (let i = 0; i < newGalleryImages.length; i++) {
         const { file } = newGalleryImages[i];
-        const storageRef = ref(storage, `images/${product.brand}/${product.name}/gallery/${updatedGallery.length + i}.webp`);
+        // Ensure a unique path for each new image
+        const uniqueFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`; // Simple unique name
+        const storageRef = ref(storage, `images/${product.brand}/${product.name}/gallery/${uniqueFileName}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
         await new Promise((resolve, reject) => {
@@ -96,31 +137,37 @@ const EditImages = ({ product, setProduct }) => {
 
         const imageUrl = await getDownloadURL(storageRef);
 
-        // Add new image to gallery
+        // Add new image URL to the gallery array
         updatedGallery.push({ original: imageUrl, thumbnail: imageUrl });
       }
 
-      // Update product with new gallery
+      // 2. Update product state with the new gallery (MongoDB update will happen when product is saved)
       setProduct(prevProduct => ({
         ...prevProduct,
         gallery: updatedGallery
       }));
-
-      setNewGalleryImages([]); // Clear uploaded images
+      setNewGalleryImages([]); // Clear preview state
+      console.log('New gallery images uploaded to Firebase and updated in state.');
     } catch (error) {
       console.error('Error uploading new gallery images:', error);
     }
   };
 
-  // Handle editing an existing gallery image
+  // Handle editing an existing gallery image (overwriting a specific gallery image)
   const handleEditGalleryImage = async (index) => {
-    if (!newGalleryImages[0]) return;
+    if (!newGalleryImages[0] || !newGalleryImages[0].file) return; // Expecting only one file for editing
 
-    const file = newGalleryImages[0].file; // Use the first selected file
-    const oldFilePath = product.gallery[index].original; // Keep the same path as the old gallery image
+    const file = newGalleryImages[0].file;
+    const oldImageObject = product.gallery[index];
+
+    // Ensure we have a valid old path to overwrite
+    if (!oldImageObject || !oldImageObject.original) {
+      console.error(`Error: Cannot find original URL for gallery image at index ${index}.`);
+      return;
+    }
 
     try {
-      const storageRef = ref(storage, oldFilePath); // Use the same reference to overwrite the old image
+      const storageRef = ref(storage, oldImageObject.original); // Use the same path to overwrite
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       await new Promise((resolve, reject) => {
@@ -128,18 +175,19 @@ const EditImages = ({ product, setProduct }) => {
       });
 
       const newImageUrl = await getDownloadURL(storageRef);
-      const updatedGallery = [...product.gallery];
+      const updatedGallery = [...product.gallery]; // Create a mutable copy
 
-      // Update the specific image
+      // Update the specific image object in the copy
       updatedGallery[index] = { original: newImageUrl, thumbnail: newImageUrl };
 
+      // 2. Update product state with the modified gallery (MongoDB update will happen when product is saved)
       setProduct(prevProduct => ({
         ...prevProduct,
         gallery: updatedGallery
       }));
-
-      setEditIndex(null); // Finish editing
-      setNewGalleryImages([]); // Clear uploaded image
+      setEditIndex(null); // Clear editing state
+      setNewGalleryImages([]); // Clear preview state
+      console.log(`Gallery image at index ${index} updated in Firebase and state.`);
     } catch (error) {
       console.error('Error uploading edited gallery image:', error);
     }
@@ -207,7 +255,7 @@ const EditImages = ({ product, setProduct }) => {
                 </button>
               </div>
             )}
-            {product.image.original && (
+            {product.image && product.image.original && ( // Check if product.image and product.image.original exist before rendering
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
                 <img
                   src={product.image.original}
@@ -224,7 +272,7 @@ const EditImages = ({ product, setProduct }) => {
           {/* Gallery Images */}
           <h4>Galleri</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px' }}>
-            {product.gallery.length > 0 ? (
+            {product.gallery && product.gallery.length > 0 ? ( // Check if product.gallery exists and has length
               product.gallery.map((image, index) => (
                 <div key={index} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <img
@@ -279,8 +327,12 @@ const EditImages = ({ product, setProduct }) => {
                     alt={`New Gallery Preview ${index}`}
                     style={{ width: '100px', height: '100px', objectFit: 'cover', border: '2px solid green' }}
                   />
-                  <button type="button" onClick={() => setNewGalleryImages([])} className="btnRed">
+                  {/* Option to remove individual new images before upload, or just clear all */}
+                  {/* <button type="button" onClick={() => { /* logic to remove specific preview */ /*}} className="btnRed">
                     <FaTrash /> Ta bort
+                  </button> */}
+                  <button type="button" onClick={() => setNewGalleryImages([])} className="btnRed"> {/* Clear all new images */}
+                    <FaTrash /> Ta bort alla förhandsvisningar
                   </button>
                 </div>
               ))}

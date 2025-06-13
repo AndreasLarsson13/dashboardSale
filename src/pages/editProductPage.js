@@ -1,141 +1,133 @@
-// src/pages/EditProductPage.jsx (eller var din EditProductPage ligger)
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-// Importera dina formulärkomponenter. DUBBELKOLLA SÖKVÄGARNA!
-// Exempel: '../../components/form/GeneralInfo'
-import GeneralInfo from '../components/form/GeneralInfo'; // Använd nu namnet GeneralInfo
-import Description from '../components/form/editDescription'; // Behåller editDescription
-import VariationsDropdown from '../components/form/EditVariations'; // Behåller EditVariations
-import Meta from '../components/form/Meta'; // Behåller Meta
-import Images from '../components/form/editImage'; // Behåller editImage
+// Importera dina formulärkomponenter
+import GeneralInfo from '../components/form/GeneralInfo';
+import Description from '../components/form/editDescription';
+import VariationsDropdown from '../components/form/EditVariations'; // Din VariationsDropdown
+import OptionsDropdown from '../components/form/Options'; // Din OptionsDropdown (förmodligen samma komponent som VariationsDropdown)
+import Meta from '../components/form/Meta';
+import EditImages from '../components/form/editImage'; // Din EditImages-komponent
 
 const EditProductPage = () => {
   const { id } = useParams(); // Hämta produkt-ID från URL-parametern
 
   // Definiera den fullständiga grundstrukturen för ett produktobjekt.
-  // Detta är kritisk för att säkerställa att alla fält finns initialt
+  // Detta är kritiskt för att säkerställa att alla fält finns initialt
   // och för att förhindra 'undefined' fel när API-svaret kanske saknar vissa fält.
   const defaultProductStructure = {
     name: '',
     sku: '',
     supplierArticleNumber: '',
-    // Prisobjekt för att matcha GeneralInfo's struktur
     price: { value: 0, currency: 'SEK', dateChanged: '' },
     sale_price: { value: 0, currency: 'SEK', dateChanged: '' },
     buying_price: { value: 0, currency: 'SEK', dateChanged: '' },
     quantity: 0,
-    description: { se: '' }, // Antar att beskrivningen kan vara flerspråkig
-    variations: [],
-    meta: [], // För meta-taggar eller liknande
-    image: { thumbnail: '', original: '' }, // Huvudbildens URL:er
-    gallery: [], // En array av galleribilder (antingen sträng-URL:er eller objekt)
+    description: { se: '' },
+    variations: [], // Initialiseras som tom array
+    options: [],    // Initialiseras som tom array för tillbehör
+    meta: [],
+    image: { thumbnail: '', original: '' },
+    gallery: [],
     brand: '',
-    featured: false, // T.ex. om produkten ska visas som "featured"
+    featured: false,
     category: [], // Komplett kapslad kategoristruktur
-    categoryPath: [], // En enklare, platt array av kategorinamn/slugs
-    productCountryOfOrigin: 'AX', // Standard för Åland
-    // Packningsinformation
+    categoryPaths: [], // För `categoryPaths` som array av arrayer av strängar
+    productCountryOfOrigin: 'AX',
     packaging: {
       weightPack: 0,
       widthPack: 0,
       heightPack: 0,
       lengthPack: 0,
     },
-    // Frakt- och säljlandsinformation (objekt med landskod som nyckel)
     sellInCountries: {},
     shippingCurrency: 'SEK',
-    shippingSpecial: { combinedWith: [], units: 1, enabled: false }, // För speciella fraktregler
-    searchKeywords: [], // En array av sökord
- specialProductData: {
-    info: { se: '' },
-    salesOption: 'direct',
-    enabled: false, // <-- Lägg till denna flagga
-  },    isProductOption: false, // Om produkten är ett tillbehör
-    hideProductFromView: false, // Om produkten ska döljas från vissa vyer
+    shippingSpecial: { combinedWith: [], units: 1, enabled: false },
+    searchKeywords: [],
+    specialProductData: {
+      info: { se: '' },
+      salesOption: 'direct',
+      enabled: false,
+    },
+    isProductOption: false,
+    hideProductFromView: false,
   };
 
-  // State för hela produktobjektet. Initialiseras med default-strukturen.
   const [product, setProduct] = useState(defaultProductStructure);
-  // State för laddningsstatus och fel
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // --- useEffect för att hämta produktdata från API ---
-  // Körs en gång när komponenten mountas, eller när 'id' i URL:en ändras.
-  useEffect(() => {
-    const fetchProductData = async () => {
-      setIsLoading(true); // Sätt laddningsstatus till true
-      setError(null);     // Rensa eventuella tidigare fel
+ useEffect(() => {
+  const fetchProductData = async () => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const response = await axios.get(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`);
-        const fetchedData = response.data; // Den hämtade produktdata
+    try {
+      const response = await axios.get(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`);
+      const fetchedData = response.data;
 
-        // Slå ihop default-strukturen med den hämtade datan på ett robust sätt.
-        // Detta säkerställer att alla fält finns och är korrekt initialiserade,
-        // samtidigt som hämtad data har företräde.
-        setProduct((prevProduct) => ({
-          ...defaultProductStructure, // Börja med den fullständiga defaultstrukturen
-          ...fetchedData,             // Överlagra med all data som hämtats från API:et
+      // Förbered alla fält
+      const newProduct = {
+        ...defaultProductStructure,
+        ...fetchedData,
+        price: { ...defaultProductStructure.price, ...(fetchedData.price || {}) },
+        sale_price: { ...defaultProductStructure.sale_price, ...(fetchedData.sale_price || {}) },
+        buying_price: { ...defaultProductStructure.buying_price, ...(fetchedData.buying_price || {}) },
+        description: { ...defaultProductStructure.description, ...(fetchedData.description || {}) },
+        shippingSpecial: { ...defaultProductStructure.shippingSpecial, ...(fetchedData.shippingSpecial || {}) },
+        specialProductData: { ...defaultProductStructure.specialProductData, ...(fetchedData.specialProductData || {}) },
+        packaging: { ...defaultProductStructure.packaging, ...(fetchedData.packaging || {}) },
+        searchKeywords: Array.isArray(fetchedData.searchKeywords) ? fetchedData.searchKeywords : [],
+        category: Array.isArray(fetchedData.category) ? fetchedData.category : [],
+        categoryPaths: Array.isArray(fetchedData.categoryPaths) ? fetchedData.categoryPaths : [],
+        gallery: Array.isArray(fetchedData.gallery) ? fetchedData.gallery : [],
+        variations: Array.isArray(fetchedData.variations) ? fetchedData.variations : [],
+        options: Array.isArray(fetchedData.options) ? fetchedData.options : []
+      };
 
-          // För nästlade objekt, slå samman dem separat för att bevara djupare defaultvärden
-          // om en egenskap saknas i fetchedData men är viktig att ha en default för.
-          // Använd `|| {}` för att säkerställa att vi inte försöker sprida ut `undefined`
-          price: { ...defaultProductStructure.price, ...(fetchedData.price || {}) },
-          sale_price: { ...defaultProductStructure.sale_price, ...(fetchedData.sale_price || {}) },
-          buying_price: { ...defaultProductStructure.buying_price, ...(fetchedData.buying_price || {}) },
-          description: { ...defaultProductStructure.description, ...(fetchedData.description || {}) },
-          shippingSpecial: { ...defaultProductStructure.shippingSpecial, ...(fetchedData.shippingSpecial || {}) },
+      // Jämför om något faktiskt förändrats (framför allt .options)
+      setProduct((prevProduct) => {
+        const sameOptions = JSON.stringify(prevProduct.options) === JSON.stringify(newProduct.options);
+        const sameData = JSON.stringify(prevProduct) === JSON.stringify(newProduct); // Valfritt – djup jämförelse
+        return sameOptions && sameData ? prevProduct : newProduct;
+      });
 
-          // *** KRITISKT FÖR PACKAGING: Säkerställ att den initialiseras korrekt ***
-          packaging: {
-            ...defaultProductStructure.packaging, // Ge defaultvärden till alla packningsfält
-            ...(fetchedData.packaging || {})     // Lägg till ALLT från fetchedData.packaging, eller ett tomt objekt om det saknas
-          },
-          
-          // Säkerställ att array-fält alltid är arrayer
-          searchKeywords: Array.isArray(fetchedData.searchKeywords) ? fetchedData.searchKeywords : [],
-          category: Array.isArray(fetchedData.category) ? fetchedData.category : [],
-          gallery: Array.isArray(fetchedData.gallery) ? fetchedData.gallery : [],
-          variations: Array.isArray(fetchedData.variations) ? fetchedData.variations : [],
-          meta: Array.isArray(fetchedData.meta) ? fetchedData.meta : [],
-          
-          // Särskild hantering för specialProductData om det behövs
-          specialProductData: fetchedData.specialProductData 
-              ? (fetchedData.specialProductData.info ? fetchedData.specialProductData : { info: {se: ""}, salesOption: "direct" }) 
-              : false,
-        }));
-      } catch (err) {
-        console.error('Fel vid hämtning av produkt:', err);
-        setError('Kunde inte ladda produktdata. Kontrollera nätverksanslutningen eller försök igen senare.');
-      } finally {
-        setIsLoading(false); // Sätt laddningsstatus till false oavsett resultat
-      }
-    };
+    } catch (err) {
+      console.error('Fel vid hämtning av produkt:', err);
+      setError('Kunde inte ladda produktdata. Kontrollera nätverksanslutningen eller försök igen senare.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchProductData();
-  }, [id]); // Beroendelista: körs om 'id' ändras
+  fetchProductData();
+}, [id]);
 
-  // --- Hanterare för VariationsDropdown ---
-  // Dessa hanterare använder useCallback för prestandaoptimering,
-  // så att de inte återskapas i varje rendering om deras beroenden inte ändras.
 
+  // --- Hanterare för VariationsDropdown (för product.variations) ---
   const handleVariationsUpdate = useCallback((variations) => {
-    setProduct((prev) => ({
-      ...prev,
-      // Se till att variationer är rena objekt utan 'isNew' flaggor vid uppdatering
-      variations: variations.map((v) => ({ ...v, isNew: undefined })),
-    }));
-  }, []);
+    // VIKTIGT: Jämför om listan faktiskt har ändrats för att undvika oändlig loop
+    // Skapa en sorterad sträng av ID:n för en stabil jämförelse
+    const currentVariationIds = product.variations.map(v => v.id).sort().join(',');
+    const newVariationIds = variations.map(v => v.id).sort().join(',');
 
+    if (currentVariationIds !== newVariationIds) {
+      setProduct((prev) => ({
+        ...prev,
+        // Se till att variationer är rena objekt utan 'isNew' flaggor vid uppdatering
+        variations: variations.map((v) => ({ ...v, isNew: undefined })),
+      }));
+    }
+  }, [product.variations]); // Beroende på product.variations för jämförelse
+
+  // Hanterare för att lägga till/ändra bildlänk för en variation
   const handleImageLinkAdd = useCallback((variationId, link) => {
     setProduct((prev) => {
       // Uppdaterar 'extraColor' för det första galleri-objektet (standardantagande)
       const newGallery = prev.gallery.map((item, index) => {
-        if (index === 0) {
+        if (index === 0) { // Antar att extraColor-data sitter på första galleribilden
           return {
             ...item,
             extraColor: {
@@ -150,11 +142,11 @@ const EditProductPage = () => {
     });
   }, []);
 
+  // Hanterare för att ta bort extra färger kopplade till en variation
   const handleRemoveExtraColors = useCallback((variationId) => {
     setProduct((prev) => {
       const newGallery = prev.gallery.map((item, index) => {
         if (index === 0 && item.extraColor) {
-          // Destrukturera bort den specifika variationId:n från extraColor
           const { [variationId]: _, ...remainingColors } = item.extraColor;
           return { ...item, extraColor: remainingColors };
         }
@@ -164,6 +156,7 @@ const EditProductPage = () => {
     });
   }, []);
 
+  // Hanterare när en variation tas bort
   const handleVariationRemove = useCallback((variationId) => {
     // Anropa även för att rensa eventuella extra färger kopplade till variationen
     handleRemoveExtraColors(variationId);
@@ -173,53 +166,35 @@ const EditProductPage = () => {
     }));
   }, [handleRemoveExtraColors]);
 
-  // --- Hanterare för bilduppladdning (om 'Images' komponenterna använder dessa callbacks) ---
-  // Om din 'Images' komponent hanterar sin egen interna state och uppdaterar 'product' direkt,
-  // kanske dessa inte behövs här.
-  const handleSingleImageUpload = useCallback((image) => {
-    setProduct((prev) => ({
-      ...prev,
-      image, // 'image' är ett objekt { thumbnail, original }
-    }));
-  }, []);
 
-  const handleGalleryImageAdd = useCallback((newImages) => {
-    setProduct((prev) => ({
-      ...prev,
-      gallery: [...prev.gallery, ...newImages], // Lägg till nya bilder i galleriet
-    }));
-  }, []);
+  // --- HANTERARE FÖR OptionsDropdown (för product.options) ---
+  const handleOptionsUpdate = useCallback((optionsList) => {
+    // VIKTIGT: Jämför om listan faktiskt har ändrats för att undvika oändlig loop
+    const currentOptionIds = product.options.map(o => o.id).sort().join(',');
+    const newOptionIds = optionsList.map(o => o.id).sort().join(',');
 
-  const handleGalleryImageRemove = useCallback((imageToRemoveUrl) => {
-    setProduct(prev => ({
+    if (currentOptionIds !== newOptionIds) {
+      setProduct((prev) => ({
         ...prev,
-        gallery: prev.gallery.filter(img => img.url !== imageToRemoveUrl) // Antar att galleribildobjekt har en 'url' egenskap
-    }));
-  }, []);
+        // Behåll isNew-flaggan om den är viktig, annars kan du ta bort den i .map()
+        options: optionsList.map((o) => (o.isNew ? o : o)),
+      }));
+    }
+  }, [product.options]); // Beroende på product.options för jämförelse
+
 
   // --- Hantera formulärinlämning ---
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Förhindra standardformulärinlämning
-
-    // Enkel klientvalidering innan data skickas till servern.
-    // Den mer detaljerade valideringen sköts av GeneralInfo's interna logik.
-    // OBS! Dessa fält måste matchas mot hur GeneralInfo's isFormCompleted validerar!
-    if (!product.name || !product.brand || !product.sku || !product.price?.value || !product.quantity) {
-      alert('Vänligen fyll i alla obligatoriska fält (Namn, Varumärke, SKU, Pris, Antal i lager).');
-      return;
-    }
-    // Lägg till fler specifika valideringar här om det behövs innan submission
+    e.preventDefault();
 
     try {
-      // Skicka det kompletta 'product'-objektet till API:et med PUT-metoden
       const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, product, {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (response.status === 200) { // Axios använder response.status för HTTP-statuskoder
+      if (response.status === 200) {
         alert('Produkten uppdaterades framgångsrikt!');
-        // Du kan här lägga till logik för att omdirigera användaren, t.ex.
-        // navigate(`/products/${id}`);
+        // Du kan här lägga till logik för att omdirigera användaren
       } else {
         console.error('Misslyckades med att uppdatera produkt:', response.status, response.data);
         alert(`Kunde inte uppdatera produkten. Fel: ${response.status} ${response.data?.message || 'Okänt fel'}`);
@@ -237,7 +212,6 @@ const EditProductPage = () => {
   if (error) {
     return <div className="error-message">Fel: {error}</div>;
   }
-  // Om 'product' är null/undefined efter laddning (bör inte hända med defaultProductStructure, men bra som fallback)
   if (!product || !product.name) {
     return <div className="no-product-found">Ingen produkt hittades med ID: {id} eller data är ofullständig.</div>;
   }
@@ -248,28 +222,30 @@ const EditProductPage = () => {
       <h2>Redigera Produkt: {product.name}</h2>
 
       {/* GeneralInfo - Huvudinformation */}
-      {/* Skickar in hela produktobjektet och setProduct för att hantera uppdateringar */}
       <GeneralInfo product={product} setProduct={setProduct} />
 
       {/* Description - Produktbeskrivning */}
       <Description product={product} setProduct={setProduct} />
 
       {/* Images - Bildhantering */}
-      <Images
+      <EditImages
         product={product}
         setProduct={setProduct}
-        // Om Images-komponenten behöver callbacks för specifika bildhändelser
-        // onSingleImageUpload={handleSingleImageUpload}
-        // onGalleryImageAdd={handleGalleryImageAdd}
-        // onGalleryImageRemove={handleGalleryImageRemove}
       />
 
-      {/* VariationsDropdown - Variationer */}
+      {/* OptionsDropdown - Tillbehör (skickar product.options till den) */}
+      <OptionsDropdown
+        onVariationsUpdate={handleOptionsUpdate}
+        initialSelectedVariations={product.options || []}
+      />  
+
+      {/* VariationsDropdown - Variationer (skickar product.variations till den) */}
       <VariationsDropdown
         product={product} // Skicka in produkt för att läsa befintliga variationer
-        onVariationsUpdate={handleVariationsUpdate} // Callback för när variationer ändras
-        onImageLinkAdd={handleImageLinkAdd}         // Callback för att lägga till bildlänk till variation
-        onVariationRemove={handleVariationRemove}   // Callback för att ta bort variation
+        onVariationsUpdate={handleVariationsUpdate}
+        onImageLinkAdd={handleImageLinkAdd}
+        onVariationRemove={handleVariationRemove}
+        initialSelectedVariations={product.variations || []} // Passera befintliga variationer
       />
 
       {/* Meta - Meta-data */}

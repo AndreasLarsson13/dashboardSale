@@ -1,101 +1,108 @@
-import React, { useState, useEffect } from "react";
-import categoriesData from '../../../data/categoriesData';
+// src/components/form/components/CategorySelector.jsx (eller var din fil nu ligger)
 
-function CategorySelector({ onChange }) {
-  const [selectedPath, setSelectedPath] = useState([]);
+import React, { useState, useEffect, useCallback } from "react";
+import categoriesData from '../../../data/categoriesData'; // Se till att sökvägen är korrekt
+
+// Den här komponenten hanterar EN ENSKILD KATEGORIVÄG
+// Den tar emot den valda sökvägen som en platt array av strängar
+// Och skickar ut den uppdaterade sökvägen som en platt array av strängar
+function CategorySelector({ selectedPath = [], onChange }) { // selectedPath är nu standardiserat till en platt array
+  const [currentPathSegments, setCurrentPathSegments] = useState(selectedPath);
   const [dropdownOptions, setDropdownOptions] = useState([]);
-console.log(selectedPath)
-  const getOptionsAtLevel = (level, path) => {
+
+  // Synkronisera internt state med prop när den ändras från föräldern
+  useEffect(() => {
+    // Använd JSON.stringify för en djup jämförelse av arrayer
+    if (JSON.stringify(currentPathSegments) !== JSON.stringify(selectedPath)) {
+      setCurrentPathSegments(selectedPath);
+    }
+  }, [selectedPath]); // Beroende på den inkommande prop:en
+
+  // Hjälpfunktion för att hämta alternativ för en specifik nivå i kategoriträdet
+  const getOptionsAtLevel = useCallback((level, pathSegments) => {
     if (level === 0) {
-      return Object.values(categoriesData);
+      return Object.values(categoriesData); // Toppnivå kategorier
     }
 
     let currentLevelNodes = Object.values(categoriesData);
     for (let i = 0; i < level; i++) {
-      const selectedValue = path[i];
-      if (!selectedValue) return [];
+      const selectedValue = pathSegments[i];
+      if (!selectedValue) return []; // Inget valt på tidigare nivå, inga barnalternativ
       const foundNode = currentLevelNodes.find(node => node.value === selectedValue);
-      if (!foundNode || !foundNode.child) return [];
+      if (!foundNode || !foundNode.child) return []; // Nod hittades inte eller inga barn
       currentLevelNodes = foundNode.child;
     }
-    return currentLevelNodes || [];
-  };
+    return currentLevelNodes || []; // Returnera alternativ för aktuell nivå
+  }, [categoriesData]); //categoriesData som beroende ifall den skulle kunna ändras
 
+  // Effekt för att uppdatera dropdown-alternativen baserat på vald sökväg
   useEffect(() => {
     let options = [];
     let level = 0;
 
+    // Bygg upp dropdown-alternativen dynamiskt för varje nivå
     while (true) {
-      const opts = getOptionsAtLevel(level, selectedPath);
-      if (!opts.length) break;
+      const opts = getOptionsAtLevel(level, currentPathSegments);
+      if (!opts.length) break; // Inga fler alternativ på denna nivå
       options[level] = opts;
 
-      const selectedValue = selectedPath[level];
-      if (!selectedValue) break;
+      const selectedValue = currentPathSegments[level];
+      if (!selectedValue) break; // Användaren har inte valt på denna nivå än
       const selectedNode = opts.find(opt => opt.value === selectedValue);
-      if (!selectedNode || !selectedNode.child) break;
+      if (!selectedNode || !selectedNode.child) break; // Ingen nod hittades eller inga barn, avsluta
 
       level++;
     }
-
     setDropdownOptions(options);
-  }, [selectedPath]);
+  }, [currentPathSegments, getOptionsAtLevel]); // Beroende på interna sökvägen och getOptionsAtLevel
 
-  const handleChange = (level, value) => {
-    const newPath = selectedPath.slice(0, level);
+  // Hanterare när en dropdown ändras
+  const handleChange = useCallback((level, value) => {
+    // Skapa en ny sökvägs-array baserat på tidigare val upp till aktuell nivå
+    const newPath = currentPathSegments.slice(0, level);
+
     if (value) {
-      newPath[level] = value;
+      newPath[level] = value; // Lägg till det nya valet
     }
-    setSelectedPath(newPath);
-    if (onChange) onChange(newPath); // om du vill skicka vidare vald path
-  };
-
-  // Visar vald kategori som text (kan användas i föräldrakomponent)
-  const getSelectedCategoryText = (path) => {
-    if (path.length === 0) return "Ingen kategori vald";
-
-    let currentNode = categoriesData[path[0]];
-    if (!currentNode) return "Ingen kategori vald";
-
-    let labels = [currentNode.label];
-
-    for (let i = 1; i < path.length; i++) {
-      if (!currentNode.child) break;
-      currentNode = currentNode.child.find(c => c.value === path[i]);
-      if (!currentNode) break;
-      labels.push(currentNode.label);
-    }
-    return labels.join(" > ");
-  };
+    // Uppdatera det interna statet
+    setCurrentPathSegments(newPath);
+    // Skicka den uppdaterade platta sökvägen till föräldern
+    if (onChange) onChange(newPath);
+  }, [currentPathSegments, onChange]);
 
   return (
     <div>
       <div style={{display: 'flex', gap: '10px'}}>
-      {dropdownOptions.map((options, level) => {
-        const selectedValue = selectedPath[level] || "";
-        return (
-          <div key={level} style={{ marginBottom: "1rem" }}>
-            <label style={{ display: "block", marginBottom: "0.3rem" }}>
-              {level === 0 ? "Huvudkategori:" : `Underkategori ${level + 1}:`}
-            </label>
-            <select
-              value={selectedValue}
-              onChange={(e) => handleChange(level, e.target.value)}
-              style={{ width: "226px", fontSize: "16px", height: "30px" }}
-            >
-              <option value="">Välj...</option>
-              {options.map(opt => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
-      })}
+        {dropdownOptions.map((options, level) => {
+          const selectedValue = currentPathSegments[level] || ""; // Vald kategori på denna nivå
+          return (
+            <div key={level} style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", marginBottom: "0.3rem" }}>
+                {level === 0 ? "Huvudkategori:" : `Underkategori ${level + 1}:`}
+              </label>
+              <select
+                value={selectedValue}
+                onChange={(e) => handleChange(level, e.target.value)}
+                style={{ width: "226px", fontSize: "16px", height: "30px" }}
+              >
+                <option value="">Välj...</option>
+                {options.map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        })}
       </div>
       <div style={{ marginTop: "1rem" }}>
-        <strong>Vald kategori:</strong> {selectedPath.map(item => (<> <span>{ `${item} >`}</span></>))}
+        <strong>Vald kategori:</strong> {currentPathSegments.map((item, index) => (
+          <span key={index}>
+            {item}
+            {index < currentPathSegments.length - 1 ? ' > ' : ''}
+          </span>
+        ))}
       </div>
     </div>
   );

@@ -31,11 +31,12 @@ const AddProductPage = () => {
     category: [],
      categoryPaths: [],
    /*  countries: [], */
-    packaging: { // Initialize packaging as an object with default numeric values
+    packagingInfo: { // Initialize packaging as an object with default numeric values
      weightPack: 0,
        lengthPack: 0,
      widthPack: 0,
      heightPack: 0,
+     enable: false,
     },
     vat: {
       "SE" : 0.25,
@@ -47,6 +48,7 @@ const AddProductPage = () => {
     createdDate: new Date().toISOString(),
     priceUpdateDate: new Date().toISOString(),
     searchKeywords: [],
+    compadibleWithProduct: [],
     shippingCosts: { }, // Nytt fält
     currency: "",
     hideProductFromView: false,

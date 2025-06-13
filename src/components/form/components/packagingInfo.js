@@ -36,7 +36,7 @@ function PackagingInfo({ packaging, onChange }) {
               required
               // Använd nullish coalescing operator (??) för att visa tom sträng om värdet är null eller undefined.
               // Om värdet är 0, kommer det att visas som 0, vilket är korrekt för numeriska inputfält.
-              value={currentPackaging[field.name] ?? ''}
+              value={currentPackaging[field.name] ?? 0}
               min="0" // Säkerställ att min-värdet är satt för nummerfält
               style={{
                 padding: '6px 8px',

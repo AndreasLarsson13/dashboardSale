@@ -7,6 +7,8 @@ import axios from 'axios';
 // Importera dina formulärelement-komponenter. DUBBELKOLLA SÖKVÄGARNA!
 import SpecialShippingSelector from '../form/SpecialShippingSelector';
 import KeywordInput from './components/keyWordInput';
+import CompadibleWithProduct from './components/compadableWithProduct';
+
 import PackagingInfo from './components/packagingInfo';
 import LabeledInput from './components/FormElements/LabeledInput';
 import LabeledSelect from './components/FormElements/LabeledSelect';
@@ -44,11 +46,11 @@ console.log(selectedCategoryPath)
     let initialPaths = [];
 
     // Prioritera product.categoryPaths om det redan är i det önskade formatet (array av arrayer)
-    if (Array.isArray(product.categoryPaths) && product.categoryPaths.length > 0) {
+ /*    if (Array.isArray(product.categoryPaths) && product.categoryPaths.length > 0) {
       initialPaths = product.categoryPaths.map(path => normalizePath(path));
     }
     // Fallback för äldre/annat product.category-format (kapslade objekt)
-    else if (Array.isArray(product.category) && product.category.length > 0) {
+    else  */if (Array.isArray(product.category) && product.category.length > 0) {
       const convertNestedToFlatPath = (nestedCat) => {
         const path = [];
         let current = nestedCat;
@@ -61,9 +63,9 @@ console.log(selectedCategoryPath)
       initialPaths = product.category.map(cat => normalizePath(convertNestedToFlatPath(cat)));
     }
     // Fallback för product.categoryPath (singular, en enda array-väg)
-    else if (Array.isArray(product.categoryPath) && product.categoryPath.length > 0) {
+ /*    else if (Array.isArray(product.categoryPath) && product.categoryPath.length > 0) {
       initialPaths = [normalizePath(product.categoryPath)];
-    }
+    } */
 
     if (initialPaths.length === 0) {
       initialPaths.push([]); // Se till att det alltid finns minst en tom sökväg att börja med
@@ -116,6 +118,7 @@ console.log(selectedCategoryPath)
   });
 
   const [searchKeywords, setSearchKeywords] = useState(product.searchKeywords || []);
+   const [compadibleWithProduct, setcompadibleWithProduct] = useState(product.compadibleWithProduct || []);
   const [showExtra, setShowExtra] = useState(specialProductData.enabled);
 
   const [shippingSpecial, setShippingSpecial] = useState(() => {
@@ -187,6 +190,9 @@ console.log(selectedCategoryPath)
 
   // --- useEffect för att uppdatera den överordnade 'product' prop:en ---
   useEffect(() => {
+
+    const stringPaths = categoryPaths.map(pathArray => pathArray.join('/'));
+
     const cleanedCategoryPaths = categoryPaths
       .map(path => path.filter(Boolean))
       .filter(path => path.length > 0);
@@ -222,9 +228,10 @@ console.log(selectedCategoryPath)
 
     const updatedFields = {
       category: nestedCategoriesForProduct,
-      categoryPaths: cleanedCategoryPaths, // <--- Här skickas de valda sökvägarna (array av arrayer av slugs)
+      categoryPaths: stringPaths, // <--- Här skickas de valda sökvägarna (array av arrayer av slugs)
       currency,
       searchKeywords,
+      compadibleWithProduct,
       shippingCurrency,
       specialProductData,
       shippingSpecial: { ...shippingSpecial, enabled: specialShippingEnabled },
@@ -244,7 +251,7 @@ console.log(selectedCategoryPath)
     currency, shippingCurrency,
     specialShippingEnabled, shippingSpecial,
     sellInCountries,
-    specialProductData, searchKeywords,
+    specialProductData, searchKeywords, compadibleWithProduct
   ]);
 
 
@@ -350,7 +357,7 @@ console.log(selectedCategoryPath)
 
 
   // --- HANTERING AV KATEGORIVÄGAR (FÖR FLERA TRÄD) ---
-  const handleCategoryPathChange = useCallback((pathIndex, level, value) => {
+  /* const handleCategoryPathChange = useCallback((pathIndex, level, value) => {
     setCategoryPaths(prevPaths => {
       const newPaths = [...prevPaths];
       const currentPath = [...newPaths[pathIndex]]; // Kopiera den specifika sökvägen
@@ -362,14 +369,14 @@ console.log(selectedCategoryPath)
       newPaths[pathIndex] = updatedPath; // Uppdatera den specifika sökvägen i arrayen
       return newPaths;
     });
-  }, []);
+  }, []); */
 
   const addCategoryPath = useCallback((e) => {
     e.preventDefault()
     setCategoryPaths(prevPaths => [...prevPaths, []]);
   }, []);
 
-  const removeCategoryPath = useCallback((indexToRemove) => {
+ /*  const removeCategoryPath = useCallback((indexToRemove) => {
     setCategoryPaths(prevPaths => {
       const filteredPaths = prevPaths.filter((_, index) => index !== indexToRemove);
       if (filteredPaths.length === 0) {
@@ -377,7 +384,7 @@ console.log(selectedCategoryPath)
       }
       return filteredPaths;
     });
-  }, []);
+  }, []); */
 
 
   // --- Hanterare för valutaändring (och nollställning av priser) ---
@@ -511,7 +518,7 @@ console.log(selectedCategoryPath)
             />
 
             <LabeledInput
-              label="Produktpris (ex moms)"
+              label="Kundpris (ex moms)"
               name="price"
               value={product.price?.value ?? ''}
               onChange={handleInputChange}
@@ -616,7 +623,10 @@ console.log(selectedCategoryPath)
               )}
             </div>
           </div>
-
+ <CompadibleWithProduct
+            compadibleWith={compadibleWithProduct}
+            setcompadibleWith={setcompadibleWithProduct}
+          /> 
           {/* --- Förpackningsinformation (egen komponent) --- */}
           <PackagingInfo
             packaging={product.packaging}
@@ -691,43 +701,43 @@ console.log(selectedCategoryPath)
           />
 
           {/* --- KATEGORIHANTERING MED FLERA TRÄD --- */}
-          <div style={{ padding: '10px' }}>
-            <h2>Produktkategorier</h2>
-            {/* Itererar över categoryPaths för att rendera en CategorySelector för varje sökväg */}
-     {categoryPaths.map((path, index) => (
-  <div key={index} style={{ border: "1px dashed #ccc", padding: "10px", marginBottom: "15px", borderRadius: "5px" }}>
-    <CategorySelector
-      selectedPath={path}
-      onChange={(newPath) => {
-        setCategoryPaths(prev => {
-          const copy = [...prev];
-          copy[index] = newPath;
-          return copy;
-        });
-      }}
-    />
-    {/* Ta bort-knapp */}
-    {categoryPaths.length > 0 && <button
-      onClick={(e) => {
-        e.preventDefault();
-        setCategoryPaths(prev => prev.filter((_, i) => i !== index));
-      }}
-      style={{ marginTop: "10px", backgroundColor: "red", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
-    >
-      Ta bort
-    </button>}
-  </div>
+           <div style={{ padding: '10px' }}>
+            <h2>Produktkategorier</h2>
+            {/* Itererar över categoryPaths för att rendera en CategorySelector för varje sökväg */}
+     {categoryPaths.map((path, index) => (
+  <div key={index} style={{ border: "1px dashed #ccc", padding: "10px", marginBottom: "15px", borderRadius: "5px" }}>
+    <CategorySelector
+      selectedPath={path} // <-- HÄR: Skicka 'path' direkt, den är redan en array av strängar
+      onChange={(newPathArray) => { // <-- HÄR: Förvänta dig att 'newPathArray' är en array av strängar
+        setCategoryPaths(prev => {
+          const copy = [...prev];
+          copy[index] = newPathArray; // <-- HÄR: Spara den nya arrayen direkt
+          return copy;
+        });
+      }}
+    />
+    {/* Ta bort-knapp */}
+    {categoryPaths.length > 0 && <button
+      onClick={(e) => {
+        e.preventDefault();
+        setCategoryPaths(prev => prev.filter((_, i) => i !== index));
+      }}
+      style={{ marginTop: "10px", backgroundColor: "red", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
+    >
+      Ta bort
+    </button>}
+  </div>
 ))}
 
 
-            {/* Knapp för att lägga till en ny tom kategoriväg */}
-            <button
-              onClick={addCategoryPath}
-              style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-            >
-              Lägg till ytterligare kategoriväg
-            </button>
-          </div>
+            {/* Knapp för att lägga till en ny tom kategoriväg */}
+            <button
+              onClick={addCategoryPath}
+              style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Lägg till ytterligare kategoriväg
+            </button>
+          </div>
 
           {/* --- Nyckelord (egen komponent) --- */}
           <KeywordInput

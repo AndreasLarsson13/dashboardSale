@@ -41,6 +41,7 @@ const GeneralInfo = ({ product, setProduct }) => {
 
   // --- Kategori State Hantering ---
   const [categoryPaths, setCategoryPaths] = useState(() => {
+    
     const normalizePath = (path) => Array.isArray(path) ? path.filter(Boolean) : [];
     let initialPaths = [];
 
