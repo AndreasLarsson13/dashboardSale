@@ -40,12 +40,12 @@ const ListAccessoriesPage = () => {
       const auth = getAuth();
       const user = auth.currentUser;
 
-      if (!user) {
-/*         setError('User not logged in');
- */        setIsLoading(false);
+   /*    if (!user) {
+      setError('User not logged in');
+         setIsLoading(false);
         return;
       }
-
+ */ 
       try {
         const token = await user.getIdToken(); // Få användarens ID-token https://serverkundportal-dot-natbutiken.lm.r.appspot.com
       
