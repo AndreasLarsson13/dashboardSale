@@ -5,7 +5,7 @@ import axios from 'axios';
 // Importera dina formulärkomponenter
 import GeneralInfo from '../components/form/GeneralInfo';
 import Description from '../components/form/editDescription';
-import VariationsDropdown from '../components/form/EditVariations'; // Din VariationsDropdown
+import VariationsDropdown from '../components/form/Variations'; // Din VariationsDropdown
 import OptionsDropdown from '../components/form/Options'; // Din OptionsDropdown (förmodligen samma komponent som VariationsDropdown)
 import Meta from '../components/form/Meta';
 import EditImages from '../components/form/editImage'; // Din EditImages-komponent
@@ -241,13 +241,12 @@ const EditProductPage = () => {
       />  
 
       {/* VariationsDropdown - Variationer (skickar product.variations till den) */}
-      <VariationsDropdown
-        product={product} // Skicka in produkt för att läsa befintliga variationer
-        onVariationsUpdate={handleVariationsUpdate}
-        onImageLinkAdd={handleImageLinkAdd}
-        onVariationRemove={handleVariationRemove}
-        initialSelectedVariations={product.variations || []} // Passera befintliga variationer
-      />
+       <VariationsDropdown
+            onVariationsUpdate={handleVariationsUpdate}
+            onImageLinkAdd={handleImageLinkAdd}
+/*             isSingleImageUploaded={isSingleImageUploaded}
+ */            product={product}
+          />
 
       {/* Meta - Meta-data */}
       <Meta product={product} setProduct={setProduct} />

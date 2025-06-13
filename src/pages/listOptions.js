@@ -47,9 +47,9 @@ const ListAccessoriesPage = () => {
       }
 
       try {
-        const token = await user.getIdToken(); // Få användarens ID-token
+        const token = await user.getIdToken(); // Få användarens ID-token https://serverkundportal-dot-natbutiken.lm.r.appspot.com
       
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/options', {
+        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer', {
           headers: {
             Authorization: `Bearer ${token}`, // Skicka token i header
           },
