@@ -65,7 +65,7 @@ const EditProductPage = () => {
     setError(null);
 
     try {
-      const response = await axios.get(`http://localhost:8088/variationer/${id}`);
+      const response = await axios.get(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`);
       const fetchedData = response.data;
 
       // Förbered alla fält
@@ -188,7 +188,7 @@ const EditProductPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8088/variationer/${id}`, product, {
+      const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`, product, {
         headers: { 'Content-Type': 'application/json' },
       });
 
