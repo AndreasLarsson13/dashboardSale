@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AddProductPage from './pages/AddProductPage';
 import ProductListPage from './components/ProductList';
+import VariationListPage from './components/VariationList';
 import EditProductPage from './pages/editProductPage';
 import AddBrand from './pages/AddBrand';
 import BrandList from './pages/ListBrand';
@@ -12,7 +13,7 @@ import PrivateRoute from './components/privateRoute'; // Import PrivateRoute
 import AdminRoute from './components/adminRoute'; // Import AdminRoute (new route for admins)
 import AddOptions from './pages/AddOptions'; // Import AdminRoute (new route for admins)
 import ListOptions from './pages/listOptions'; // Import AdminRoute (new route for admins)
-
+import EditVariationPage from './pages/editProductVariationPage';
 
 function App() {
   return (
@@ -29,8 +30,8 @@ function App() {
           <Route path="/review-products" element={<AdminRoute element={<ReviewProductsPage />} />} /> {/* Protected route for admins */}
 
           <Route path="/add-option" element={<PrivateRoute element={<AddOptions />} />} /> {/* Protected route */}
-          <Route path="/list-option" element={<PrivateRoute element={<ListOptions />} />} /> {/* Protected route */}
-
+          <Route path="/list-option" element={<PrivateRoute element={<VariationListPage />} />} /> {/* Protected route */}
+          <Route path="/edit-variations/:id" element={<PrivateRoute element={<EditVariationPage />} />} /> {/* Protected route */}
         </Routes>
       </Layout>
     </Router>

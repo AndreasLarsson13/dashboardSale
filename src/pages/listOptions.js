@@ -49,7 +49,7 @@ const ListAccessoriesPage = () => {
       try {
         const token = await user.getIdToken(); // Få användarens ID-token https://serverkundportal-dot-natbutiken.lm.r.appspot.com
       
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer', {
+        const response = await axios.get('http://localhost:8088/variationer', {
           headers: {
             Authorization: `Bearer ${token}`, // Skicka token i header
           },
@@ -57,7 +57,6 @@ const ListAccessoriesPage = () => {
             uid: user.uid, // Valfritt: skicka uid som query parameter
             uidEmail: user.email, // Valfritt: skicka e-post om det behövs
           },
-          withCredentials: true // Lägg till detta om servern kräver autentiserade förfrågningar
         });
       
         setAccessories(response.data);
