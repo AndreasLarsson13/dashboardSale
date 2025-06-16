@@ -143,7 +143,8 @@ const updateParentVariations = useCallback(
       id: v._id,
       sku: inputs[v._id]?.sku || '',
       price: inputs[v._id]?.price || {},
-      variationImg: v.variationImg || false
+      variationImg: v.variationImg || false,
+      product: true
     }));
     onVariationsUpdate(variationsToSave);
   },

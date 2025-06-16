@@ -58,7 +58,7 @@ const ProductItem = ({ product, onDelete }) => {
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h2 style={{ color: "#333", marginBottom: "10px" }}>
-          {product.name} - {product.status === "accepted" 
+          {product.name} - {product.status === "confirmed" 
             ? "Godkänd" 
             : product.status === "rejected" 
             ? "Avvisad" 
@@ -66,14 +66,13 @@ const ProductItem = ({ product, onDelete }) => {
         </h2>
         
         {/* Utropstecken-ikon för att visa modal */}
-        {product.reviewComment && product.status !== "accepted" ? <span
+        {product.reviewComment && product.status !== "confirmed" ? <span
           style={{ cursor: "pointer", color: "#ff9900", fontSize: "24px", marginRight: "15px" }}
           onClick={toggleModal}
         >
           &#x2757;
         </span> : ""}
-        
-        <p><strong style={{ color: "#333", fontSize: "18px" }}>€{formatPrice(parseInt(product.price))}</strong></p>
+        <p><strong style={{ color: "#333", fontSize: "18px" }}>{formatPrice(parseInt(product.price.value))} - Valuta : {product.currency}</strong></p>
       </div>
 
       <p

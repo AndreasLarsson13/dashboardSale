@@ -9,10 +9,20 @@ import VariationsDropdown from '../components/form/Variations'; // Din Variation
 import OptionsDropdown from '../components/form/Options'; // Din OptionsDropdown (förmodligen samma komponent som VariationsDropdown)
 import Meta from '../components/form/Meta';
 import EditImages from '../components/form/editImage'; // Din EditImages-komponent
+import VariationGroup from '../components/form/components/variationGroup';
+
 
 const EditProductPage = () => {
   const { id } = useParams(); // Hämta produkt-ID från URL-parametern
 
+
+  const [accessory, setAccessory] = useState({
+     
+      color: false,
+      meta: false,
+      type: '',
+     
+    });
   // Definiera den fullständiga grundstrukturen för ett produktobjekt.
   // Detta är kritiskt för att säkerställa att alla fält finns initialt
   // och för att förhindra 'undefined' fel när API-svaret kanske saknar vissa fält.
@@ -56,7 +66,18 @@ const EditProductPage = () => {
 
   const [product, setProduct] = useState(defaultProductStructure);
   const [isLoading, setIsLoading] = useState(true);
+    const [message, setMessage] = useState('');
+  
   const [error, setError] = useState(null);
+
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  setAccessory((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   // --- useEffect för att hämta produktdata från API ---
  useEffect(() => {
@@ -221,6 +242,12 @@ const EditProductPage = () => {
     <form onSubmit={handleSubmit} className="form-container">
       <h2>Redigera Produkt: {product.name}</h2>
 
+            <VariationGroup
+  accessory={accessory}
+  onChange={handleInputChange}
+  message={message}
+/>
+
       {/* GeneralInfo - Huvudinformation */}
       <GeneralInfo product={product} setProduct={setProduct} />
 
@@ -241,12 +268,7 @@ const EditProductPage = () => {
       />  
 
       {/* VariationsDropdown - Variationer (skickar product.variations till den) */}
-       <VariationsDropdown
-            onVariationsUpdate={handleVariationsUpdate}
-            onImageLinkAdd={handleImageLinkAdd}
-/*             isSingleImageUploaded={isSingleImageUploaded}
- */            product={product}
-          />
+    
 
       {/* Meta - Meta-data */}
       <Meta product={product} setProduct={setProduct} />

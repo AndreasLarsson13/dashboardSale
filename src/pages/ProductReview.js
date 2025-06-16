@@ -97,6 +97,7 @@ http://localhost:8080
     if (!confirmApprove) return;
 
     setIsApproving(true);
+  
     try {
       const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addproducts', {
         method: 'POST',
@@ -187,8 +188,8 @@ http://localhost:8080
               <div className="product-horizontal-info">
                 <h3>{product.name}</h3>
                 <p><strong>Varumärke:</strong> {product.brand}</p>
-                <p><strong>Pris:</strong> {product.price} €</p>
-                <p><strong>Försäljningspris:</strong> {product.sale_price} €</p>
+                <p><strong>Pris:</strong> {product.price.value} - Valuta: {product.price.currency}</p>
+                <p><strong>Försäljningspris:</strong> {product.sale_price.value} - Valuta: {product.price.currency}</p>
                 <p><strong>SKU:</strong> {product.sku}</p>
                 <p><strong>Antal:</strong> {product.quantity}</p>
                 <p><strong>Status:</strong> {product.status}</p>
