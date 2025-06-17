@@ -89,6 +89,7 @@ const EditImages = ({ product, setProduct }) => {
 
     try {
       const { file } = newSingleImage;
+      console.log(product.image)
       // Construct a new, unique path if no old path exists, or use the old one to overwrite
       let filePath = product.image?.original || `images/${product.brand}/${product.name}/main_imagez`; // Fallback path
       const storageRef = ref(storage, filePath);
@@ -99,11 +100,14 @@ const EditImages = ({ product, setProduct }) => {
       });
 
       const originalURL = await getDownloadURL(storageRef);
+    const newImageObject = { original: originalURL };
 
       // 2. Update product state with new URL (MongoDB update will happen when product is saved)
       setProduct(prevProduct => ({
         ...prevProduct,
-        image: {  original: originalURL } // Update with new URL
+        image: {  original: originalURL }, // Update with new URL
+        gallery: [newImageObject, ...(prevProduct.gallery || [])] // Lägg till först i galleriet
+
       }));
       setNewSingleImage(null); // Clear preview state
       console.log('Single image uploaded to Firebase and updated in state.');
