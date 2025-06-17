@@ -183,7 +183,14 @@ http://http://localhost:8088
           {products.map((product) => (
             <div className="product-horizontal-card" key={product._id}>
               <div className="product-horizontal-image">
-                <img src={product.image.thumbnail || '/placeholder.jpg'} alt={product.name} />
+                <img style={{width: "250px", height: "250px" }} src={product.image.original || '/placeholder.jpg'} alt={product.name} />
+                
+                   <span  style={{display: "flex", flexDirection: "row"}}>
+{product.gallery?.slice(1).map((image, index) => (
+ 
+    <img key={index} style={{width: "80px", height: "80px" }} src={image.original || '/placeholder.jpg'} alt={product.name} />
+ 
+))}               </span> 
               </div>
               <div className="product-horizontal-info">
                 <h3>{product.name}</h3>
