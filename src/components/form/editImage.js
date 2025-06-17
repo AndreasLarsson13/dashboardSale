@@ -90,7 +90,7 @@ const EditImages = ({ product, setProduct }) => {
     try {
       const { file } = newSingleImage;
       // Construct a new, unique path if no old path exists, or use the old one to overwrite
-      let filePath = product.image?.original || `images/${product.brand}/${product.name}/main_image.webp`; // Fallback path
+      let filePath = product.image?.original || `images/${product.brand}/${product.name}/main_imagez`; // Fallback path
       const storageRef = ref(storage, filePath);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -103,7 +103,7 @@ const EditImages = ({ product, setProduct }) => {
       // 2. Update product state with new URL (MongoDB update will happen when product is saved)
       setProduct(prevProduct => ({
         ...prevProduct,
-        image: { thumbnail: originalURL, original: originalURL } // Update with new URL
+        image: {  original: originalURL } // Update with new URL
       }));
       setNewSingleImage(null); // Clear preview state
       console.log('Single image uploaded to Firebase and updated in state.');
@@ -178,7 +178,7 @@ const EditImages = ({ product, setProduct }) => {
       const updatedGallery = [...product.gallery]; // Create a mutable copy
 
       // Update the specific image object in the copy
-      updatedGallery[index] = { original: newImageUrl, thumbnail: newImageUrl };
+      updatedGallery[index] = { original: newImageUrl };
 
       // 2. Update product state with the modified gallery (MongoDB update will happen when product is saved)
       setProduct(prevProduct => ({
