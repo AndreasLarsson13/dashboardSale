@@ -49,7 +49,7 @@ const ReviewProductsPage = () => {
     }
   }, [isAdmin]);
 /*   https://serverkundportal-dot-natbutiken.lm.r.appspot.com
-http://localhost:8080
+http://http://localhost:8088
  */  const fetchPendingProducts = async () => {
     try {
       const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/pendingProducts');
@@ -130,7 +130,7 @@ http://localhost:8080
     if (!confirmReject) return;
 
     try {
-/*       http://localhost:8080/
+/*      http://localhost:8088
  */      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/rejectproduct/`, {
         method: 'POST',
         headers: {

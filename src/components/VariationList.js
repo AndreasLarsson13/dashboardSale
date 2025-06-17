@@ -61,16 +61,18 @@ const ProductList = () => {
         return;
       }
 
-      const token = await user.getIdToken(); // Get the user's ID token
+      const token = await user.getIdToken(); // Get the user's ID tokenhttp://localhost:8088  https://serverkundportal-dot-natbutiken.lm.r.appspot.com
 
-      await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`, {
+      await axios.delete(`http://localhost:8088/variationer/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token in the header
         },
       });
 
       // Update the product list after deletion
+
       setProducts(products.filter((product) => product._id !== id));
+      alert('Produkten togs bort!');
     } catch (error) {
       setError('Error deleting the product');
     }
