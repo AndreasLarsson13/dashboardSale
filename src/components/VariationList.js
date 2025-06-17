@@ -63,7 +63,7 @@ const ProductList = () => {
 
       const token = await user.getIdToken(); // Get the user's ID tokenhttp://localhost:8088  https://serverkundportal-dot-natbutiken.lm.r.appspot.com
 
-      await axios.delete(`http://localhost:8088/variationer/${id}`, {
+      await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token in the header
         },
