@@ -52,6 +52,9 @@ const ProductList = () => {
   
 
   const handleDelete = async (id) => {
+     const confirmed = window.confirm('Är du säker på att du vill ta bort produkten?');
+
+  if (!confirmed) return;
     try {
       const auth = getAuth();
       const user = auth.currentUser;
@@ -71,6 +74,8 @@ const ProductList = () => {
 
       // Update the product list after deletion
       setProducts(products.filter((product) => product._id !== id));
+       alert('Produkten togs bort!');
+  
     } catch (error) {
       setError('Error deleting the product');
     }
