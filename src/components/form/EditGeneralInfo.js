@@ -223,7 +223,7 @@ const GeneralInfo = ({ product, setProduct }) => {
       const newData = { ...prev };
       if (checked) {
         if (!newData[country]) {
-          newData[country] = { shippingCost: '', deliveryTime: '' };
+          newData[country] = { shippingCost: 0, deliveryTime: '' };
         }
       } else {
         delete newData[country];

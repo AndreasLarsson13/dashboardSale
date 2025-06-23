@@ -319,7 +319,7 @@ console.log(selectedCategoryPath)
       const newData = { ...prev };
       if (checked) {
         if (!newData[country]) {
-          newData[country] = { shippingCost: '', deliveryTime: '', currency: shippingCurrency };
+          newData[country] = { shippingCost: 0, deliveryTime: '', currency: shippingCurrency };
         }
       } else {
         delete newData[country];
