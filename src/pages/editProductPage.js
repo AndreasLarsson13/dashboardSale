@@ -64,7 +64,7 @@ const EditProductPage = () => {
     setIsLoading(true);
     setError(null);
 
-    try {
+    try {//http://localhost:8088 https://serverkundportal-dot-natbutiken.lm.r.appspot.com
       const response = await axios.get(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`);
       const fetchedData = response.data;
 
@@ -188,7 +188,7 @@ const EditProductPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, product, {
+      const response = await axios.put(`http://localhost:8088/products/${id}`, product, {
         headers: { 'Content-Type': 'application/json' },
       });
 

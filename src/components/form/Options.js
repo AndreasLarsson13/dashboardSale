@@ -8,33 +8,26 @@ const VariationsDropdown = ({
   initialSelectedVariations,
   onVariationsUpdate,
   onVariationRemove = () => {},
-
 }) => {
-  const [selectedVariations, setSelectedVariations] = useState(initialSelectedVariations);
+  const [selectedVariations, setSelectedVariations] = useState([]);
   const [productVariations, setProductVariations] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-console.log(selectedVariations)
-  // Hämta variationer en gång vid mount
+
+  // Hämta alla variationer vid mount
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
     const fetchProductVariations = async () => {
-      setLoading(true);
-      const auth = getAuth();
-      const user = auth.currentUser;
-
-      if (!user) {
-        if (isMounted) {
-          setError('User not logged in');
-          setLoading(false);
-        }
-        return;
-      }
-
       try {
+        setLoading(true);
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (!user) throw new Error('User not logged in');
+
         const token = await user.getIdToken();
         const response = await axios.get(
           'https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products',
@@ -44,17 +37,14 @@ console.log(selectedVariations)
             signal: controller.signal,
           }
         );
+
         if (isMounted) {
           setProductVariations(response.data);
           setError(null);
         }
       } catch (err) {
         if (isMounted) {
-          if (axios.isCancel(err)) {
-            console.log('Fetch avbröts');
-          } else {
-            setError(err.message || 'Failed to fetch product variations');
-          }
+          setError(axios.isCancel(err) ? 'Avbröts' : err.message);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -69,34 +59,37 @@ console.log(selectedVariations)
     };
   }, []);
 
-  // Synca selectedVariations när productVariations, initialVariations eller product ändras
- 
-/*  useEffect(() => {
-  if (!productVariations.length) return;
+  // Synka initialSelectedVariations → selectedVariations när datan finns
+  useEffect(() => {
+    if (!productVariations.length) return;
 
-  const variationsToUse = initialSelectedVariations.length > 0
-    ? initialSelectedVariations
-    : (initialSelectedVariations?.options || []);
+    const variationsToUse = initialSelectedVariations?.length
+      ? initialSelectedVariations
+      : initialSelectedVariations?.options || [];
 
-  const resolved = variationsToUse.map((item) => {
-    const match = productVariations.find((p) => p._id === item.id);
-    if (!match) return null;
+    const resolved = variationsToUse.map((item) => {
+      const match = productVariations.find((p) => p._id === item._id || p._id === item.id);
+      if (!match) return null;
 
-    return {
-      ...match,
-      price: typeof item.price === 'object' ? item.price.value : item.price,
-    };
-  }).filter(Boolean);
+      return {
+        ...match,
+        price: typeof item.price === 'object' ? item.price.value ?? item.price : item.price,
+      };
+    }).filter(Boolean);
 
-  setSelectedVariations(resolved);
+    setSelectedVariations(resolved);
 
-  onVariationsUpdate(resolved.map((v) => ({
-    id: v._id,
-    price: { value: v.price, currency: 'SEK' },
-    product: true,
-  })));
-}, []); */
- 
+    if (typeof onVariationsUpdate === 'function') {
+      onVariationsUpdate(resolved.map((v) => ({
+        name: v.name,
+        sku: v.sku,
+        _id: v._id,
+        price: { value: v.price, currency: 'SEK' },
+        product: true,
+      })));
+    }
+  }, [initialSelectedVariations, productVariations]);
+
   // Hantera val i dropdown
   const handleVariationSelect = (e) => {
     const selectedId = e.target.value;
@@ -110,52 +103,51 @@ console.log(selectedVariations)
     const updated = [...selectedVariations, variation];
     setSelectedVariations(updated);
 
-    if (typeof onVariationsUpdate === 'function') {
-      onVariationsUpdate(updated.map((v) => ({
-        id: v._id,
-        price: { value: v.price, currency: 'SEK' },
-        product: true,
-      })));
-    }
+    onVariationsUpdate?.(updated.map((v) => ({
+      name: v.name,
+      sku: v.sku,
+      _id: v._id,
+      price: { value: v.price, currency: 'SEK' },
+      product: true,
+    })));
   };
 
   // Ta bort variation
- const handleRemove = (e,rawId) => {
-  e.preventDefault()
-  // Rensa bort eventuellt e.preventDefault – du vill inte ha event här
-  // Identifiera id-strängen, oavsett om rawId är ett objekt eller en sträng
-  const idToRemove = rawId && typeof rawId === 'object' && rawId._id
-    ? rawId._id
-    : rawId;
+ const handleRemove = (e, rawId) => {
+  e.preventDefault();
 
-  // Filtrera bort alla variationer vars _id eller id matchar
-  const filtered = selectedVariations.filter(v => {
-    // v._id är din primära nyckel, men om du har v.id i vissa fall, kolla det också
-    return v._id !== idToRemove && v.id !== idToRemove;
-  });
+  // Hämta ID att ta bort
+  const idToRemove = typeof rawId === 'object' ? rawId._id ?? rawId.id : rawId;
 
-  // Logga före/efter om du vill debugga
-  console.log('Före:', selectedVariations.map(v => v._id));
-  console.log('Efter:', filtered.map(v => v._id));
+  // Filtrera bort varianten som ska tas bort
+  const filtered = selectedVariations.filter(
+    (v) => v._id !== idToRemove && v.id !== idToRemove
+  );
 
-  // Uppdatera local state
+  // Uppdatera state
   setSelectedVariations(filtered);
 
-  // Bubblar upp via onVariationsUpdate, om funktionen finns
-  if (typeof onVariationsUpdate === 'function') {
-    onVariationsUpdate(
-      filtered.map(v => ({
-        id: v._id,
-        price: { value: v.price, currency: 'SEK' },
-        product: true,
-      }))
-    );
-  }
+  // Mappa till korrekt format direkt från det nya värdet
+  const mapped = filtered.map((v) => {
+    const value = v.price?.value?.value ?? v.price?.value ?? v.price;
+    const currency = v.price?.currency ?? 'SEK';
+    const dateChanged = v.price?.dateChanged ?? '';
 
-  // Bubblar upp remove-kallbacken
-  if (typeof onVariationRemove === 'function') {
-    onVariationRemove(idToRemove);
-  }
+    return {
+      name: v.name,
+      sku: v.sku,
+      _id: v._id,
+      price: {
+        value: { value, currency, dateChanged },
+        currency,
+      },
+      product: true,
+    };
+  });
+
+  // Skicka uppdaterade variationer till parent
+  onVariationsUpdate?.(mapped);
+  onVariationRemove?.(idToRemove);
 };
 
 
@@ -199,8 +191,8 @@ console.log(selectedVariations)
           <ul style={{ marginTop: 10 }}>
             {selectedVariations.map((v) => (
               <li key={v._id}>
-                {v.name || v.title || 'Namnlös'} ({JSON.stringify(v.price.value)} SEK){' '}
-                <button onClick={(e) => handleRemove(v)}>Ta bort</button>
+                {v.name || v.title || 'Namnlös'} ({/* {v.price?.value?.value ?? v.price} */} SEK){' '}
+                <button onClick={(e) => handleRemove(e, v)}>Ta bort</button>
               </li>
             ))}
           </ul>
