@@ -1,214 +1,63 @@
-import React, { useState } from 'react';
-import { getAuth } from 'firebase/auth'; // Import Firebase Auth to get the current user
-import GeneralInfo from '../components/form/GeneralInfo';
-import Description from '../components/form/Description';
-import VariationsDropdown from '../components/form/Variations';
-import OptionsDropdown from '../components/form/Options';
+// src/pages/AddProductPage.jsx
+import React, { useState, useMemo } from 'react'; // Added useMemo
+import { getAuth } from 'firebase/auth';
+import axios from 'axios';
 
-import Meta from '../components/form/Meta';
-import Images from '../components/form/Images';
-import RelatedProductsDropdown from '../components/form/Related'; // Ensure this import is correct
+import ProductForm from '../components/form/ProductForm';
 
 const AddProductPage = () => {
   const auth = getAuth();
-  const user = auth.currentUser; // Get the current logged-in user
+  const user = auth.currentUser;
 
-  const [product, setProduct] = useState({
-    name: '',
-    sku: '',
-    supplierArticleNumber: '',
-    price: {},
-    buying_price: {},
-    sale_price: {},
-    quantity: 0,
-    description: { se: '' },
-    variations: [],
-    meta: [],
-    image: { thumbnail: '', original: '' },
-    gallery: [],
-    brand: '',
-    featured: false,
-    category: [],
-     categoryPaths: [],
-   /*  countries: [], */
-    packagingInfo: { // Initialize packaging as an object with default numeric values
-     weightPack: 0,
-       lengthPack: 0,
-     widthPack: 0,
-     heightPack: 0,
-     enable: false,
-    },
-    vat: {
-      "SE" : 0.25,
-      "AX" : 0.255,
-      "FI" : 0.255
-    },
-    isProductOption: false,
-    relatedProducts: [], // Add related products state
-    createdDate: new Date().toISOString(),
-    priceUpdateDate: new Date().toISOString(),
-    searchKeywords: [],
-    compadibleWithProduct: [],
-    shippingCosts: { }, // Nytt fält
-    currency: "",
-    hideProductFromView: false,
-    shippingCurrency: 'EUR', // Nytt fält
-    productCountryOfOrigin: '',
-    campaigns: [],
-  });
+  const defaultProductStructure = useMemo(() => ({
+    name: '', sku: '', supplierArticleNumber: '',
+    price: { value: 0, currency: 'SEK', dateChanged: '' },
+    buying_price: { value: 0, currency: 'SEK', dateChanged: '' },
+    sale_price: { value: 0, currency: 'SEK', dateChanged: '' },
+    quantity: 0, description: { se: '' },
+    variations: [], options: [], meta: [],
+    image: { thumbnail: '', original: '' }, gallery: [],
+    brand: '', featured: false, category: [], categoryPaths: [],
+    productCountryOfOrigin: 'AX',
+    packaging: { weightPack: 0, lengthPack: 0, widthPack: 0, heightPack: 0, enable: false },
+    vat: { "SE" : 0.25, "AX" : 0.255, "FI" : 0.255 },
+    isProductOption: false, relatedProducts: [],
+    createdDate: new Date().toISOString(), priceUpdateDate: new Date().toISOString(),
+    searchKeywords: [], compadibleWithProduct: [], shippingCosts: { },
+    currency: "", hideProductFromView: false, shippingCurrency: 'EUR', campaigns: [],
+  }), []);
 
-  const [isSingleImageUploaded, setIsSingleImageUploaded] = useState(false);
+  const [product, setProduct] = useState(defaultProductStructure);
 
-  const handleCountryChange = (countries) => {
-    setProduct((prev) => ({
-      ...prev,
-      countries,
-    }));
-  };
-
-  const handleRelatedProductsUpdate = (updatedProducts) => {
-    setProduct((prev) => ({
-      ...prev,
-      relatedProducts: updatedProducts,
-    }));
-  };
-
-  const handleRelatedProductRemove = (productId) => {
-    setProduct((prev) => ({
-      ...prev,
-      relatedProducts: prev.relatedProducts.filter(product => product._id !== productId),
-    }));
-  };
-
-  const handleVariationsUpdate = (variations) => {
-    setProduct((prev) => ({
-      ...prev,
-      variations: variations.map((v) => (v.isNew ? v : v)),
-    }));
-  };
-
-   const handleOptionsUpdate = (variations) => {
-    setProduct((prev) => ({
-      ...prev,
-      options: variations.map((v) => (v.isNew ? v : v)),
-    }));
-  };
-
-
-  const handleImageLinkAdd = (variationId, link) => {
-    setProduct((prev) => {
-      const newGallery = [...prev.gallery];
-      if (newGallery.length > 0) {
-        const firstItem = newGallery[0];
-        if (!firstItem.extraColor) {
-          firstItem.extraColor = {};
-        }
-
-        firstItem.extraColor[variationId] = link;
-        newGallery[0] = firstItem;
-      }
-      return { ...prev, gallery: newGallery };
-    });
-  };
-
-  const handleSingleImageUpload = (image) => {
-    setProduct((prev) => ({
-      ...prev,
-      image,
-    }));
-    setIsSingleImageUploaded(true);
-  };
-
-  const handleGalleryImageAdd = (image) => {
-    const newImage = {
-      ...image,
-    };
-    setProduct((prev) => ({
-      ...prev,
-      gallery: [...prev.gallery, newImage],
-    }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
-
-    if (!user) {
-      alert('User is not logged in');
-      return;
-    }
-
-    product.uid = user.uid;
-    product.email = user.email;
-
-    if (!product.name || !product.brand) {
-      alert('Please fill in the name and brand before submitting.');
-      return;
-    }
-  /*   product.originalPriceCurrencyAndDate = {
-      originalPrice: product.price[product.currency].value,
-      originalCurrency: product.currency, // Use the latest currency
-      originalShippingPrice: product.shippingCosts,
-      dateOfPrice: new Date().toISOString().split('T')[0],
-    } */
-
-/*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
- */    try {
+    if (!user) { alert('User is not logged in'); return; }
+    const productToSubmit = { ...product, uid: user.uid, email: user.email };
+    if (!productToSubmit.name || !productToSubmit.brand) { alert('Please fill in the name and brand before submitting.'); return; }
+    try {
       const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/reviewProducts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(product), // Submit product data including countries and related products
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productToSubmit),
       });
       if (response.ok) {
-        alert('Produkten las till utan problem!');
+        alert('Produkten lades till utan problem!');
+        setProduct(defaultProductStructure);
       } else {
-        console.error('Failed to add product:', await response.text());
+        const errorText = await response.text(); console.error('Failed to add product:', errorText);
+        alert(`Kunde inte lägga till produkten. Fel: ${response.status} ${errorText || 'Okänt fel'}`);
       }
-    } catch (error) {
-      console.error('Error adding product:', error);
-    }
+    } catch (error) { console.error('Error adding product:', error); alert('Error adding product.'); }
   };
 
-  // Conditionally show the form or a message if the user is not logged in
+  if (!user) { return <div>Please log in to add products.</div>; }
+
   return (
-    <>
-      {user ? (
-        <form onSubmit={handleSubmit} className='form'>
-          <GeneralInfo product={product} setProduct={setProduct} onCountryChange={handleCountryChange} />
-          <Description product={product} setProduct={setProduct} />
-          <Images
-            product={product}
-            setProduct={setProduct}
-            onSingleImageUpload={handleSingleImageUpload}
-            onGalleryImageAdd={handleGalleryImageAdd}
-          />
-
- <OptionsDropdown
-      
-        onVariationsUpdate={handleOptionsUpdate}
-        initialSelectedVariations={product.options || []}
-      />  
-
-
-          <VariationsDropdown
-            onVariationsUpdate={handleVariationsUpdate}
-            onImageLinkAdd={handleImageLinkAdd}
-            isSingleImageUploaded={isSingleImageUploaded}
-            product={product}
-          />
-          <Meta product={product} setProduct={setProduct} />
-         {/*  <RelatedProductsDropdown
-            product={product}
-            onRelatedProductsUpdate={handleRelatedProductsUpdate}
-            onRelatedProductRemove={handleRelatedProductRemove}
-          /> */}
-          <button type="submit">Lägg till</button>
-        </form>
-      ) : (
-        <div>Please log in to add products.</div>
-      )}
-    </>
+    <ProductForm
+      product={product}
+      setProduct={setProduct}
+      onSubmit={handleSubmitAdd}
+      isEditing={false}
+      mode = 'add'
+    />
   );
 };
 
