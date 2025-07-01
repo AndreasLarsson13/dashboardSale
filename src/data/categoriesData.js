@@ -117,9 +117,8 @@ const categoriesData = {
           { label: "Kökskranar", value: "kokskranar" },
           { label: "Diskho", value: "diskho" },
           { label: "Tillbehör", value: "tillbehor" }
-        ],
+        ]
       },
-      ,
       {
         label: "Badrum",
         value: "badrum",
@@ -127,11 +126,115 @@ const categoriesData = {
           { label: "Tvättställskranar", value: "tvattstallskranar" },
           { label: "Badkarsblandare", value: "badkarsblandare" },
           { label: "Handfat", value: "handfat" },
-           { label: "badkar", value: "Badkar" }
+          { label: "badkar", value: "Badkar" }
+        ]
+      }
+    ],
+  },  
+   Fritid: {
+    label: "Fritid",
+    value: "fritid",
+    child: [
+      {
+        label: "Bastu",
+        value: "bastu",
+        child: [
+          { label: "Elektrisk Bastupriser", value: "elektiskt/bastupriser" },
+          { label: "Vedeldade Bastuspisar", value: "vedeldade/bastuspisar" },
+          { label: "Tillbehör", value: "tillbehor" },
+          { label: "Bastuinredning", value: "bastu-inredning" },
+          { label: "Bastustugor", value: "bastu-stugor" },
+        ],
+      },
+      {
+        label: "Fordon/ATV",
+        value: "forfon/atv",
+        child: [
+          { label: "ATV/UTV", value: "atv/utv" },
+          { label: "Snöskoter", value: "snoskoter" },
+          { label: "Elsparkcyklar", value: "elsparkcyklar" },
+          { label: "Elcyklar", value: "elcyklar" },
+          { label: "Cyklar", value: "cyklar" },
+          { label: "Mopeder", value: "mopeder" },
+          { label: "Mopedbilar", value: "mopedbilar" },
+        ],
+      },
+      {
+        label: "Båtar/Marin",
+        value: "batar/marin",
+        child: [
+          { label: "Plotter/Ekolod", value: "plotter/ekolod" },
+          { label: "Radar", value: "radar" },
+          { label: "Rodd båt", value: "roddbat" },
+          { label: "Jetskis", value: "jetskis" },
+          { label: "Bryggor", value: "bryggor" },
+          { label: "Flytvästar", value: "flytvastar" },
+        ],
+      },
+      {
+        label: "Fiske",
+        value: "fiske",
+        child: [
+          { label: "Fiskespön", value: "fiskespon" },
+          { label: "Fiskerullar", value: "fiskerulle" },
+          { label: "Fiskedrag", value: "fiskedrag" },
+          { label: "Ekolod", value: "ekolod" },
+          { label: "Trollingmotor", value: "trollingmotor" },
+          { label: "Fiskekläder", value: "fiskeklader" },
         ],
       },
     ],
-  },  
+  },
+  Sport: {
+    label: "Sport",
+    value: "sport",
+    child: [
+      {
+        label: "Golf",
+        value: "golf",
+        child: [
+          { label: "Golfbollar", value: "golfbollar" },
+          { label: "Golfklubbor", value: "golfklubbor" },
+          { label: "Utrustning", value: "utrustning" },
+          { label: "Golfkläder", value: "golfklader" },
+        ],
+      },
+      {
+        label: "Sportkläder",
+        value: "sportklader",
+        child: [
+          { label: "Träningskläder", value: "traningsklader" },
+          { label: "Golfkläder", value: "golfklader" },
+        ],
+      },
+      {
+        label: "Alpin",
+        value: "alpin",
+        child: [
+          { label: "Längdskidor", value: "langdskidor" },
+          { label: "Skidor", value: "skidor" },
+        ],
+      },
+      {
+        label: "Fotboll",
+        value: "fotboll",
+        child: [
+          { label: "Fotbollar", value: "fotbollar" },
+          { label: "Fotbollskläder", value: "fotbollsklader" },
+          { label: "Fotbollsskor", value: "fotbollskor" },
+        ],
+      },
+      {
+        label: "Hockey",
+        value: "hockey",
+        child: [
+          { label: "Hockeyutrustning", value: "hockeyutrustning" },
+          { label: "Skridskor", value: "skridskor" },
+          { label: "Klubbor", value: "klubbor" },
+        ],
+      },
+    ],
+  }
 };
 
 export default categoriesData;
