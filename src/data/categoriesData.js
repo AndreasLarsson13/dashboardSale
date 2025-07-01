@@ -1,6 +1,6 @@
 const categoriesData = {
   Hushall: {
-    label: "Hushåll",
+    label: "Hus & Hem",
     value: "hushall",
     child: [
       {
@@ -119,8 +119,19 @@ const categoriesData = {
           { label: "Tillbehör", value: "tillbehor" }
         ],
       },
+      ,
+      {
+        label: "Badrum",
+        value: "badrum",
+        child: [
+          { label: "Tvättställskranar", value: "tvattstallskranar" },
+          { label: "Badkarsblandare", value: "badkarsblandare" },
+          { label: "Handfat", value: "handfat" },
+           { label: "badkar", value: "Badkar" }
+        ],
+      },
     ],
-  },
+  },  
 };
 
 export default categoriesData;
