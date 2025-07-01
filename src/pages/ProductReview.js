@@ -157,7 +157,7 @@ const ReviewProductsPage = () => {
     if (!confirmDelete) return;
 
     try {//http://localhost:8088 https://serverkundportal-dot-natbutiken.lm.r.appspot.com/
-      const response = await fetch(`http://localhost:8088/productsInAdmin/${productId}`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/${productId}`, {
         method: 'DELETE',
       });
 
