@@ -48,9 +48,8 @@ const ReviewProductsPage = () => {
       fetchPendingProducts();
     }
   }, [isAdmin]);
-/*   https://serverkundportal-dot-natbutiken.lm.r.appspot.com
-http://http://localhost:8088
- */  const fetchPendingProducts = async () => {
+
+  const fetchPendingProducts = async () => {
     try {
       const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/pendingProducts');
       if (response.ok) {
@@ -97,7 +96,7 @@ http://http://localhost:8088
     if (!confirmApprove) return;
 
     setIsApproving(true);
-  
+
     try {
       const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addproducts', {
         method: 'POST',
@@ -108,7 +107,7 @@ http://http://localhost:8088
       });
 
       if (response.ok) {
-        alert('Produkten är godkännd och tillagd');
+        alert('Produkten är godkänd och tillagd');
         setProducts(products.filter((p) => p._id !== product._id));
       } else {
         console.error('Failed to approve product');
@@ -124,14 +123,13 @@ http://http://localhost:8088
     setShowRejectPopup(true);
     setSelectedProductId(productId);
   };
-  
+
   const submitReject = async () => {
     const confirmReject = window.confirm('Är du säker att du vill?');
     if (!confirmReject) return;
 
     try {
-/*      http://localhost:8088
- */      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/rejectproduct/`, {
+      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/rejectproduct/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,6 +150,26 @@ http://http://localhost:8088
     setShowRejectPopup(false);
     setRejectComment('');
     setSelectedProductId(null);
+  };
+
+  const handleDelete = async (productId) => {
+    const confirmDelete = window.confirm('Är du säker att du vill ta bort produkten permanent?');
+    if (!confirmDelete) return;
+
+    try {//http://localhost:8088 https://serverkundportal-dot-natbutiken.lm.r.appspot.com/
+      const response = await fetch(`http://localhost:8088/productsInAdmin/${productId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        alert('Produkten har tagits bort permanent');
+        setProducts(products.filter((p) => p._id !== productId));
+      } else {
+        console.error('Failed to delete product');
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
   };
 
   const closePopup = () => {
@@ -183,17 +201,16 @@ http://http://localhost:8088
           {products.map((product) => (
             <div className="product-horizontal-card" key={product._id}>
               <div className="product-horizontal-image">
-                <img style={{width: "250px", height: "250px" }} src={product.image.original || '/placeholder.jpg'} alt={product.name} />
-                
-                   <span  style={{display: "flex", flexDirection: "row"}}>
-{product.gallery?.slice(1).map((image, index) => (
- 
-    <img key={index} style={{width: "80px", height: "80px" }} src={image.original || '/placeholder.jpg'} alt={product.name} />
- 
-))}               </span> 
+                <img style={{ width: "250px", height: "250px" }} src={product.image.original || '/placeholder.jpg'} alt={product.name} />
+                <span style={{ display: "flex", flexDirection: "row" }}>
+                  {product.gallery?.slice(1).map((image, index) => (
+                    <img key={index} style={{ width: "80px", height: "80px" }} src={image.original || '/placeholder.jpg'} alt={product.name} />
+                  ))}
+                </span>
               </div>
               <div className="product-horizontal-info">
                 <h3>{product.name}</h3>
+                <p><strong>Företag:</strong> {product.companyName}</p>
                 <p><strong>Varumärke:</strong> {product.brand}</p>
                 <p><strong>Pris:</strong> {product.price.value} - Valuta: {product.price.currency}</p>
                 <p><strong>Försäljningspris:</strong> {product.sale_price.value} - Valuta: {product.price.currency}</p>
@@ -201,9 +218,10 @@ http://http://localhost:8088
                 <p><strong>Antal:</strong> {product.quantity}</p>
                 <p><strong>Status:</strong> {product.status}</p>
                 <span>
-  <strong>Beskrivning:</strong> 
-  <span dangerouslySetInnerHTML={{ __html: product.description?.se || 'No description available' }} />
-</span>                <p><strong>Packstorlek:</strong> {product.lengthPack} x {product.widthPack} x {product.heightPack} mm</p>
+                  <strong>Beskrivning:</strong>
+                  <span dangerouslySetInnerHTML={{ __html: product.description?.se || 'No description available' }} />
+                </span>
+                <p><strong>Packstorlek:</strong> {product.lengthPack} x {product.widthPack} x {product.heightPack} mm</p>
 
                 {differences[product._id] && (
                   <div className="product-differences">
@@ -226,12 +244,13 @@ http://http://localhost:8088
                   {isApproving ? 'Godkänns...' : 'Godkänn'}
                 </button>
                 <button className="reject-button" onClick={() => handleReject(product._id)}>Neka produkt</button>
+                <button className="delete-button" onClick={() => handleDelete(product._id)}>Ta bort permanent</button>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <p>Inga produkter till gransking</p>
+        <p>Inga produkter till granskning</p>
       )}
 
       {showRejectPopup && (
