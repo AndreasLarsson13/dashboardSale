@@ -1,7 +1,7 @@
 const categoriesData = {
   Hushall: {
     label: "Hus & Hem",
-    value: "hushall",
+    value: "husochhem",
     child: [
       {
         label: "Kaminer",
@@ -23,10 +23,6 @@ const categoriesData = {
           {
             label: "Gjutjärnskaminer",
             value: "gjutjarnskaminer",
-          },
-          {
-            label: "Tillbehor",
-            value: "tillbehor-kamin",
           }
         ],
       },
