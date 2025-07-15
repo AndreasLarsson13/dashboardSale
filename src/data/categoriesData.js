@@ -17,12 +17,23 @@ const categoriesData = {
             
           },
           {
-            label: "Eldstäder/Murspis",
-            value: "eldstader/murspis",
+            label: "Eldstäder/Murspisar",
+            value: "eldstader-murspisar",
           },
           {
             label: "Gjutjärnskaminer",
             value: "gjutjarnskaminer",
+          },
+          
+          {
+            label: "Skorstenar",
+            value: "skorstenar",
+          },
+          ,
+          
+          {
+            label: "Tillbehör",
+            value: "tillbehor",
           }
         ],
       },
@@ -30,11 +41,16 @@ const categoriesData = {
         label: "Värmepumpar",
         value: "varmepumpar",
         child: [
-          { label: "Luftvärmepumpar", value: "luftvarmepumpar" },
-          { label: "Frånluftvärmepump", value: "franluftvarmepump" },
-          { label: "Bergvärmepumpar", value: "bergvarmepumpar" },
-          { label: "Jordvärmepump", value: "jordvarmepump" },
-          { label: "AC", value: "AC" },
+          { label: "Luft-Luft", value: "luft-luft" },
+          { label: "Luft-Vatten", value: "luft-vatten" },
+          { label: "Frånluft", value: "franluft" },
+          { label: "Bergvärme", value: "bergvarme" },
+          { label: "Jordvärme", value: "jordvarme" },
+          { label: "AC/Kyla", value: "AC-kyla" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -44,11 +60,23 @@ const categoriesData = {
           { label: "FTX-Aggregat", value: "ftx-aggregat" },
           { label: "Mekanisk Ventilation", value: "mekaniskventilation" },
           { label: "Friflöde/Självdrag", value: "friflode-sjalvdrag" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
         label: "Golvvärme",
         value: "golvvarme",
+         child: [
+          { label: "El-Golvvärme", value: "el-golvvarme" },
+           { label: "Vattenburen Golvvärme", value: "vattenburen-golvvarme" },
+            {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
+           ]
       },
       {
         label: "VVS",
@@ -58,6 +86,10 @@ const categoriesData = {
           { label: "Handfat/Badkar", value: "handfat/badkar" },
           { label: "Spabad/Badtunnor", value: "spabad/badtunnor" },
           { label: "Toalstolar", value: "toastolar" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -67,6 +99,10 @@ const categoriesData = {
           { label: "Solsystem", value: "solsystem" },
           { label: "Batterier", value: "batterier" },
           { label: "Elbilsladdning", value: "elbilsladdning" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -75,6 +111,10 @@ const categoriesData = {
         child: [
           { label: "Fönster", value: "fonster" },
           { label: "Takstegar", value: "takstegar" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -86,6 +126,10 @@ const categoriesData = {
           { label: "Garderob/Förvaring", value: "garderob/forvaring" },
           { label: "Hallinredning", value: "hallinredning" },
           { label: "Vardagsrumsinredning", value: "vardagsrumsinrening" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -104,6 +148,10 @@ const categoriesData = {
           { label: "Mikrougn", value: "microugn" },
           { label: "Hällar", value: "hallar" },
           { label: "Ugnar", value: "ugnar" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -122,14 +170,18 @@ const categoriesData = {
           { label: "Tvättställskranar", value: "tvattstallskranar" },
           { label: "Badkarsblandare", value: "badkarsblandare" },
           { label: "Handfat", value: "handfat" },
-          { label: "badkar", value: "Badkar" }
+          { label: "badkar", value: "Badkar" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ]
       }
     ],
   },  
    Fritid: {
-    label: "Fritid",
-    value: "fritid",
+    label: "Fritid & Trädgård",
+    value: "fritid-tradgard",
     child: [
       {
         label: "Bastu",
@@ -140,6 +192,23 @@ const categoriesData = {
           { label: "Tillbehör", value: "tillbehor" },
           { label: "Bastuinredning", value: "bastu-inredning" },
           { label: "Bastustugor", value: "bastu-stugor" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
+        ],
+      },
+       {
+        label: "Trädgård & Utemiljö",
+        value: "tradgard-utemiljo",
+        
+        child: [
+          { label: "Spabad", value: "spabad" },
+          { label: "Badtunnor", value: "badtunnor" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -153,6 +222,10 @@ const categoriesData = {
           { label: "Cyklar", value: "cyklar" },
           { label: "Mopeder", value: "mopeder" },
           { label: "Mopedbilar", value: "mopedbilar" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -165,6 +238,10 @@ const categoriesData = {
           { label: "Jetskis", value: "jetskis" },
           { label: "Bryggor", value: "bryggor" },
           { label: "Flytvästar", value: "flytvastar" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -177,6 +254,10 @@ const categoriesData = {
           { label: "Ekolod", value: "ekolod" },
           { label: "Trollingmotor", value: "trollingmotor" },
           { label: "Fiskekläder", value: "fiskeklader" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
     ],
@@ -193,6 +274,10 @@ const categoriesData = {
           { label: "Golfklubbor", value: "golfklubbor" },
           { label: "Utrustning", value: "utrustning" },
           { label: "Golfkläder", value: "golfklader" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -201,6 +286,10 @@ const categoriesData = {
         child: [
           { label: "Träningskläder", value: "traningsklader" },
           { label: "Golfkläder", value: "golfklader" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -209,6 +298,10 @@ const categoriesData = {
         child: [
           { label: "Längdskidor", value: "langdskidor" },
           { label: "Skidor", value: "skidor" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -218,6 +311,10 @@ const categoriesData = {
           { label: "Fotbollar", value: "fotbollar" },
           { label: "Fotbollskläder", value: "fotbollsklader" },
           { label: "Fotbollsskor", value: "fotbollskor" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
       {
@@ -227,6 +324,10 @@ const categoriesData = {
           { label: "Hockeyutrustning", value: "hockeyutrustning" },
           { label: "Skridskor", value: "skridskor" },
           { label: "Klubbor", value: "klubbor" },
+           {
+            label: "Tillbehör",
+            value: "tillbehor",
+          }
         ],
       },
     ],

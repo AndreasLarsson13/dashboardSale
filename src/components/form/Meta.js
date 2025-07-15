@@ -24,7 +24,7 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
         { label: "Betong", value: "concrete" }, { label: "Titan", value: "titanium" },
         { label: "Matt Svart", value: "matte black" }, { label: "Krom", value: "chrome" },
         { label: "Mässing", value: "brass" }, { label: "Koppar", value: "copper" },
-        { label: "Brons", value: "bronze" }, { label: "Svart Krom", value: "black chrome" },
+        { label: "Brons", "value": "bronze" }, { label: "Svart Krom", value: "black chrome" },
         { label: "Honungsguld", value: "honey gold" }, { label: "Borstad Svart Krom", value: "brushed black chrome" },
         { label: "Borstad Honungsguld", value: "brushed honey gold" }, { label: "Borstad Nickel", value: "brushed nickel" },
         { label: "Ascot Grå", value: "ascot grey" }, { label: "Grafit", value: "graphite" },
@@ -147,13 +147,19 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
             return savedItem;
         });
 
-        setProduct(prev => ({
-            ...prev,
-            meta: [
-                ...prev.meta.filter(meta => meta.title !== 'TecnicalData'),
-                { title: 'TecnicalData', tecnical: dataToSave }
-            ]
-        }));
+        setProduct(prev => {
+            const updatedMeta = prev.meta.filter(meta => meta.title !== 'TecnicalData');
+            if (dataToSave.length > 0) {
+                return {
+                    ...prev,
+                    meta: [...updatedMeta, { title: 'TecnicalData', tecnical: dataToSave }]
+                };
+            }
+            return {
+                ...prev,
+                meta: updatedMeta // Remove TecnicalData object if the array is empty
+            };
+        });
     }, [technicalData, setProduct]);
 
 
@@ -173,13 +179,19 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
             return savedItem;
         });
 
-        setProduct(prev => ({
-            ...prev,
-            meta: [
-                ...prev.meta.filter(meta => meta.title !== 'TecnicalData'),
-                { title: 'TecnicalData', tecnical: dataToSave }
-            ]
-        }));
+        setProduct(prev => {
+            const updatedMeta = prev.meta.filter(meta => meta.title !== 'TecnicalData');
+            if (dataToSave.length > 0) {
+                return {
+                    ...prev,
+                    meta: [...updatedMeta, { title: 'TecnicalData', tecnical: dataToSave }]
+                };
+            }
+            return {
+                ...prev,
+                meta: updatedMeta // Remove TecnicalData object if the array is empty
+            };
+        });
     }, [technicalData, setProduct]);
 
 
@@ -228,13 +240,19 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
             return savedItem;
         });
 
-        setProduct(prev => ({
-            ...prev,
-            meta: [
-                ...prev.meta.filter(meta => meta.title !== 'PDF'),
-                { title: 'PDF', PDF: dataToSave }
-            ]
-        }));
+        setProduct(prev => {
+            const updatedMeta = prev.meta.filter(meta => meta.title !== 'PDF');
+            if (dataToSave.length > 0) {
+                return {
+                    ...prev,
+                    meta: [...updatedMeta, { title: 'PDF', PDF: dataToSave }]
+                };
+            }
+            return {
+                ...prev,
+                meta: updatedMeta // Remove PDF object if the array is empty
+            };
+        });
     }, [pdfData, mode, setProduct]);
 
 
@@ -255,13 +273,19 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
             return savedItem;
         });
 
-        setProduct(prev => ({
-            ...prev,
-            meta: [
-                ...prev.meta.filter(meta => meta.title !== 'PDF'),
-                { title: 'PDF', PDF: dataToSave }
-            ]
-        }));
+        setProduct(prev => {
+            const updatedMeta = prev.meta.filter(meta => meta.title !== 'PDF');
+            if (dataToSave.length > 0) {
+                return {
+                    ...prev,
+                    meta: [...updatedMeta, { title: 'PDF', PDF: dataToSave }]
+                };
+            }
+            return {
+                ...prev,
+                meta: updatedMeta // Remove PDF object if the array is empty
+            };
+        });
     }, [pdfData, setProduct, mode]);
 
 
@@ -292,13 +316,19 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
             return savedItem;
         });
 
-        setProduct(prev => ({
-            ...prev,
-            meta: [
-                ...prev.meta.filter(meta => meta.title !== 'TecnicalData'),
-                { title: 'TecnicalData', tecnical: dataToSave }
-            ]
-        }));
+        setProduct(prev => {
+            const updatedMeta = prev.meta.filter(meta => meta.title !== 'TecnicalData');
+            if (dataToSave.length > 0) {
+                return {
+                    ...prev,
+                    meta: [...updatedMeta, { title: 'TecnicalData', tecnical: dataToSave }]
+                };
+            }
+            return {
+                ...prev,
+                meta: updatedMeta
+            };
+        });
     }, [technicalData, setProduct]);
 
 
@@ -322,13 +352,19 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
             return savedItem;
         });
 
-        setProduct(prev => ({
-            ...prev,
-            meta: [
-                ...prev.meta.filter(meta => meta.title !== 'TecnicalData'),
-                { title: 'TecnicalData', tecnical: dataToSave }
-            ]
-        }));
+        setProduct(prev => {
+            const updatedMeta = prev.meta.filter(meta => meta.title !== 'TecnicalData');
+            if (dataToSave.length > 0) {
+                return {
+                    ...prev,
+                    meta: [...updatedMeta, { title: 'TecnicalData', tecnical: dataToSave }]
+                };
+            }
+            return {
+                ...prev,
+                meta: updatedMeta
+            };
+        });
     }, [technicalData, setProduct]);
 
     const isTechnicalDataCompleted =

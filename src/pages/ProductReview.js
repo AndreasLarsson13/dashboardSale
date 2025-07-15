@@ -156,21 +156,26 @@ const ReviewProductsPage = () => {
     const confirmDelete = window.confirm('Är du säker att du vill ta bort produkten permanent?');
     if (!confirmDelete) return;
 
-    try {//http://localhost:8088 https://serverkundportal-dot-natbutiken.lm.r.appspot.com/
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/${productId}`, {
-        method: 'DELETE',
-      });
+    try {
+        // The backend route '/products/:id' does not expect a collection name in the URL path.
+        // It will iterate through the predefined collections on the server side.
+        const response = await fetch(`http://localhost:8089/products/${productId}`, {
+            method: 'DELETE',
+        });
 
-      if (response.ok) {
-        alert('Produkten har tagits bort permanent');
-        setProducts(products.filter((p) => p._id !== productId));
-      } else {
-        console.error('Failed to delete product');
-      }
+        if (response.ok) {
+            alert('Produkten har tagits bort permanent');
+            setProducts(products.filter((p) => p._id !== productId));
+        } else {
+            const errorData = await response.json(); // Get error details from the server
+            console.error('Failed to delete product:', response.status, errorData);
+            alert(`Kunde inte ta bort produkten: ${errorData.error || response.statusText}`);
+        }
     } catch (error) {
-      console.error('Error deleting product:', error);
+        console.error('Fel vid borttagning av produkt:', error);
+        alert('Ett oväntat fel inträffade vid borttagning av produkten.');
     }
-  };
+};
 
   const closePopup = () => {
     setShowRejectPopup(false);
