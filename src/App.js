@@ -13,6 +13,7 @@ import PrivateRoute from './components/privateRoute'; // Import PrivateRoute
 import AdminRoute from './components/adminRoute'; // Import AdminRoute (new route for admins)
 import AddOptions from './pages/AddOptions'; // Import AdminRoute (new route for admins)
 import ListOptions from './pages/listOptions'; // Import AdminRoute (new route for admins)
+import OptionsListPage from './components/OptionList';
 import EditVariationPage from './pages/editProductVariationPage';
 
 function App() {
@@ -28,9 +29,9 @@ function App() {
           <Route path="/list-brand" element={<PrivateRoute element={<BrandList />} />} /> {/* Protected route */}
           {/* Admin-only route */}
           <Route path="/review-products" element={<AdminRoute element={<ReviewProductsPage />} />} /> {/* Protected route for admins */}
-
+            <Route path="/list-option" element={<PrivateRoute element={<OptionsListPage />} />} /> {/* Protected route */}
           <Route path="/add-option" element={<PrivateRoute element={<AddOptions />} />} /> {/* Protected route */}
-          <Route path="/list-option" element={<PrivateRoute element={<VariationListPage />} />} /> {/* Protected route */}
+          <Route path="/list-variations" element={<PrivateRoute element={<VariationListPage />} />} /> {/* Protected route */}
           <Route path="/edit-variations/:id" element={<PrivateRoute element={<EditVariationPage />} />} /> {/* Protected route */}
         </Routes>
       </Layout>

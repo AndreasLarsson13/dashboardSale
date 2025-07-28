@@ -51,13 +51,17 @@ const Sidebar = () => {
           <Link to="/add-product" style={{ color: 'white', textDecoration: 'none' }}>Lägg till produkt</Link>
         </li>
         
+ <li style={{ display: 'flex', gap: '17px', flexDirection: 'column' }}>
+          <Link to="/list-option" style={{ color: 'white', textDecoration: 'none' }}>Alla tillbehör</Link>
+        </li>
+
         <li style={{ display: 'flex', gap: '17px', flexDirection: 'column' }}>
           <Link to="/list-brand" style={{ color: 'white', textDecoration: 'none' }}>Alla varumärken</Link>
           <Link to="/add-brand" style={{ color: 'white', textDecoration: 'none' }}>Lägg till varumärken</Link>
         </li>
 
         <li style={{ display: 'flex', gap: '17px', flexDirection: 'column' }}>
-          <Link to="/list-option" style={{ color: 'white', textDecoration: 'none' }}>Alla variationer</Link>
+          <Link to="/list-variations" style={{ color: 'white', textDecoration: 'none' }}>Alla variationer</Link>
           <Link to="/add-option" style={{ color: 'white', textDecoration: 'none' }}>Lägg till variationer</Link>
         </li>
 

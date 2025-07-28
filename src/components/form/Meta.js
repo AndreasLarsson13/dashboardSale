@@ -46,6 +46,8 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
         { key: 'gasconsumption', value: { se: 'Gaskonsumtion', en: 'Gas consumption', fi: 'Kaasunkulutus' } },
         { key: 'preheatingtime', value: { se: 'Förvärmningstid', en: 'Preheating time', fi: 'Esilämmitysaika' } },
         { key: 'floor', value: { se: 'Bakyta', en: 'Back surface', fi: 'Takapinta' } },
+        { key: 'kyleffekt', value: { se: 'Kyleffekt', en: 'Cooling power', fi: 'Jäähdytysteho' } },
+{ key: 'varmeeffekt', value: { se: 'Värmeeffekt', en: 'Heating power', fi: 'Lämmitysteho' } },
         { key: 'custom', value: { se: 'Anpassad', en: 'Custom', fi: 'Mukautettu' } }
     ], []);
 

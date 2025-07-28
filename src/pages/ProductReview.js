@@ -98,7 +98,7 @@ const ReviewProductsPage = () => {
     setIsApproving(true);
 
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addproducts', {
+      const response = await fetch('http://localhost:8089/addproducts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

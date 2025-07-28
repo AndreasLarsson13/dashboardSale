@@ -8,7 +8,7 @@ import axios from 'axios';
 import SpecialShippingSelector from '../form/SpecialShippingSelector';
 import KeywordInput from './components/keyWordInput';
 import CompadibleWithProduct from './components/compadableWithProduct';
-
+import PriceCalculatorModal from './PriceCalculatorModal';
 import PackagingInfo from './components/packagingInfo';
 import LabeledInput from './components/FormElements/LabeledInput';
 import LabeledSelect from './components/FormElements/LabeledSelect';
@@ -78,6 +78,7 @@ console.log(selectedCategoryPath)
   const [currency, setCurrency] = useState(product.price?.currency || 'SEK');
   const [shippingCurrency, setShippingCurrency] = useState(product.shippingCurrency || 'SEK');
   const [specialShippingEnabled, setSpecialShippingEnabled] = useState(product.shippingSpecial?.enabled || false);
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false)
 
   const [sellInCountries, setSellInCountries] = useState(() => {
     const getNormalizedDeliveryTimeValue = (deliveryTimeData) => {
@@ -567,6 +568,27 @@ console.log(selectedCategoryPath)
               onChange={handleInputChange}
             />
 
+{/* Lägg till kalkylatorknappen här, kanske i en div tillsammans med inputen */}
+<div style={{ gridColumn: '1 / 4', display: 'flex', justifyContent: 'center', marginTop: '10px' }}> {/* Spänner över alla 3 kolumner */}
+    <button
+        onClick={() => setIsPriceModalOpen(true)}
+        style={{
+            padding: '10px 20px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '1em',
+            maxWidth: '300px', // Begränsa bredden
+            width: '100%',
+            margin: '0 auto', // Centrera knappen
+        }}
+    >
+        Öppna priskalkylator
+    </button>
+</div>
+
             <LabeledInput
               label="Inköpspris (ex moms)"
               name="buying_price"
@@ -744,7 +766,20 @@ console.log(selectedCategoryPath)
             keywords={searchKeywords}
             setKeywords={setSearchKeywords}
           />
+
+
+
+          {/* Priskalkylator Modal */}
+<PriceCalculatorModal
+    isOpen={isPriceModalOpen}
+    onClose={() => setIsPriceModalOpen(false)}
+    product={product}
+    setProduct={setProduct}
+    currentCurrency={currency} // Skicka med den valda valutan
+/>
         </div>
+
+        
       )}
     </div>
   );
