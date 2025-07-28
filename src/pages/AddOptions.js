@@ -199,7 +199,7 @@ const updatedProduct = {
 /*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
  */    
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addVariation`, {
+      const response = await fetch(`http://localhost:8089/UnderReviewVariation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ const updatedProduct = {
         body: JSON.stringify(updatedProduct), // Submit product data including countries and related products
       });
       if (response.ok) {
-        alert('Produkten las till utan problem!');
+        alert('Produkten las till utan problem, väntar på granskning!');
       } else {
         console.error('Failed to add product:', await response.text());
       }

@@ -51,7 +51,7 @@ const ReviewProductsPage = () => {
 
   const fetchPendingProducts = async () => {
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/pendingProducts');
+      const response = await fetch('http://localhost:8089/pendingProducts');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -92,7 +92,7 @@ const ReviewProductsPage = () => {
   };
 
   const handleApprove = async (product) => {
-    const confirmApprove = window.confirm('Are you sure you want to approve this product?');
+    const confirmApprove = window.confirm('Vill du godkänna produkten?');
     if (!confirmApprove) return;
 
     setIsApproving(true);
@@ -129,7 +129,7 @@ const ReviewProductsPage = () => {
     if (!confirmReject) return;
 
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/rejectproduct/`, {
+      const response = await fetch(`http://localhost:8089/rejectproduct/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ const ReviewProductsPage = () => {
       });
 
       if (response.ok) {
-        alert('Product rejected and comment added!');
+        alert('Produkten avvisades och en kommentar har lagts till!');
         setProducts(products.filter((p) => p._id !== selectedProductId));
       } else {
         console.error('Failed to reject product');

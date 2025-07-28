@@ -571,7 +571,8 @@ console.log(selectedCategoryPath)
 {/* Lägg till kalkylatorknappen här, kanske i en div tillsammans med inputen */}
 <div style={{ gridColumn: '1 / 4', display: 'flex', justifyContent: 'center', marginTop: '10px' }}> {/* Spänner över alla 3 kolumner */}
     <button
-        onClick={() => setIsPriceModalOpen(true)}
+        onClick={(e) =>   {e.preventDefault();
+ setIsPriceModalOpen(true)}}
         style={{
             padding: '10px 20px',
             backgroundColor: '#007bff',

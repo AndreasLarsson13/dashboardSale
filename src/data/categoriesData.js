@@ -83,8 +83,9 @@ const categoriesData = {
         value: "vvs",
         child: [
           { label: "Kranar", value: "kranar" },
-          { label: "Handfat/Badkar", value: "handfat/badkar" },
-          { label: "Spabad/Badtunnor", value: "spabad/badtunnor" },
+          { label: "Handfat", value: "handfat" },
+          { label: "Badkar", value: "badkar" },
+          
           { label: "Toalstolar", value: "toastolar" },
            {
             label: "Tillbehör",

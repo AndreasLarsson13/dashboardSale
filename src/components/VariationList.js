@@ -27,7 +27,7 @@ const ProductList = () => {
         const token = await user.getIdToken();
   
         // Make the GET request to fetch products
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer', {
+        const response = await axios.get('http://localhost:8089/variationer', {
           headers: {
             Authorization: `Bearer ${token}`, // Include token in Authorization header
           },
@@ -66,7 +66,7 @@ const ProductList = () => {
 
       const token = await user.getIdToken(); // Get the user's ID tokenhttp://localhost:8088  https://serverkundportal-dot-natbutiken.lm.r.appspot.com
 
-      await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`, {
+      await axios.delete(`http://localhost:8089/variationer/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token in the header
         },
