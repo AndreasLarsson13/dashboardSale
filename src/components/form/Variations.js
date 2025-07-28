@@ -88,9 +88,9 @@ const VariationsDropdown = ({
       if (brand) params.append('brand', brand);
       if (category && !search) params.append('category', category); 
       if (search) params.append('search', search);
-//https://serverkundportal-dot-natbutiken.lm.r.appspot.com/ http://localhost:8088/
+
       try {
-        const res = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions?${params.toString()}`);
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/productsoptions?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch variations');
         const data = await res.json();
         if (isMounted) {
@@ -120,7 +120,7 @@ const VariationsDropdown = ({
       try {
         const token = await user.getIdToken();
 
-        const brandsRes = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
+        const brandsRes = await axios.get(`${process.env.REACT_APP_API_URL}/brands`, {
           headers: {
             Authorization: `Bearer ${token}`
           },
@@ -129,8 +129,8 @@ const VariationsDropdown = ({
         if (isMounted) {
           setAvailableBrands(brandsRes.data);
         }
-//https://serverkundportal-dot-natbutiken.lm.r.appspot.com/ http://localhost:8088
-        const categoriesRes = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/categories');
+
+        const categoriesRes = await fetch(`${process.env.REACT_APP_API_URL}/categories`);
         if (!categoriesRes.ok) throw new Error('Failed to fetch categories');
         const categoriesData = await categoriesRes.json();
         if (isMounted) {

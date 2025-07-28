@@ -20,7 +20,7 @@ const SpecialShippingSelector = ({ value = [], onChange }) => {
       try {
         const token = await user.getIdToken();
         const response = await axios.get(
-          'https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products',
+          `${process.env.REACT_APP_API_URL}/products`,
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { uid: user.uid, uidEmail: user.email },

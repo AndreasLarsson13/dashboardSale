@@ -9,7 +9,7 @@ const RelatedProductsDropdown = ({ onRelatedProductsUpdate, onRelatedProductRemo
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/products`);
         const data = await response.json();
         setProductOptions(data);
       } catch (error) {

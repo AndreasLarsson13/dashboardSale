@@ -26,8 +26,8 @@ const ProductList = () => {
         // Get Firebase ID token
         const token = await user.getIdToken();
   
-        // Make the GET request to fetch products http://localhost:8088   https://serverkundportal-dot-natbutiken.lm.r.appspot.com
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products', {
+        // Make the GET request to fetch products 
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/products`, {
           headers: {
             Authorization: `Bearer ${token}`, // Include token in Authorization header
           },
@@ -66,7 +66,7 @@ const ProductList = () => {
 
       const token = await user.getIdToken(); // Get the user's ID token
 
-      await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token in the header
         },

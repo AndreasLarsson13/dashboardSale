@@ -51,7 +51,7 @@ const ReviewProductsPage = () => {
 
   const fetchPendingProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8089/pendingProducts');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/pendingProducts`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -67,7 +67,7 @@ const ReviewProductsPage = () => {
   const compareProduct = async (product) => {
     setIsComparing(true);
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/compareProduct', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/compareProduct`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const ReviewProductsPage = () => {
     setIsApproving(true);
 
     try {
-      const response = await fetch('http://localhost:8089/addproducts', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/addproducts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const ReviewProductsPage = () => {
     if (!confirmReject) return;
 
     try {
-      const response = await fetch(`http://localhost:8089/rejectproduct/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/rejectproduct/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ const ReviewProductsPage = () => {
     try {
         // The backend route '/products/:id' does not expect a collection name in the URL path.
         // It will iterate through the predefined collections on the server side.
-        const response = await fetch(`http://localhost:8089/products/${productId}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/products/${productId}`, {
             method: 'DELETE',
         });
 

@@ -172,7 +172,7 @@ const GeneralInfo = ({ product, setProduct }) => {
       }
       try {
         const token = await user.getIdToken();
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/brands`, {
           headers: {
             Authorization: `Bearer ${token}`
           },

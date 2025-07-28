@@ -18,7 +18,7 @@ const EditVariations = ({ onVariationsUpdate, onImageLinkAdd, onVariationRemove,
   useEffect(() => {
     const fetchVariations = async () => {
       try {
-        const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/productsoptions`);
         const data = await response.json();
         setVariationOptions(data);
       } catch (error) {

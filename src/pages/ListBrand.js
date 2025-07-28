@@ -31,7 +31,7 @@ const ListBrandPage = () => {
         const tokenResult = await user.getIdTokenResult();
         setIsAdmin(tokenResult.claims.admin || false);
 
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/brands`, {
           params: { uid: user.uid, uidEmail: user.email },
         });
 
@@ -59,10 +59,26 @@ const ListBrandPage = () => {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = maxSize;
-        canvas.height = maxSize;
 
-        ctx.drawImage(img, 0, 0, maxSize, maxSize);
+        // Calculate aspect ratio to resize properly within maxSize box
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob((blob) => {
           resolve(blob);
@@ -87,7 +103,7 @@ const ListBrandPage = () => {
     }));
 
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/updatebrands', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/updatebrands`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +135,7 @@ const ListBrandPage = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/deletebrand/${brandId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}deletebrand/${brandId}`, {
         method: 'DELETE',
       });
 
@@ -235,6 +251,18 @@ const ListBrandPage = () => {
     setEditForm({ name: '', slug: '', image: { thumbnail: '', original: '' } });
   };
 
+  // Helper function to get card background color based on brand status
+  const getCardBackgroundColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return '#fff9c4'; // light yellow
+      case 'rejected':
+        return '#ffcdd2'; // light red
+      default:
+        return 'white'; // default background
+    }
+  };
+
   return (
     <div>
       <h2>Varumärken</h2>
@@ -245,7 +273,13 @@ const ListBrandPage = () => {
         <ul style={ brands.length > 0 ? {display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" } : {gridTemplateColumns: "1fr"}}>
           {brands.length > 0 ? (
             brands.map((brand) => (
-              <li key={brand._id} style={styles.card}>
+              <li
+                key={brand._id}
+                style={{
+                  ...styles.card,
+                  backgroundColor: getCardBackgroundColor(brand.status),
+                }}
+              >
                 {editingBrand === brand._id ? (
                   <form onSubmit={handleSubmitEdit} style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
                     <div>
@@ -280,7 +314,7 @@ const ListBrandPage = () => {
                   </form>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: "space-between" }}>
-                    <h3>{brand.name}</h3>
+                    <h3>{brand.name} {brand.status === "pending" && "- Väntar på granskning"}</h3>
                     <img
                       src={brand.image.thumbnail}
                       alt={brand.name}

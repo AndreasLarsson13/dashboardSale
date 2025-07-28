@@ -27,12 +27,12 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
       }
       try {
         const token = await user.getIdToken();
-        const brandsRes = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/brands', {
+        const brandsRes = await axios.get(`${process.env.REACT_APP_API_URL}/brands`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setAvailableBrands(brandsRes.data);
-//localhosthttp://localhost:8088
-        const categoriesRes = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/categories');
+
+        const categoriesRes = await fetch(`${process.env.REACT_APP_API_URL}/categories`);
         const categoriesData = await categoriesRes.json();
         setAvailableCategories(categoriesData);
 
@@ -55,10 +55,10 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
     }
     
     params.append('type', type);
-//https://serverkundportal-dot-natbutiken.lm.r.appspot.com/ http://localhost:8088
+
     const token = await user.getIdToken();
     const response = await axios.get(
-        `https://serverkundportal-dot-natbutiken.lm.r.appspot.com/productsoptions?${params.toString()}`,
+        `${process.env.REACT_APP_API_URL}/productsoptions?${params.toString()}`,
         {
             headers: { Authorization: `Bearer ${token}` },
             params: { uid: user.uid, uidEmail: user.email },

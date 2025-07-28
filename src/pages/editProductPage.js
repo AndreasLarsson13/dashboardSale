@@ -38,7 +38,7 @@ const EditProductPage = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`);
         const fetchedData = response.data;
         const newProduct = {
           ...defaultProductStructure, ...fetchedData,
@@ -70,8 +70,8 @@ const EditProductPage = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     if (!user) { alert('Användaren är inte inloggad.'); return; }
-    try { //https://serverkundportal-dot-natbutiken.lm.r.appspot.com/ http://localhost:8088
-      const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/products/${id}`, product, {
+    try { 
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/products/${id}`, product, {
         headers: { 'Content-Type': 'application/json' },
         params: { uid: user.uid, uidEmail: user.email },
       });

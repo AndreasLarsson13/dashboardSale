@@ -150,7 +150,7 @@ const AddBrandPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addBrand', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/underReviewBrand`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ const AddBrandPage = () => {
       });
 console.log(response)
       if (response.ok) {
-        setMessage('Brand added successfully!');
+        setMessage('Brand added successfully, wiating for confirm!');
         setBrand({ name: '', slug: '', image: { thumbnail: '', original: '' } }); // Reset the form
       } else {
         setMessage('Varumärket las till!.');

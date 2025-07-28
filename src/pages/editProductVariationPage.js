@@ -86,7 +86,7 @@ const handleInputChange = (e) => {
     setError(null);
 
     try {
-      const response = await axios.get(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/variationer/${id}`);
       const fetchedData = response.data;
 
       // Förbered alla fält
@@ -209,7 +209,7 @@ const handleInputChange = (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer/${id}`, product, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/variationer/${id}`, product, {
         headers: { 'Content-Type': 'application/json' },
       });
 

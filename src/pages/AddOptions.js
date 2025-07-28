@@ -199,7 +199,7 @@ const updatedProduct = {
 /*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
  */    
     try {
-      const response = await fetch(`http://localhost:8089/UnderReviewVariation`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/UnderReviewVariation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

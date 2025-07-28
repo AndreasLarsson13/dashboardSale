@@ -35,7 +35,7 @@ const AddProductPage = () => {
     const productToSubmit = { ...product, uid: user.uid, email: user.email };
     if (!productToSubmit.name || !productToSubmit.brand) { alert('Please fill in the name and brand before submitting.'); return; }
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/reviewProducts`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/reviewProducts`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productToSubmit),
       });
       if (response.ok) {

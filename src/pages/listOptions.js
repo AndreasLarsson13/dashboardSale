@@ -49,7 +49,7 @@ const ListAccessoriesPage = () => {
       try {
         const token = await user.getIdToken(); // Få användarens ID-token https://serverkundportal-dot-natbutiken.lm.r.appspot.com
       
-        const response = await axios.get('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/variationer', {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/variationer`, {
           headers: {
             Authorization: `Bearer ${token}`, // Skicka token i header
           },
@@ -76,7 +76,7 @@ const ListAccessoriesPage = () => {
     const confirmDelete = window.confirm('Are you sure you want to delete this accessory?');
     if (!confirmDelete) return;
     try {
-      const response = await axios.delete(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/deleteAccessory/${accessoryId}`);
+      const response = await axios.delete(`${process.env.REACT_APP_API_URL}/deleteAccessory/${accessoryId}`);
       if (response.status === 200) {
         setAccessories(accessories.filter((accessory) => accessory._id !== accessoryId));
         setMessage('Accessory deleted successfully.');
@@ -134,7 +134,7 @@ const ListAccessoriesPage = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/${editingAccessory}`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/${editingAccessory}`, {
         namn: editForm.namn,
         price: editForm.price,
         color: editForm.color,
