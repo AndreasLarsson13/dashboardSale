@@ -164,7 +164,7 @@ const ReviewProductsPage = () => {
         });
 
         if (response.ok) {
-            alert('Produkten har tagits bort permanent');
+            
             setProducts(products.filter((p) => p._id !== productId));
         } else {
             const errorData = await response.json(); // Get error details from the server
@@ -200,7 +200,7 @@ const ReviewProductsPage = () => {
 
   return (
     <div className="review-products-page">
-      <h2>Produkter till granskning</h2>
+      <h2>Produkter/Varumärken till granskning</h2>
       {products.length > 0 ? (
         <div className="product-list">
           {products.map((product) => (
@@ -213,38 +213,48 @@ const ReviewProductsPage = () => {
                   ))}
                 </span>
               </div>
-              <div className="product-horizontal-info">
-                <h3>{product.name}</h3>
-                <p><strong>Företag:</strong> {product.companyName}</p>
-                <p><strong>Varumärke:</strong> {product.brand}</p>
-                <p><strong>Pris:</strong> {product.price.value} - Valuta: {product.price.currency}</p>
-                <p><strong>Försäljningspris:</strong> {product.sale_price.value} - Valuta: {product.price.currency}</p>
-                <p><strong>SKU:</strong> {product.sku}</p>
-                <p><strong>Antal:</strong> {product.quantity}</p>
-                <p><strong>Status:</strong> {product.status}</p>
-                <span>
-                  <strong>Beskrivning:</strong>
-                  <span dangerouslySetInnerHTML={{ __html: product.description?.se || 'No description available' }} />
-                </span>
-                <p><strong>Packstorlek:</strong> {product.lengthPack} x {product.widthPack} x {product.heightPack} mm</p>
+            {product.type === 'brand' ? (
+  <div className="product-horizontal-info">
+    <h3>{product.name} - Varumärke</h3>
+    <p><strong>Företag:</strong> {product.companyName}</p>
+    <p><strong>Varumärke:</strong> {product.name}</p>
+    {/* Lägg till fler fält för brand om du vill */}
+  </div>
+) : (
+  <div className="product-horizontal-info">
+    <h3>{product.name}</h3>
+    <p><strong>Företag:</strong> {product.companyName}</p>
+    <p><strong>Varumärke:</strong> {product.brand}</p>
+    <p><strong>Pris:</strong> {product.price.value} - Valuta: {product.price.currency}</p>
+    <p><strong>Försäljningspris:</strong> {product.sale_price.value} - Valuta: {product.price.currency}</p>
+    <p><strong>SKU:</strong> {product.sku}</p>
+    <p><strong>Antal:</strong> {product.quantity}</p>
+    <p><strong>Status:</strong> {product.status}</p>
+    <span>
+      <strong>Beskrivning:</strong>
+      <span dangerouslySetInnerHTML={{ __html: product.description?.se || 'No description available' }} />
+    </span>
+    <p><strong>Packstorlek:</strong> {product.lengthPack} x {product.widthPack} x {product.heightPack} mm</p>
 
-                {differences[product._id] && (
-                  <div className="product-differences">
-                    <h4>Skillnader:</h4>
-                    {Object.keys(differences[product._id]).map((field) =>
-                      getComparisonField(
-                        field,
-                        differences[product._id][field].oldValue,
-                        differences[product._id][field].newValue
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
+    {differences[product._id] && (
+      <div className="product-differences">
+        <h4>Skillnader:</h4>
+        {Object.keys(differences[product._id]).map((field) =>
+          getComparisonField(
+            field,
+            differences[product._id][field].oldValue,
+            differences[product._id][field].newValue
+          )
+        )}
+      </div>
+    )}
+  </div>
+)}
+
               <div className="product-horizontal-actions">
-                <button className="compare-button" onClick={() => compareProduct(product)} disabled={isComparing}>
+              {/*   <button className="compare-button" onClick={() => compareProduct(product)} disabled={isComparing}>
                   {isComparing ? 'Jämför...' : 'Jämför med tidigare'}
-                </button>
+                </button> */}
                 <button className="approve-button" onClick={() => handleApprove(product)} disabled={isApproving}>
                   {isApproving ? 'Godkänns...' : 'Godkänn'}
                 </button>
