@@ -37,7 +37,6 @@ const AddAccessoryPage = () => {
 
 
 
-
 const [product, setProduct] = useState({
     name: '',
     sku: '',
@@ -175,6 +174,9 @@ console.log(accessory)
   }; */
 
   const handleSubmitDetailed = async (e) => {
+
+      const auth = getAuth();
+        const user = auth.currentUser;
     e.preventDefault();
 
 const updatedProduct = {
@@ -185,7 +187,7 @@ const updatedProduct = {
       meta: accessory.meta,
     },
     uid: user.uid, 
-    email: user.emai
+    email: user.email
   };
 
 
