@@ -141,6 +141,10 @@ console.log(accessory)
     accessoryToSubmit.uid = user.uid;
     accessoryToSubmit.email = user.email;
 
+"companyName": "Hus & Fritidscenter Åland AB",
+"uid": "4Q9eLR64gsbB76TvJCCOJxFp7783",
+  "email": "info@hfc.ax",
+
     setIsSubmitting(true);
     try {
       const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addOptions', {
@@ -180,6 +184,8 @@ const updatedProduct = {
       color: accessory.color,
       meta: accessory.meta,
     },
+    uid: user.uid, 
+    email: user.emai
   };
 
 
