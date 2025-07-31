@@ -440,7 +440,7 @@ console.log(selectedCategoryPath)
     (categoryPaths.length > 0 && categoryPaths.some(path => path.length > 0 && path[0] !== '')) && // Kontrollera att minst en väg är vald
     currency &&
     product.name && product.name.trim() !== '' &&
-    product.sku && product.sku.trim() !== '' &&
+   /*  product.sku && product.sku.trim() !== '' &&  */ // not marked as required 31/7 
     product.brand && product.brand.trim() !== '' &&
     product.price?.value !== undefined && Number.isFinite(product.price.value) && product.price.value >= 0 &&
     product.sale_price?.value !== undefined && Number.isFinite(product.sale_price.value) && product.sale_price.value >= 0 &&
@@ -539,8 +539,7 @@ console.log(selectedCategoryPath)
               />
             </div>
 
-            <LabeledInput label="SKU" name="sku" value={product.sku || ''} onChange={handleInputChange} required />
-
+<LabeledInput label="SKU" name="sku" value={product.sku || ''} onChange={handleInputChange} /> {/* Removed required 31/7 */}
             <LabeledInput
               label="Rabbaterat pris (ex moms)"
               name="sale_price"
@@ -568,27 +567,7 @@ console.log(selectedCategoryPath)
               onChange={handleInputChange}
             />
 
-{/* Lägg till kalkylatorknappen här, kanske i en div tillsammans med inputen */}
-<div style={{ gridColumn: '1 / 4', display: 'flex', justifyContent: 'center', marginTop: '10px' }}> {/* Spänner över alla 3 kolumner */}
-    <button
-        onClick={(e) =>   {e.preventDefault();
- setIsPriceModalOpen(true)}}
-        style={{
-            padding: '10px 20px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '1em',
-            maxWidth: '300px', // Begränsa bredden
-            width: '100%',
-            margin: '0 auto', // Centrera knappen
-        }}
-    >
-        Öppna priskalkylator
-    </button>
-</div>
+
 
             <LabeledInput
               label="Inköpspris (ex moms)"

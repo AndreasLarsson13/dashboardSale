@@ -62,6 +62,8 @@ const EditProductPage = () => {
     },
     isProductOption: false,
     hideProductFromView: false,
+        variationGroup: { se: '', fi: '', en: '' }, // Här är din variationGroup
+
   };
 
   const [product, setProduct] = useState(defaultProductStructure);
@@ -105,7 +107,11 @@ const handleInputChange = (e) => {
         categoryPaths: Array.isArray(fetchedData.categoryPaths) ? fetchedData.categoryPaths : [],
         gallery: Array.isArray(fetchedData.gallery) ? fetchedData.gallery : [],
         variations: Array.isArray(fetchedData.variations) ? fetchedData.variations : [],
-        options: Array.isArray(fetchedData.options) ? fetchedData.options : []
+        options: Array.isArray(fetchedData.options) ? fetchedData.options : [],
+  variationGroup: {
+            ...defaultProductStructure.variationGroup,
+            ...(fetchedData.variationGroup || {})
+          }
       };
 
       // Jämför om något faktiskt förändrats (framför allt .options)
@@ -126,23 +132,15 @@ const handleInputChange = (e) => {
   fetchProductData();
 }, [id]);
 
-
+ // --- Hanterare för VariationsDropdown (för product.variations) ---
+  const handleVariationsUpdate = useCallback((variations) => {
+    setProduct((prev) => ({
+      ...prev,
+      variations: variations.map((v) => ({ ...v, isNew: undefined })),
+    }));
+  }, []);
   // --- Hanterare för VariationsDropdown (för product.variations) ---
-  const handleVariationsUpdate = useCallback((variations) => {
-    // VIKTIGT: Jämför om listan faktiskt har ändrats för att undvika oändlig loop
-    // Skapa en sorterad sträng av ID:n för en stabil jämförelse
-    const currentVariationIds = product.variations.map(v => v.id).sort().join(',');
-    const newVariationIds = variations.map(v => v.id).sort().join(',');
-
-    if (currentVariationIds !== newVariationIds) {
-      setProduct((prev) => ({
-        ...prev,
-        // Se till att variationer är rena objekt utan 'isNew' flaggor vid uppdatering
-        variations: variations.map((v) => ({ ...v, isNew: undefined })),
-      }));
-    }
-  }, [product.variations]); // Beroende på product.variations för jämförelse
-
+  
   // Hanterare för att lägga till/ändra bildlänk för en variation
   const handleImageLinkAdd = useCallback((variationId, link) => {
     setProduct((prev) => {
@@ -176,6 +174,20 @@ const handleInputChange = (e) => {
       return { ...prev, gallery: newGallery };
     });
   }, []);
+
+
+ // Hanterare för att uppdatera variationGroup-objektet
+  // Den tar event-objektet (e) och språkkoden (lang, t.ex. 'se', 'fi', 'en')
+  const handleVariationGroupChange = useCallback((e, lang) => {
+    const { value } = e.target; // Hämta värdet från inputfältet
+    setProduct((prevProduct) => ({
+      ...prevProduct, // Behåll befintliga produktdata
+      variationGroup: {
+        ...prevProduct.variationGroup, // Behåll befintliga översättningar
+        [lang]: value, // Uppdatera specifikt språkvärde
+      },
+    }));
+  }, []);
 
   // Hanterare när en variation tas bort
   const handleVariationRemove = useCallback((variationId) => {
@@ -240,13 +252,42 @@ const handleInputChange = (e) => {
   // --- Rendering av formuläret ---
   return (
     <form onSubmit={handleSubmit} className="form-container">
-      <h2>Redigera Produkt: {product.name}</h2>
+      <h2>Redigera Variation: {product.name} zzz</h2>
 
-            <VariationGroup
-  accessory={accessory}
-  onChange={handleInputChange}
-  message={message}
-/>
+       
+      <div className="form-section">
+        <h3>Gruppnamn för variationer (översättningar)</h3>
+        <div className="form-field">
+          <label htmlFor="variationGroup_se">Svenska:</label>
+          <input
+            type="text"
+            id="variationGroup_se"
+            value={product.variationGroup.se || ''} 
+            onChange={(e) => handleVariationGroupChange(e, 'se')} 
+            placeholder="T.ex. Färg"
+          />
+        </div>
+        <div className="form-field">
+          <label htmlFor="variationGroup_fi">Finska:</label>
+          <input
+            type="text"
+            id="variationGroup_fi"
+            value={product.variationGroup.fi || ''}
+            onChange={(e) => handleVariationGroupChange(e, 'fi')} 
+            placeholder="Esim. Väri"
+          />
+        </div>
+        <div className="form-field">
+          <label htmlFor="variationGroup_en">Engelska:</label>
+          <input
+            type="text"
+            id="variationGroup_en"
+            value={product.variationGroup.en || ''} 
+            onChange={(e) => handleVariationGroupChange(e, 'en')} 
+            placeholder="E.g. Color"
+          />
+        </div>
+      </div>
 
       {/* GeneralInfo - Huvudinformation */}
       <GeneralInfo product={product} setProduct={setProduct} />

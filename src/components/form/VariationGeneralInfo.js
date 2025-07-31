@@ -439,7 +439,7 @@ console.log(selectedCategoryPath)
     (categoryPaths.length > 0 && categoryPaths.some(path => path.length > 0 && path[0] !== '')) && // Kontrollera att minst en väg är vald
     currency &&
     product.name && product.name.trim() !== '' &&
-    product.sku && product.sku.trim() !== '' &&
+   /*  product.sku && product.sku.trim() !== '' &&  */ // not marked as required 31/7 
     product.brand && product.brand.trim() !== '' &&
     product.price?.value !== undefined && Number.isFinite(product.price.value) && product.price.value >= 0 &&
     product.sale_price?.value !== undefined && Number.isFinite(product.sale_price.value) && product.sale_price.value >= 0 &&

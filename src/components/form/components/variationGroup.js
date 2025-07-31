@@ -11,15 +11,16 @@ const variationOptions = {
 };
 
 const VariationSelector = ({ accessory, onChange, message }) => {
+  console.log(accessory)
   return (
     <div>
-      <h2>Lägg till variation</h2>
+  {/*     <h2>Lägg till variation</h2> */}
       {message && <p>{message}</p>}
 
       <div style={{ display: 'flex', gap: '80px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-            <label htmlFor="type">Välj tillbehör (Gruppnamn för kunden):</label>
+            <label htmlFor="type">Välj tillbehör (Grupspnamn för kunden):</label>
             <select
               name="type"
               id="type"
