@@ -34,6 +34,12 @@ const AddProductPage = () => {
     if (!user) { alert('User is not logged in'); return; }
     const productToSubmit = { ...product, uid: user.uid, email: user.email };
     if (!productToSubmit.name || !productToSubmit.brand) { alert('Please fill in the name and brand before submitting.'); return; }
+
+    // Kolla om sku eller supplierArticleNumber saknas
+if (!productToSubmit.sku || !productToSubmit.supplierArticleNumber) {
+  const proceed = window.confirm('Du har inte fyllt i SKU eller leverantörens artikelnummer. Vill du skicka in produkten ändå?');
+  if (!proceed) return;
+}
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/reviewProducts`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productToSubmit),

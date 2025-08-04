@@ -26,21 +26,27 @@ const PriceCalculatorModal = ({ isOpen, onClose, product, setProduct, currentCur
     }, [isOpen, product.buying_price?.value]);
 
     // Beräkna exklusive moms när input ändras
-    const calculateExVat = () => {
-        const incVat = parseFloat(priceIncVatInput);
-        const vatRate = parseFloat(vatRateInput);
+   const calculateExVat = () => {
+    const incVat = parseFloat(priceIncVatInput);
+    const vatRate = parseFloat(vatRateInput);
 
-        if (isNaN(incVat) || isNaN(vatRate) || vatRate < 0) {
-            setCalculatedPriceExVat('');
-            setCalculatedVatAmount('');
-            return;
-        }
+    if (isNaN(incVat) || isNaN(vatRate) || vatRate < 0) {
+        setCalculatedPriceExVat('');
+        setCalculatedVatAmount('');
+        return;
+    }
 
-        const priceExVat = incVat / (1 + vatRate / 100);
-        const vatAmount = incVat - priceExVat;
-        setCalculatedPriceExVat(priceExVat.toFixed(2));
-        setCalculatedVatAmount(vatAmount.toFixed(2));
-    };
+    const priceExVat = incVat / (1 + vatRate / 100);
+    const vatAmount = incVat - priceExVat;
+
+    setCalculatedPriceExVat(priceExVat.toFixed(2));
+    setCalculatedVatAmount(vatAmount.toFixed(2));
+
+    // 👉 Lägg automatiskt in i inköpsprisfältet
+    setOriginalBuyingPrice(priceExVat.toFixed(2));
+    setCalculatedBuyingPrice(''); // Töm tidigare avdragspris
+};
+
 
     // Beräkna inköpspris med procentavdrag
     const calculateDeductedBuyingPrice = () => {
@@ -87,7 +93,7 @@ const PriceCalculatorModal = ({ isOpen, onClose, product, setProduct, currentCur
     };
 
 
-    if (!isOpen) return null;
+   if (!isOpen) return null;
 
     return (
         <div style={{
