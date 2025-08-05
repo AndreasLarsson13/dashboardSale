@@ -48,7 +48,11 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
         { key: 'floor', value: { se: 'Bakyta', en: 'Back surface', fi: 'Takapinta' } },
         { key: 'kyleffekt', value: { se: 'Kyleffekt', en: 'Cooling power', fi: 'Jäähdytysteho' } },
 { key: 'varmeeffekt', value: { se: 'Värmeeffekt', en: 'Heating power', fi: 'Lämmitysteho' } },
-        { key: 'custom', value: { se: 'Anpassad', en: 'Custom', fi: 'Mukautettu' } }
+        { key: 'custom', value: { se: 'Anpassad', en: 'Custom', fi: 'Mukautettu' } },
+{ key: 'bastuvolym', value: { se: 'Bastuvolym', en: 'Sauna volume', fi: 'Saunan tilavuus' } },
+{ key: 'stenmassa', value: { se: 'Stenmassa (MAX)', en: 'Stone mass (MAX)', fi: 'Kivimassa (MAX)' } },
+{ key: 'diameter', value: { se: 'Diameter', en: 'Diameter', fi: 'Halkaisija' } },
+
     ], []);
 
     const colorOptions = useMemo(() => [
