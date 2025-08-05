@@ -1,0 +1,23 @@
+.gallery-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.gallery-item {
+  width: 100%;
+  padding-top: 66%; /* 3:2 ratio */
+  position: relative;
+  cursor: pointer;
+}
+
+.placeholder-box {
+  background-color: #e0e0e0;
+  border: 2px dashed #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+  position: relative;
+}

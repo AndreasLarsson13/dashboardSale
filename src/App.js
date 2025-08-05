@@ -7,6 +7,7 @@ import EditProductPage from './pages/editProductPage';
 import AddBrand from './pages/AddBrand';
 import BrandList from './pages/ListBrand';
 import ReviewProductsPage from './pages/ProductReview'; // Import Review Products Page
+import AdminWebsite from './pages/adminWebsite'; // Website admin
 import Layout from './layout';
 import LoginPage from './pages/login'; // Import the login page
 import PrivateRoute from './components/privateRoute'; // Import PrivateRoute
@@ -29,6 +30,7 @@ function App() {
           <Route path="/list-brand" element={<PrivateRoute element={<BrandList />} />} /> {/* Protected route */}
           {/* Admin-only route */}
           <Route path="/review-products" element={<AdminRoute element={<ReviewProductsPage />} />} /> {/* Protected route for admins */}
+          <Route path="/admin-website" element={<AdminRoute element={<AdminWebsite />} />} /> {/* Protected route for admins */}
             <Route path="/list-option" element={<PrivateRoute element={<OptionsListPage />} />} /> {/* Protected route */}
           <Route path="/add-option" element={<PrivateRoute element={<AddOptions />} />} /> {/* Protected route */}
           <Route path="/list-variations" element={<PrivateRoute element={<VariationListPage />} />} /> {/* Protected route */}

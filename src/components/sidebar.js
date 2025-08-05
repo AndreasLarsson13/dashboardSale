@@ -66,11 +66,24 @@ const Sidebar = () => {
         </li>
 
         {/* Conditionally render the Admin link based on isAdmin state */}
-        {isAdmin && (
-          <li>
-            <Link to="/review-products" style={{ color: 'white', textDecoration: 'none' }}>Admin</Link>
-          </li>
-        )}
+      {isAdmin && (
+  <li>
+    <details style={{ color: 'white' }}>
+      <summary style={{ cursor: 'pointer', listStyle: 'none', color: 'white' }}>
+        Admin
+      </summary>
+      <ul style={{ paddingLeft: '15px', marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <li>
+          <Link to="/review-products" style={{ color: 'white', textDecoration: 'none' }}>Granskning</Link>
+        </li>
+        <li>
+          <Link to="/admin-website" style={{ color: 'white', textDecoration: 'none' }}>Hemsida</Link>
+        </li>
+      </ul>
+    </details>
+  </li>
+)}
+
 
         <li>
           <LogoutBtn />

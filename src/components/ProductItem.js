@@ -72,10 +72,10 @@ const ProductItem = ({ product, onDelete }) => {
         >
           &#x2757;
         </span> : ""}
-        <p><strong style={{ color: "#333", fontSize: "18px" }}>{formatPrice(parseInt(product.price.value))} - Valuta : {product.currency}</strong></p>
-      </div>
+{/*         <p><strong style={{ color: "#333", fontSize: "18px" }}>{product.price.value && formatPrice(parseInt(product.price.value))} - Valuta : {product.currency}</strong></p>
+ */}      </div>
 
-      <p
+     {/*  <p
         style={{ color: "#555", fontSize: "14px", marginBottom: "15px", cursor: "pointer" }}
         onClick={toggleDescription}
       >
@@ -88,7 +88,7 @@ const ProductItem = ({ product, onDelete }) => {
             }}
           />
         )}
-      </p>
+      </p> */}
 
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <button
