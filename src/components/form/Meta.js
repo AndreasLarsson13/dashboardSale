@@ -49,8 +49,8 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
         { key: 'kyleffekt', value: { se: 'Kyleffekt', en: 'Cooling power', fi: 'Jäähdytysteho' } },
 { key: 'varmeeffekt', value: { se: 'Värmeeffekt', en: 'Heating power', fi: 'Lämmitysteho' } },
         { key: 'custom', value: { se: 'Anpassad', en: 'Custom', fi: 'Mukautettu' } },
-{ key: 'bastuvolym', value: { se: 'Bastuvolym (m³)', en: 'Sauna volume (m³)', fi: 'Saunan tilavuus (m³)' } },
-{ key: 'stenmassa', value: { se: 'Stenmassa (MAX) (kg)', en: 'Stone mass (MAX) (kg)', fi: 'Kivimassa (MAX) (kg)' } },
+{ key: 'bastuvolymkbm', value: { se: 'Bastuvolym (m³)', en: 'Sauna volume (m³)', fi: 'Saunan tilavuus (m³)' } },
+{ key: 'stenmassakg', value: { se: 'Stenmassa (MAX) (kg)', en: 'Stone mass (MAX) (kg)', fi: 'Kivimassa (MAX) (kg)' } },
 { key: 'diameter', value: { se: 'Diameter (cm)', en: 'Diameter (cm)', fi: 'Halkaisija (cm)' } },
 
     ], []);
