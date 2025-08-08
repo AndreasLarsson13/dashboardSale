@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaChevronDown, FaChevronUp, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import categoriesData from '../../data/categoriesData'; // Din kapslade categoriesData
+/* import categoriesData from '../../data/categoriesData'; // Din kapslade categoriesData
+ */import { fetchCategoryData } from '../../data/categoryFetch';
+
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
@@ -27,18 +29,33 @@ const sellableCountryOptions = ['SV', 'FI', 'AX'];
 
 // NY: Leveransalternativ med översättningar
 const deliveryTimeOptions = [
-  { value: '3-5_days', label: { se: '3-5 dagar', en: '3-5 days', fi: '3-5 päivää' } },
-  { value: '5-10_days', label: { se: '5-10 dagar', en: '5-10 days', fi: '5-10 viikkoa' } },
+  { value: '3-5_days', label: { se: '3-5 arbetsdagar', en: '3-5 working  days', fi: '3-5 arkipäivän kuluessa' } },
+  { value: '5-10_days', label: { se: '5-10 arbetsdagar', en: '5-10 working  days', fi: '5-10 arkipäivän kuluessa' } },
   { value: '2-3_weeks', label: { se: '2-3 veckor', en: '2-3 weeks', fi: '2-3 viikkoa' } },
   { value: '+3_weeks', label: { se: '+ 3 veckor', en: '+3 weeks', fi: '+3 viikkoa' } },
 ];
 
 // --- GeneralInfo Komponent ---
 const GeneralInfo = ({ product, setProduct }) => {
+ const [categoriesData, setCategoriesData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/products`); // Axios automatically parses JSON
+        setCategoriesData(res.data); // `res.data` contains the parsed JSON
+        console.log(res.data);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+      }
+    };
+
+    fetchData();
+  }, []);
   // --- Lokal UI-state (initialiseras från 'product' prop vid första rendering) ---
   const [isGeneralInfoOpen, setIsGeneralInfoOpen] = useState(false);
   const [selectedCategoryPath, setSelectedCategoryPath] = useState([]);
-console.log(selectedCategoryPath)
+
   // --- Kategori State Hantering ---
   // Initialiseras från 'product' prop för att ladda existerande kategorier
   const [categoryPaths, setCategoryPaths] = useState(() => {

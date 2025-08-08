@@ -177,19 +177,6 @@ const categoriesData = {
             value: "tillbehor",
           }
         ]
-      },
-       {
-        label: "Bastu",
-        value: "bastu",
-        child: [
-          { label: "Elektriska bastuaggregat", value: "elektriska-bastuaggregat" },
-          { label: "Vedeldad bastu", value: "vedeldad-bastu" },
-          { label: "Bastuinredning", value: "bastuinredning" },
-           {
-            label: "Tillbehör",
-            value: "tillbehor",
-          }
-        ]
       }
     ],
   },  
@@ -197,18 +184,20 @@ const categoriesData = {
     label: "Fritid & Trädgård",
     value: "fritid-tradgard",
     child: [
-     {
+      {
         label: "Bastu",
         value: "bastu",
         child: [
-          { label: "Elektriska bastuaggregat", value: "elektriska-bastuaggregat" },
-          { label: "Vedeldad bastu", value: "vedeldad-bastu" },
-          { label: "Bastuinredning", value: "bastuinredning" },
+          { label: "Elektrisk Bastupriser", value: "elektiskt/bastupriser" },
+          { label: "Vedeldade Bastuspisar", value: "vedeldade/bastuspisar" },
+          { label: "Tillbehör", value: "tillbehor" },
+          { label: "Bastuinredning", value: "bastu-inredning" },
+          { label: "Bastustugor", value: "bastu-stugor" },
            {
             label: "Tillbehör",
-            value: "tillbehor",
+            value: "tillbehor"
           }
-        ]
+        ],
       },
        {
         label: "Trädgård & Utemiljö",

@@ -1,12 +1,29 @@
 // src/components/form/components/CategorySelector.jsx (eller var din fil nu ligger)
 
 import React, { useState, useEffect, useCallback } from "react";
-import categoriesData from '../../../data/categoriesData'; // Se till att sökvägen är korrekt
+import axios from 'axios';
 
+/* import categoriesData from '../../../data/categoriesData'; // Se till att sökvägen är korrekt
+ */import { fetchCategoryData } from '../../../data/categoryFetch';
 // Den här komponenten hanterar EN ENSKILD KATEGORIVÄG
 // Den tar emot den valda sökvägen som en platt array av strängar
 // Och skickar ut den uppdaterade sökvägen som en platt array av strängar
 function CategorySelector({ selectedPath = [], onChange }) { // selectedPath är nu standardiserat till en platt array
+ const [categoriesData, setCategoriesData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/menu`); // Axios automatically parses JSON
+        setCategoriesData(res.data); // `res.data` contains the parsed JSON
+        console.log(res.data);
+      } catch (error) {
+        console.error('Failed to fetch menu', error);
+      }
+    };
+
+    fetchData();
+  }, []);
   const [currentPathSegments, setCurrentPathSegments] = useState(selectedPath);
   const [dropdownOptions, setDropdownOptions] = useState([]);
 
