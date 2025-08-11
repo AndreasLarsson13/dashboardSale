@@ -30,30 +30,30 @@ const Meta = ({ product, setProduct, mode = 'edit' }) => {
         { label: "Ascot Grå", value: "ascot grey" }, { label: "Grafit", value: "graphite" },
     ], []);
 
-    const predefinedTechnicalFields = useMemo(() => [
-        { key: 'height', value: { se: 'Höjd (mm)', en: 'Height (mm)', fi: 'Korkeus (mm)' } },
-        { key: 'weight', value: { se: 'Nettovikt (kg)', en: 'Net weight (kg)', fi: 'Nettopaino (kg)' } },
-        { key: 'width', value: { se: 'Bredd (mm)', en: 'Width (mm)', fi: 'Leveys (mm)' } },
-        { key: 'depth', value: { se: 'Djup (mm)', en: 'Depth (mm)', fi: 'Syvyys (mm)' } },
-        { key: 'vedlängd', value: { se: 'Maximal vedlängd (cm)', en: 'Max log length (cm)', fi: 'Suurin puun pituus (cm)' } },
-        { key: 'effekt', value: { se: 'Effekt (W)', en: 'Power (W)', fi: 'Teho (W)' } },
-        { key: 'color', value: { se: 'Färg', en: 'Color', fi: 'Väri' } },
-        { key: 'material', value: { se: 'Material', en: 'Material', fi: 'Materiaali' } },
-        { key: 'uppvärmningsyta', value: { se: 'Maximal uppvärmningsyta (m²)', en: 'Max heating area (m²)', fi: 'Suurin lämmitettävä pinta-ala (m²)' } },
-        { key: 'skorstensanslutning', value: { se: 'Skorstensanslutning', en: 'Chimney connection', fi: 'Savupiipun liitäntä' } },
-        { key: 'skorstensanslutningValue', value: { se: 'Upptill, Bak', en: 'Top, Back', fi: 'Ylhäällä, Takana' } },
-        { key: 'verkningsgrad', value: { se: 'Verkningsgrad (%)', en: 'Efficiency (%)', fi: 'Hyötysuhde (%)' } },
-        { key: 'gasconsumption', value: { se: 'Gaskonsumtion', en: 'Gas consumption', fi: 'Kaasunkulutus' } },
-        { key: 'preheatingtime', value: { se: 'Förvärmningstid', en: 'Preheating time', fi: 'Esilämmitysaika' } },
-        { key: 'floor', value: { se: 'Bakyta', en: 'Back surface', fi: 'Takapinta' } },
-        { key: 'kyleffekt', value: { se: 'Kyleffekt', en: 'Cooling power', fi: 'Jäähdytysteho' } },
-{ key: 'varmeeffekt', value: { se: 'Värmeeffekt', en: 'Heating power', fi: 'Lämmitysteho' } },
-        { key: 'custom', value: { se: 'Anpassad', en: 'Custom', fi: 'Mukautettu' } },
-{ key: 'bastuvolymkbm', value: { se: 'Bastuvolym (m³)', en: 'Sauna volume (m³)', fi: 'Saunan tilavuus (m³)' } },
-{ key: 'stenmassakg', value: { se: 'Stenmassa (MAX) (kg)', en: 'Stone mass (MAX) (kg)', fi: 'Kivimassa (MAKS) (kg)' } },
-{ key: 'diameter', value: { se: 'Diameter', en: 'Diameter', fi: 'Halkaisija' } },
+const predefinedTechnicalFields = useMemo(() => [
+  { key: 'height', value: { se: 'Höjd (mm)', en: 'Height (mm)', fi: 'Korkeus (mm)' } },
+  { key: 'weight', value: { se: 'Nettovikt (kg)', en: 'Net weight (kg)', fi: 'Nettopaino (kg)' } },
+  { key: 'width', value: { se: 'Bredd (mm)', en: 'Width (mm)', fi: 'Leveys (mm)' } },
+  { key: 'depth', value: { se: 'Djup (mm)', en: 'Depth (mm)', fi: 'Syvyys (mm)' } },
+  { key: 'vedlängd', value: { se: 'Maximal vedlängd (cm)', en: 'Max log length (cm)', fi: 'Suurin puun pituus (cm)' } },
+  { key: 'effekt', value: { se: 'Effekt (W)', en: 'Power (W)', fi: 'Teho (W)' } },
+  { key: 'color', value: { se: 'Färg', en: 'Color', fi: 'Väri' } },
+  { key: 'material', value: { se: 'Material', en: 'Material', fi: 'Materiaali' } },
+  { key: 'uppvärmningsyta', value: { se: 'Maximal uppvärmningsyta (m²)', en: 'Max heating area (m²)', fi: 'Suurin lämmitettävä pinta-ala (m²)' } },
+  { key: 'skorstensanslutning', value: { se: 'Skorstensanslutning', en: 'Chimney connection', fi: 'Savupiipun liitäntä' } },
+  { key: 'skorstensanslutningValue', value: { se: 'Upptill, Bak', en: 'Top, Back', fi: 'Ylhäällä, Takana' } },
+  { key: 'verkningsgrad', value: { se: 'Verkningsgrad (%)', en: 'Efficiency (%)', fi: 'Hyötysuhde (%)' } },
+  { key: 'gasconsumption', value: { se: 'Gaskonsumtion', en: 'Gas consumption', fi: 'Kaasunkulutus' } },
+  { key: 'preheatingtime', value: { se: 'Förvärmningstid', en: 'Preheating time', fi: 'Esilämmitysaika' } },
+  { key: 'floor', value: { se: 'Bakyta', en: 'Back surface', fi: 'Takapinta' } },
+  { key: 'kyleffekt', value: { se: 'Kyleffekt', en: 'Cooling power', fi: 'Jäähdytysteho' } },
+  { key: 'varmeeffekt', value: { se: 'Värmeeffekt', en: 'Heating power', fi: 'Lämmitysteho' } },
+  { key: 'custom', value: { se: 'Anpassad', en: 'Custom', fi: 'Mukautettu' } },
+  { key: 'bastuvolymkbm', value: { se: 'Bastuvolym (m³)', en: 'Sauna volume (m³)', fi: 'Saunan tilavuus (m³)' } },
+  { key: 'stenmassakg', value: { se: 'Stenmassa (MAX) (kg)', en: 'Stone mass (MAX) (kg)', fi: 'Kivimassa (MAKS) (kg)' } },
+  { key: 'diameter', value: { se: 'Diameter', en: 'Diameter', fi: 'Halkaisija' } },
+].sort((a, b) => a.value.se.localeCompare(b.value.se, 'sv')), []);
 
-    ], []);
 
     const colorOptions = useMemo(() => [
         { label: "Vit", value: "white" }, { label: "Röd", value: "red" },
