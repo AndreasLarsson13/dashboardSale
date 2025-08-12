@@ -203,9 +203,7 @@ const updatedProduct = {
       alert('Please fill in the name and brand before submitting.');
       return;
     }
-
-/*     https://serverkundportal-dot-natbutiken.lm.r.appspot.com
- */    
+ 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/UnderReviewVariation`, {
         method: 'POST',

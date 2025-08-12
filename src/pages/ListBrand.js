@@ -14,7 +14,8 @@ const ListBrandPage = () => {
   const [editForm, setEditForm] = useState({ name: '', slug: '', image: { thumbnail: '', original: '' } });
   const [uploadStatus, setUploadStatus] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [modifiedBrands, setModifiedBrands] = useState({});
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [currentComment, setCurrentComment] = useState('');
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -22,7 +23,7 @@ const ListBrandPage = () => {
       const user = auth.currentUser;
 
       if (!user) {
-        setMessage('User is not authenticated.');
+        setMessage('Användaren är inte inloggad.');
         setIsLoading(false);
         return;
       }
@@ -38,8 +39,8 @@ const ListBrandPage = () => {
         setBrands(response.data);
         setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching brands:', error);
-        setMessage('Error fetching brands.');
+        console.error('Fel vid hämtning av varumärken:', error);
+        setMessage('Ett fel uppstod vid hämtning av varumärken.');
         setIsLoading(false);
       }
     };
@@ -59,10 +60,9 @@ const ListBrandPage = () => {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-
-        // Calculate aspect ratio to resize properly within maxSize box
         let width = img.width;
         let height = img.height;
+
         if (width > height) {
           if (width > maxSize) {
             height = (height * maxSize) / width;
@@ -89,65 +89,24 @@ const ListBrandPage = () => {
     });
   };
 
-  const handlePopularChange = (brandId, isPopular) => {
-    setModifiedBrands((prevState) => ({
-      ...prevState,
-      [brandId]: isPopular,
-    }));
-  };
-
-  const handleSubmitChanges = async () => {
-    const updates = Object.keys(modifiedBrands).map((brandId) => ({
-      id: brandId,
-      popular: modifiedBrands[brandId],
-    }));
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/updatebrands`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (response.ok) {
-        setBrands(
-          brands.map((brand) =>
-            modifiedBrands.hasOwnProperty(brand._id)
-              ? { ...brand, popular: modifiedBrands[brand._id] }
-              : brand
-          )
-        );
-        setMessage('Brands updated successfully.');
-        setModifiedBrands({});
-      } else {
-        setMessage('Failed to update brands.');
-      }
-    } catch (error) {
-      console.error('Error updating brands:', error);
-      setMessage('Error updating brands.');
-    }
-  };
-
   const handleDeleteBrand = async (brandId) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this brand?');
+    const confirmDelete = window.confirm('Är du säker på att du vill ta bort detta varumärke?');
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}deletebrand/${brandId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/deletebrand/${brandId}`, {
+        method: 'delete',
       });
 
       if (response.ok) {
         setBrands(brands.filter((brand) => brand._id !== brandId));
         setMessage('Varumärket togs bort utan problem.');
       } else {
-        setMessage('Problem med att ta bort varumärket');
+        setMessage('Problem med att ta bort varumärket.');
       }
     } catch (error) {
-      console.error('Error deleting brand:', error);
-      setMessage('Error bortganing av varumärke.');
+      console.error('Fel vid borttagning av varumärke:', error);
+      setMessage('Fel vid borttagning av varumärke.');
     }
   };
 
@@ -157,6 +116,7 @@ const ListBrandPage = () => {
       name: brand.name,
       slug: brand.slug,
       image: brand.image,
+      status: brand.status,
     });
   };
 
@@ -165,7 +125,7 @@ const ListBrandPage = () => {
     setEditForm((prevForm) => ({
       ...prevForm,
       [name]: value,
-      slug: generateSlug(value),
+      slug: name === 'name' ? generateSlug(value) : prevForm.slug,
     }));
   };
 
@@ -173,7 +133,7 @@ const ListBrandPage = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setUploadStatus('Uploading...');
+    setUploadStatus('Laddar upp bild...');
 
     try {
       const resizedImage = await resizeImage(file, 198);
@@ -182,28 +142,22 @@ const ListBrandPage = () => {
       if (editForm.image.original) {
         const oldOriginalRef = ref(storage, `brands/${brandSlug}/${brandSlug}.webp`);
         const oldThumbnailRef = ref(storage, `brands/${brandSlug}/${brandSlug}_thumb.webp`);
-
-        await deleteObject(oldOriginalRef).catch((error) => console.error('Error deleting old image:', error));
-        await deleteObject(oldThumbnailRef).catch((error) => console.error('Error deleting old thumbnail:', error));
+        await deleteObject(oldOriginalRef).catch((error) => console.error('Fel vid borttagning av gammal bild:', error));
+        await deleteObject(oldThumbnailRef).catch((error) => console.error('Fel vid borttagning av gammal thumbnail:', error));
       }
 
       const originalStorageRef = ref(storage, `brands/${brandSlug}/${brandSlug}.webp`);
       const thumbnailStorageRef = ref(storage, `brands/${brandSlug}/${brandSlug}_thumb.webp`);
 
-      const originalUploadTask = uploadBytesResumable(originalStorageRef, resizedImage);
-      const thumbnailUploadTask = uploadBytesResumable(thumbnailStorageRef, resizedImage);
-
-      await Promise.all([
-        new Promise((resolve, reject) => {
-          originalUploadTask.on('state_changed', null, reject, resolve);
-        }),
-        new Promise((resolve, reject) => {
-          thumbnailUploadTask.on('state_changed', null, reject, resolve);
-        }),
+      const [originalUploadTask, thumbnailUploadTask] = await Promise.all([
+        uploadBytesResumable(originalStorageRef, resizedImage),
+        uploadBytesResumable(thumbnailStorageRef, resizedImage),
       ]);
 
-      const originalURL = await getDownloadURL(originalStorageRef);
-      const thumbnailURL = await getDownloadURL(thumbnailStorageRef);
+      const [originalURL, thumbnailURL] = await Promise.all([
+        getDownloadURL(originalUploadTask.ref),
+        getDownloadURL(thumbnailUploadTask.ref),
+      ]);
 
       setEditForm((prevForm) => ({
         ...prevForm,
@@ -213,17 +167,17 @@ const ListBrandPage = () => {
         },
       }));
 
-      setUploadStatus('Upload successful.');
+      setUploadStatus('Uppladdning lyckades.');
     } catch (error) {
-      console.error('Error uploading image:', error);
-      setUploadStatus('Failed to upload image.');
+      console.error('Fel vid bilduppladdning:', error);
+      setUploadStatus('Misslyckades att ladda upp bild.');
     }
   };
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://serverkundportal-dot-natbutiken.lm.r.appspot.com/updatebrand/${editingBrand}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/updatebrand/${editingBrand}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -233,16 +187,18 @@ const ListBrandPage = () => {
 
       if (response.ok) {
         setBrands(
-          brands.map((brand) => (brand._id === editingBrand ? { ...brand, ...editForm } : brand))
+brands.map((brand) =>
+  brand._id === editingBrand ? { ...brand, ...editForm, status: 'pending' } : brand
+)
         );
         setEditingBrand(null);
-        setMessage('Brand updated successfully.');
+        setMessage('Varumärket uppdaterades framgångsrikt.');
       } else {
-        setMessage('Failed to update brand.');
+        setMessage('Misslyckades att uppdatera varumärket.');
       }
     } catch (error) {
-      console.error('Error updating brand:', error);
-      setMessage('Error updating brand.');
+      console.error('Fel vid uppdatering av varumärke:', error);
+      setMessage('Fel vid uppdatering av varumärke.');
     }
   };
 
@@ -251,7 +207,6 @@ const ListBrandPage = () => {
     setEditForm({ name: '', slug: '', image: { thumbnail: '', original: '' } });
   };
 
-  // Helper function to get card background color based on brand status
   const getCardBackgroundColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending':
@@ -263,6 +218,18 @@ const ListBrandPage = () => {
     }
   };
 
+  // Open modal and set comment text
+  const openCommentModal = (comment) => {
+    setCurrentComment(comment);
+    setShowCommentModal(true);
+  };
+
+  // Close modal
+  const closeCommentModal = () => {
+    setShowCommentModal(false);
+    setCurrentComment('');
+  };
+
   return (
     <div>
       <h2>Varumärken</h2>
@@ -270,7 +237,7 @@ const ListBrandPage = () => {
       {isLoading ? (
         <p>Laddar varumärken...</p>
       ) : (
-        <ul style={ brands.length > 0 ? {display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" } : {gridTemplateColumns: "1fr"}}>
+        <ul style={brands.length > 0 ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" } : { gridTemplateColumns: "1fr" }}>
           {brands.length > 0 ? (
             brands.map((brand) => (
               <li
@@ -278,6 +245,8 @@ const ListBrandPage = () => {
                 style={{
                   ...styles.card,
                   backgroundColor: getCardBackgroundColor(brand.status),
+                  position: 'relative',
+                  paddingRight: '30px', // to make space for info icon
                 }}
               >
                 {editingBrand === brand._id ? (
@@ -292,7 +261,6 @@ const ListBrandPage = () => {
                         required
                       />
                     </div>
-
                     <div>
                       <label>Varumärkets logga:</label>
                       <div style={{ display: "flex" }}>
@@ -314,11 +282,35 @@ const ListBrandPage = () => {
                   </form>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: "space-between" }}>
-                    <h3>{brand.name} {brand.status === "pending" && "- Väntar på granskning"}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                      <h3 style={{ margin: 0 }}>
+                        {brand.name} {brand.status === "pending" && "- Väntar på granskning"}
+                      </h3>
+                      {brand.reviewFailComment && (
+                        <button
+                          onClick={() => openCommentModal(brand.reviewFailComment)}
+                          title="Det finns kommentarer om granskningen"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#d32f2f',
+                            fontWeight: 'bold',
+                            fontSize: '18px',
+                            lineHeight: 1,
+                            padding: 0,
+                            marginLeft: '8px',
+                          }}
+                          aria-label="Visa granskningskommentarer"
+                        >
+                          &#9432; {/* info symbol */}
+                        </button>
+                      )}
+                    </div>
                     <img
                       src={brand.image.thumbnail}
                       alt={brand.name}
-                      style={{ width: '50px', height: '50px', marginRight: '10px' }}
+                      style={{ width: '50px', height: '50px', marginRight: '10px', objectFit: 'contain' }}
                     />
                     <div style={{ display: "flex", gap: "10px" }}>
                       <button onClick={() => handleEditBrand(brand)}>Ändra</button>
@@ -329,12 +321,61 @@ const ListBrandPage = () => {
               </li>
             ))
           ) : (
-            <div style={{display: "flex", flexDirection: "column", textAlign: "center", justifyContent: "center"}}>
+            <div style={{ display: "flex", flexDirection: "column", textAlign: "center", justifyContent: "center" }}>
               <p>Inga tillgängliga varumärken.</p>
-              <Link to="/add-brand" style={{ color: "black"}}>Klicka här för att lägga till</Link>
+              <Link to="/add-brand" style={{ color: "black" }}>Klicka här för att lägga till</Link>
             </div>
           )}
         </ul>
+      )}
+
+      {/* Modal for review fail comment */}
+      {showCommentModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}
+          onClick={closeCommentModal}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '8px',
+              maxWidth: '500px',
+              width: '90%',
+              position: 'relative',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Kommentar från granskning</h3>
+            <p>{currentComment}</p>
+            <button
+              onClick={closeCommentModal}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                border: 'none',
+                background: 'transparent',
+                fontSize: '20px',
+                cursor: 'pointer',
+              }}
+              aria-label="Stäng modal"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

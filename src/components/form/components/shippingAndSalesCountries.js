@@ -1,92 +1,85 @@
-// components/FormElements/ShippingAndSalesCountries.jsx
 import React from 'react';
+import LabeledSelect from './FormElements/LabeledSelect';
+import LabeledInput from './FormElements/LabeledInput';
+
+const deliveryTypeLabels = {
+  home: 'Hemleverans',
+  warehouse: 'Lagerleverans',
+};
 
 const ShippingAndSalesCountries = ({
   currencyOptions,
   shippingCurrency,
   handleShippingCurrencyChange,
   countryOptions,
-  sellInCountries, // Detta är det objekt som kommer från GeneralInfo
+  sellInCountries,
   handleCountryCheckboxChange,
   handleShippingCostChange,
   handleDeliveryTimeChange,
-  deliveryTimeOptions, // NY PROP: Leveransalternativ med översättningar
-  currentLanguage = 'se', // NY PROP: Aktuellt språk (default 'se' om inget skickas)
+  deliveryTimeOptions,
 }) => {
   return (
-    <div style={{ padding: '10px', backgroundColor: '#eaeaea' }}>
-      {/* Valuta för frakt */}
-      <div style={{ marginBottom: '15px' }}>
-        <label style={{ display: 'block', marginBottom: '5px' }}>Valuta för frakt:</label>
-        <select
-          value={shippingCurrency} // Använder värdet från props
+    <div style={{ padding: '10px', marginTop: '20px', backgroundColor: '#f9f9f9', borderRadius: '5px' }}>
+      <h2>Försäljnings- och fraktländer</h2>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px', marginBottom: '15px' }}>
+        <LabeledSelect
+          label="Fraktvaluta"
+          name="shippingCurrency"
+          value={shippingCurrency}
           onChange={handleShippingCurrencyChange}
-          style={{ width: '226px', fontSize: '19px', height: '28px' }}
-        >
-          {currencyOptions.map((currency) => (
-            <option key={currency} value={currency}>
-              {currency}
-            </option>
-          ))}
-        </select>
+          options={currencyOptions}
+          optionLabels={Object.fromEntries(currencyOptions.map((opt) => [opt, opt]))}
+        />
       </div>
 
-      {/* Vilka länder får den säljas */}
-      <div>
-        <label style={{ display: 'block', marginBottom: '10px' }}>Vilka länder får den säljas?</label>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {countryOptions.map((country) => {
-            // Kontrollerar om landet finns som en nyckel i sellInCountries-objektet
-            const isSelected = sellInCountries.hasOwnProperty(country);
-            return (
-              <div key={country} style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <input
-                    type="checkbox"
-                    value={country}
-                    checked={isSelected} // 'checked' styrs av om landet finns i sellInCountries-objektet
-                    onChange={handleCountryCheckboxChange}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <strong>{country}</strong>
-                </label>
-                {isSelected && (
-                  <div style={{ marginLeft: '25px', marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <span>Frakpris (ex moms)</span><input
-                        type="number"
-                        placeholder={`Fraktpris för ${country}`}
-                        // Hämtar värdet från sellInCountries[country].shippingCost
-                        value={sellInCountries[country]?.shippingCost ?? ''}
-                        onChange={(e) => handleShippingCostChange(e, country)}
-                        style={{ padding: '5px', fontSize: '16px' }}
-                      />
-                      <span>Valuta : {sellInCountries[country]?.currency}</span>
-                    </div>
+      {countryOptions.map((countryCode) => (
+        <div key={countryCode} style={{ border: '1px solid #ddd', padding: '10px', marginBottom: '15px', borderRadius: '5px', backgroundColor: '#fff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+            <label style={{ fontWeight: 'bold' }}>
+              <input
+                type="checkbox"
+                value={countryCode}
+                checked={!!sellInCountries[countryCode]}
+                onChange={handleCountryCheckboxChange}
+                style={{ marginRight: '10px' }}
+              />
+              {countryCode} - {countryCode === 'SV' ? 'Sverige' : countryCode === 'FI' ? 'Finland' : 'Åland'}
+            </label>
+          </div>
 
-                    {/* NYTT: Select-dropdown för leveranstid */}
-                    <select
-                      // `value` för select-elementet ska matcha `value` för <option>.
-                      // `sellInCountries[country]?.deliveryTime` förväntas nu vara en sträng (t.ex. '3-5_days')
-                      value={sellInCountries[country]?.deliveryTime ?? ''}
-                      onChange={(e) => handleDeliveryTimeChange(e, country)}
-                      style={{ width: 'calc(100% - 10px)', padding: '5px', fontSize: '16px' }}
-                    >
-                      <option value="">Välj leveranstid</option> {/* Standard/placeholder */}
-                      {/* Kontrollera att deliveryTimeOptions är en array innan .map() */}
-                      {Array.isArray(deliveryTimeOptions) && deliveryTimeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label[currentLanguage] || option.label.se} {/* Visar översatt text */}
-                        </option>
-                      ))}
-                    </select>
+          {sellInCountries[countryCode] && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {Object.keys(deliveryTypeLabels).map(deliveryType => (
+                <div key={deliveryType} style={{ borderLeft: '3px solid #007bff', paddingLeft: '10px' }}>
+                  <h4 style={{ margin: '0 0 10px', fontSize: '1em', fontWeight: 'normal' }}>{deliveryTypeLabels[deliveryType]}</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}>
+                    <LabeledInput
+                      label="Fraktkostnad"
+                      name={`shippingCost-${countryCode}-${deliveryType}`}
+                      value={sellInCountries[countryCode][deliveryType]?.shippingCost ?? ''}
+                      onChange={(e) => handleShippingCostChange(e, countryCode, deliveryType)}
+                      type="number"
+                      min="0"
+                    />
+
+                    <LabeledSelect
+                      label="Leveranstid"
+                      name={`deliveryTime-${countryCode}-${deliveryType}`}
+                      value={sellInCountries[countryCode][deliveryType]?.deliveryTime ?? ''}
+                      onChange={(e) => handleDeliveryTimeChange(e, countryCode, deliveryType)}
+                      options={deliveryTimeOptions.map(opt => opt.value)}
+                      optionLabels={Object.fromEntries(
+                        deliveryTimeOptions.map(opt => [opt.value, opt.label.se])
+                      )}
+                    />
                   </div>
-                )}
-              </div>
-            );
-          })}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      ))}
     </div>
   );
 };

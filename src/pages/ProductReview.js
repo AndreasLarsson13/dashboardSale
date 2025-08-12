@@ -2,8 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import './ProductReview.css'; // Import the CSS for styling
+import GenericModal from '../components/ui/GenericModal';
 
 const ReviewProductsPage = () => {
+ const [modalOpen, setModalOpen] = useState(false);
+const [modalType, setModalType] = useState('success');
+const [modalTitle, setModalTitle] = useState('');
+const [modalMessage, setModalMessage] = useState('');
+const [modalAutoClose, setModalAutoClose] = useState(null);
+const [modalShowButton, setModalShowButton] = useState(true);
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
@@ -14,6 +22,16 @@ const ReviewProductsPage = () => {
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [rejectComment, setRejectComment] = useState('');
   const [selectedProductId, setSelectedProductId] = useState(null);
+
+  const showModal = (type, title, message, autoCloseMs = null, showButton = true) => {
+  setModalType(type);
+  setModalTitle(title);
+  setModalMessage(message);
+  setModalOpen(true);
+  setModalAutoClose(autoCloseMs);
+  setModalShowButton(showButton);
+};
+
 
   const navigate = useNavigate();
 
@@ -107,7 +125,14 @@ const ReviewProductsPage = () => {
       });
 
       if (response.ok) {
-        alert('Produkten är godkänd och tillagd');
+
+showModal(
+  'success',
+  'Produkten godkänd',
+  `"${product.name}" är nu publicerad!`,
+  2000 // stäng efter 2 sekunder
+);
+        /* alert('Produkten är godkänd och tillagd'); */
         setProducts(products.filter((p) => p._id !== product._id));
       } else {
         console.error('Failed to approve product');
@@ -200,6 +225,15 @@ const ReviewProductsPage = () => {
 
   return (
     <div className="review-products-page">
+      <GenericModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={modalTitle}
+        type={modalType}
+        autoCloseDuration={2000} // stäng efter 2 sekunder
+      >
+        {modalMessage}
+      </GenericModal>
       <h2>Produkter/Varumärken till granskning</h2>
       {products.length > 0 ? (
         <div className="product-list">
@@ -285,7 +319,9 @@ const ReviewProductsPage = () => {
           </div>
         </div>
       )}
+      
     </div>
+    
   );
 };
 

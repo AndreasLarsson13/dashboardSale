@@ -27,8 +27,8 @@ const sellableCountryOptions = ['SV', 'FI', 'AX'];
 
 // NY: Leveransalternativ med översättningar
 const deliveryTimeOptions = [
-  { value: '3-5_days', label: { se: '3-5 arbetsdagar', en: '3-5 working  days', fi: '3-5 arkipäivän kuluessa' } },
-  { value: '5-10_days', label: { se: '5-10 arbetsdagar', en: '5-10 working  days', fi: '5-10 arkipäivän kuluessa' } },
+  { value: '3-5_days', label: { se: '3-5 dagar', en: '3-5 days', fi: '3-5 päivää' } },
+  { value: '5-10_days', label: { se: '5-10 dagar', en: '5-10 days', fi: '5-10 viikkoa' } },
   { value: '2-3_weeks', label: { se: '2-3 veckor', en: '2-3 weeks', fi: '2-3 viikkoa' } },
   { value: '+3_weeks', label: { se: '+ 3 veckor', en: '+3 weeks', fi: '+3 viikkoa' } },
 ];

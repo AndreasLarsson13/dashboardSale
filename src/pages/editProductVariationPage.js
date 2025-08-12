@@ -11,7 +11,6 @@ import Meta from '../components/form/Meta';
 import EditImages from '../components/form/editImage'; // Din EditImages-komponent
 import VariationGroup from '../components/form/components/variationGroup';
 
-
 const EditProductPage = () => {
   const { id } = useParams(); // Hämta produkt-ID från URL-parametern
 
