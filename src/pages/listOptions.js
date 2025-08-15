@@ -47,7 +47,7 @@ const ListAccessoriesPage = () => {
       }
  */ 
       try {
-        const token = await user.getIdToken(); // Få användarens ID-token https://serverkundportal-dot-natbutiken.lm.r.appspot.com
+        const token = await user.getIdToken(); // Få användarens ID-token 
       
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/variationer`, {
           headers: {

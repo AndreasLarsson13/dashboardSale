@@ -556,6 +556,13 @@ const GeneralInfo = ({ product, setProduct }) => {
               onChange={handleInputChange}
             />
 
+            <LabeledInput
+              label="Varukod (export)"
+              name="commoditycode"
+              value={product.commoditycode || ''}
+              onChange={handleInputChange}
+            />
+
             <div style={{ gridColumn: '1 / 4', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
               <button
                 onClick={(e) => {

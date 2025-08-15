@@ -21,7 +21,7 @@ const KeywordInput = ({ compadibleWith, setcompadibleWith }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleAdd();
+      handleAdd(e);
     }
   };
   console.log(compadibleWith)

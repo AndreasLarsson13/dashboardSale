@@ -572,6 +572,12 @@ console.log(selectedCategoryPath)
               value={product.supplierArticleNumber || ''}
               onChange={handleInputChange}
             />
+            <LabeledInput
+                          label="Varukod (export)"
+                          name="commoditycode"
+                          value={product.supplierArticleNumber || ''}
+                          onChange={handleInputChange}
+                        />
 {/* Lägg till kalkylatorknappen här, kanske i en div tillsammans med inputen */}
 <div style={{ gridColumn: '1 / 4', display: 'flex', justifyContent: 'center', marginTop: '10px' }}> {/* Spänner över alla 3 kolumner */}
     <button

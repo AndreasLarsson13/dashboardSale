@@ -10,7 +10,7 @@ const AddProductPage = () => {
   const user = auth.currentUser;
 
   const defaultProductStructure = useMemo(() => ({
-    name: '', sku: '', supplierArticleNumber: '',
+    name: '', sku: '', supplierArticleNumber: '', commoditycode: '',
     price: { value: 0, currency: 'SEK', dateChanged: '' },
     buying_price: { value: 0, currency: 'SEK', dateChanged: '' },
     sale_price: { value: 0, currency: 'SEK', dateChanged: '' },
