@@ -240,23 +240,23 @@ showModal(
           {products.map((product) => (
             <div className="product-horizontal-card" key={product._id}>
               <div className="product-horizontal-image">
-                <img style={{ width: "250px", height: "250px" }} src={product.image.original || '/placeholder.jpg'} alt={product.name} />
+                <img style={{ width: "250px", height: "250px" }} src={product.image.original || '/placeholder.jpg'} alt={product.name.se} />
                 <span style={{ display: "flex", flexDirection: "row" }}>
                   {product.gallery?.slice(1).map((image, index) => (
-                    <img key={index} style={{ width: "80px", height: "80px" }} src={image.original || '/placeholder.jpg'} alt={product.name} />
+                    <img key={index} style={{ width: "80px", height: "80px" }} src={image.original || '/placeholder.jpg'} alt={product.name.se} />
                   ))}
                 </span>
               </div>
             {product.type === 'brand' ? (
   <div className="product-horizontal-info">
-    <h3>{product.name} - Varumärke</h3>
+    <h3>{product.name.se} - Varumärke</h3>
     <p><strong>Företag:</strong> {product.companyName}</p>
     <p><strong>Varumärke:</strong> {product.name}</p>
     {/* Lägg till fler fält för brand om du vill */}
   </div>
 ) : (
   <div className="product-horizontal-info">
-    <h3>{product.name}</h3>
+    <h3>{product.name.se}</h3>
     <p><strong>Företag:</strong> {product.companyName}</p>
     <p><strong>Varumärke:</strong> {product.brand}</p>
     <p><strong>Pris:</strong> {product.price.value} - Valuta: {product.price.currency}</p>
