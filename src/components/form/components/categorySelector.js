@@ -45,7 +45,7 @@ function CategorySelector({ selectedPath = [], onChange }) { // selectedPath är
     for (let i = 0; i < level; i++) {
       const selectedValue = pathSegments[i];
       if (!selectedValue) return []; // Inget valt på tidigare nivå, inga barnalternativ
-      const foundNode = currentLevelNodes.find(node => node.value === selectedValue);
+const foundNode = currentLevelNodes.find(node => node.value === selectedValue);
       if (!foundNode || !foundNode.child) return []; // Nod hittades inte eller inga barn
       currentLevelNodes = foundNode.child;
     }

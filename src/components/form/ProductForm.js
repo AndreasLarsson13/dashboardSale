@@ -233,9 +233,9 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
   return (
     <form onSubmit={onSubmit} className="form-container">
       {/* <--- Here's the change for the header ---> */}
-      <h2>{isEditing ? `Redigera Produkt: ${product.name}` : 'Lägg till ny produkt'}</h2>
+      <h2>{isEditing ? `Redigera Produkt: ${product.name.se}` : 'Lägg till ny produkt'}</h2>
 
-      <GeneralInfo product={product} setProduct={setProduct} />
+      <GeneralInfo product={product} setProduct={setProduct} mode={mode} />
       <Description
         product={product}
         setProduct={setProduct}

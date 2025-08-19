@@ -252,7 +252,7 @@ const handleInputChange = (e) => {
   // --- Rendering av formuläret ---
   return (
     <form onSubmit={handleSubmit} className="form-container">
-      <h2>Redigera Variation: {product.name} zzz</h2>
+      <h2>Redigera Variation: {product.name.se} zzz</h2>
 
        
       <div className="form-section">

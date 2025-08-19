@@ -58,7 +58,7 @@ const ProductItem = ({ product, onDelete }) => {
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h2 style={{ color: "#333", marginBottom: "10px" }}>
-          {product.name} - {product.status === "confirmed" 
+          {product.name.se ? product.name.se : product.name} - {product.status === "confirmed" 
             ? "Godkänd" 
             : product.status === "rejected" 
             ? "Avvisad" 

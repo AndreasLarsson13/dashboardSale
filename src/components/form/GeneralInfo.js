@@ -37,9 +37,10 @@ const deliveryTimeOptions = [
 ];
 
 // --- GeneralInfo Komponent ---
-const GeneralInfo = ({ product, setProduct }) => {
+const GeneralInfo = ({ product, setProduct, mode}) => {
   const [categoriesData, setCategoriesData] = useState([]);
-
+const [activeLanguage, setActiveLanguage] = useState('se'); // Standardflik är svenska
+console.log(mode)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -55,27 +56,20 @@ const GeneralInfo = ({ product, setProduct }) => {
   const [isGeneralInfoOpen, setIsGeneralInfoOpen] = useState(false);
   const [selectedCategoryPath, setSelectedCategoryPath] = useState([]);
 
-  const [categoryPaths, setCategoryPaths] = useState(() => {
-    const normalizePath = (path) => Array.isArray(path) ? path.filter(Boolean) : [];
-    let initialPaths = [];
+ const [categoryPaths, setCategoryPaths] = useState(() => {
+    // This is the incoming data from the backend.
+    // E.g., ['husochhem/ventilation/mekaniskventilation', 'husochhem/varmepumpar/luft-vatten']
+    console.log(product.categoryPaths)
 
-    if (Array.isArray(product.category) && product.category.length > 0) {
-      const convertNestedToFlatPath = (nestedCat) => {
-        const path = [];
-        let current = nestedCat;
-        while (current && current.slug) {
-          path.push(current.slug);
-          current = current.child && current.child.length > 0 ? current.child[0] : null;
-        }
-        return path;
-      };
-      initialPaths = product.category.map(cat => normalizePath(convertNestedToFlatPath(cat)));
+    // Check if the data exists and is not empty.
+    if (Array.isArray(product.categoryPaths) && product.categoryPaths.length > 0) {
+        // This line is the key. It maps over the array of strings and,
+        // for each string, it splits the string at every "/" character.
+        return product.categoryPaths.map(path => path.split("/"));
     }
-    if (initialPaths.length === 0) {
-      initialPaths.push([]);
-    }
-    return initialPaths;
-  });
+    // If there's no data, it returns a single empty array to start fresh.
+    return [[]];
+});
 
   const [brands, setBrands] = useState([]);
   const [currency, setCurrency] = useState(product.price?.currency || 'SEK');
@@ -282,6 +276,16 @@ const GeneralInfo = ({ product, setProduct }) => {
     const { name, value, type } = e.target;
 
     setProduct((prev) => {
+       if (name.includes('.')) {
+      const [mainKey, subKey] = name.split('.');
+      return {
+        ...prev,
+        [mainKey]: {
+          ...prev[mainKey],
+          [subKey]: value,
+        },
+      };
+    } 
       if (['price', 'sale_price', 'buying_price'].includes(name)) {
         return {
           ...prev,
@@ -323,6 +327,21 @@ const GeneralInfo = ({ product, setProduct }) => {
     }));
   }, []);
 
+
+const handleLanguageInputChange = useCallback((e, lang) => {
+      const { name, value } = e.target;
+      setProduct((prev) => {
+          // Ensure the name property is an object before spreading
+          const existingName = prev[name] && typeof prev[name] === 'object' ? prev[name] : {};
+          return {
+              ...prev,
+              [name]: {
+                  ...existingName,
+                  [lang]: value,
+              },
+          };
+      });
+  }, [setProduct]);
   const handleSpecialProductInfoChange = useCallback((e) => {
     handleSpecialProductDataChange('info', { se: e.target.value });
   }, [handleSpecialProductDataChange]);
@@ -432,7 +451,7 @@ const GeneralInfo = ({ product, setProduct }) => {
   const isFormCompleted =
     (categoryPaths.length > 0 && categoryPaths.some(path => path.length > 0 && path[0] !== '')) &&
     currency &&
-    product.name && product.name.trim() !== '' &&
+    product.name.se && product.name.se.trim() !== '' &&
     product.brand && product.brand.trim() !== '' &&
     product.price?.value !== undefined && Number.isFinite(product.price.value) && product.price.value >= 0 &&
     product.sale_price?.value !== undefined && Number.isFinite(product.sale_price.value) && product.sale_price.value >= 0 &&
@@ -475,8 +494,67 @@ const GeneralInfo = ({ product, setProduct }) => {
               backgroundColor: '#eaeaea',
             }}
           >
-            <LabeledInput label="Namn" name="name" value={product.name || ''} onChange={handleInputChange} required />
 
+
+            
+
+<div style={{ gridColumn: '1 / 4' }}>
+ {mode === 'edit' &&  <div style={{ display: 'flex', borderBottom: '1px solid #ccc', marginBottom: '10px' }}>
+    {['se', 'en', 'fi'].map(lang => (
+      <button
+        key={lang}
+        onClick={() => setActiveLanguage(lang)}
+        style={{
+          padding: '10px 15px',
+          border: 'none',
+          backgroundColor: activeLanguage === lang ? '#ddd' : 'transparent',
+          borderBottom: activeLanguage === lang ? '2px solid #007bff' : 'none',
+          cursor: 'pointer',
+          fontWeight: 'bold',
+          outline: 'none',
+          transition: 'background-color 0.2s'
+        }}
+      >
+        {lang.toUpperCase()}
+      </button>
+    ))}
+  </div>}
+
+  {/* Använd den nya hanteraren och skicka med rätt språkkod */}
+  {activeLanguage === 'se' && (
+    <LabeledInput
+      label="Namn (Svenska)"
+      name="name" // behåll namnet 'name'
+      value={product.name?.se || ''}
+      onChange={(e) => handleLanguageInputChange(e, 'se')}
+      required
+    />
+  )}
+
+  {activeLanguage === 'en' && mode === 'edit' && (
+    <LabeledInput
+      label="Namn (Engelska)"
+      name="name" // behåll namnet 'name'
+      value={product.name?.en || ''}
+      onChange={(e) => handleLanguageInputChange(e, 'en')}
+      required
+    />
+  )}
+
+  {activeLanguage === 'fi' && mode === 'edit' &&( 
+    <LabeledInput
+      label="Namn (Finska)"
+      name="name" // behåll namnet 'name'
+      value={product.name?.fi || ''}
+      onChange={(e) => handleLanguageInputChange(e, 'fi')}
+      required
+    />
+  )}
+</div>
+          {/*   <LabeledInput label="Namn" name="name" value={product.name.en || ''} onChange={handleInputChange} required />
+            <LabeledInput label="Namn" name="name" value={product.name.se || ''} onChange={handleInputChange} required />
+            <LabeledInput label="Namn" name="name" value={product.name.fi || ''} onChange={handleInputChange} required />
+ */}
             <LabeledSelect
               label="Original valuta på produkt"
               name="currency"

@@ -166,7 +166,7 @@ const VariationsDropdown = ({
     return await imageCompression(file, options);
   };
 
-  const handleImageUpload = async (variationId, file) => {
+  /* const handleImageUpload = async (variationId, file) => {
     try {
       const compressedFile = await compressImageToWebP(file);
       const productBrand = product?.brand || 'unknown_brand';
@@ -204,7 +204,7 @@ const VariationsDropdown = ({
       setUploadStatus((prev) => ({ ...prev, [variationId]: 'error' }));
       console.error('Error uploading image:', err);
     }
-  };
+  }; */
 
   const updateParentVariations = useCallback(
     (selectedVars, inputs) => {
@@ -343,7 +343,7 @@ const VariationsDropdown = ({
                     }}
                     onClick={() => handleVariationSelect(variation)} // Klicka för att avmarkera
                   >
-                    <span style={{ marginRight: 5 }}>{variation.name_parrent} / {variation.name}</span>
+                    <span style={{ marginRight: 5 }}>{variation.name_parrent} / {variation.name.se}</span>
                     <FaCheckCircle style={{ color: 'green', fontSize: 12 }} />
                   </div>
                 ))}
