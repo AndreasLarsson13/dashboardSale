@@ -10,7 +10,7 @@ const SelectableItemList = ({
   onItemsUpdate,
   onItemRemove = () => {},
   itemKeyExtractor = (item) => item._id,
-  itemDisplayLabelExtractor = (item) => item.name || item.title || 'Namnlös',
+  itemDisplayLabelExtractor = (item) => item.name.se || item.title || 'Namnlös',
   itemParentLabelExtractor = (item) => item.name_parrent,
   showBrandFilter = false,
   showCategoryFilter = false,
@@ -238,7 +238,7 @@ const SelectableItemList = ({
   const unselectedAndFilteredItems = availableItems.filter(item => 
     !selectedItems.some(sel => itemKeyExtractor(sel) === itemKeyExtractor(item))
   );
-
+console.log(unselectedAndFilteredItems)
   const areItemsValid = selectedItems.length > 0;
 
   return (
@@ -292,7 +292,8 @@ const SelectableItemList = ({
                   >
                     <span style={{ marginRight: 5 }}>
                         {itemParentLabelExtractor(item) && `${itemParentLabelExtractor(item)} / `}
-                        {itemDisplayLabelExtractor(item)}
+                       {/*  {itemDisplayLabelExtractor(item)} */}
+                              { item.name.se ? item.name.se : "Inget namn"}
                     </span>
                     <FaTimesCircle style={{ color: 'red', fontSize: 12 }} />
                   </div>
@@ -400,7 +401,9 @@ const SelectableItemList = ({
                 <div style={{ flexGrow: 1 }}>
                   <div>
                     {itemParentLabelExtractor(item) && `**${itemParentLabelExtractor(item)}** / `}
-                    {itemDisplayLabelExtractor(item)}
+                 {/*   {itemDisplayLabelExtractor(item)} */}
+                                      { item.name.se ? item.name.se : "Inget namn"}
+
                   </div>
                   <div style={{ fontSize: 12, color: '#666' }}>ID: {itemKeyExtractor(item)}</div>
                   {/* Rendar extra fält för o-valda objekt om funktionen är definierad */}
