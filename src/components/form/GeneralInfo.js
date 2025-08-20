@@ -617,7 +617,7 @@ const handleLanguageInputChange = useCallback((e, lang) => {
             />
 
             <div style={{ display: 'flex', gap: '10px' }}>
-              <label>Vill du dölja produkten? (Från text filtersidan):</label>
+              <label>Vill enbart säljas som ett tillbehör (inte enskild):</label>
               <input
                 type="checkbox"
                 name="hideProductFromView"

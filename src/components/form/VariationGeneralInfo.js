@@ -555,7 +555,7 @@ console.log(selectedCategoryPath)
               min="0"
             />
 
-            <div style={{ display: 'flex', gap: '10px' }}>
+           {/*  <div style={{ display: 'flex', gap: '10px' }}>
               <label>Vill du dölja produkten? (Från text filtersidan):</label>
               <input
                 type="checkbox"
@@ -564,7 +564,7 @@ console.log(selectedCategoryPath)
                 onChange={(e) => setProduct((prev) => ({ ...prev, hideProductFromView: e.target.checked }))}
                 style={{ width: '20px', height: '20px' }}
               />
-            </div>
+            </div> */}
 
             <LabeledInput
               label="Artikelnummer"
