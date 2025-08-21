@@ -81,7 +81,7 @@ const EditImages = ({ product, setProduct }) => {
     if (!newSingleImage || !newSingleImage.file) return;
 
     // Ensure product.brand and product.name exist for path construction
-    if (!product.brand || !product.name) {
+    if (!product.brand || !product.name.se) {
       console.error('Error: Product brand or name is missing. Cannot upload image.');
       // Optionally, provide user feedback here
       return;
@@ -132,7 +132,7 @@ const EditImages = ({ product, setProduct }) => {
         const { file } = newGalleryImages[i];
         // Ensure a unique path for each new image
         const uniqueFileName = `${Date.now()}-${file.name.se.replace(/[^a-zA-Z0-9.]/g, '')}`; // Simple unique name
-        const storageRef = ref(storage, `images/${product.brand}/${product.name}/gallery/${uniqueFileName}`);
+        const storageRef = ref(storage, `images/${product.brand}/${product.name.se}/gallery/${uniqueFileName}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
         await new Promise((resolve, reject) => {
