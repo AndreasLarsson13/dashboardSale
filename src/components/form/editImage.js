@@ -91,7 +91,7 @@ const EditImages = ({ product, setProduct }) => {
       const { file } = newSingleImage;
       console.log(product.image)
       // Construct a new, unique path if no old path exists, or use the old one to overwrite
-      let filePath = product.image?.original || `images/${product.brand}/${product.name}/main_imagez`; // Fallback path
+      let filePath = product.image?.original || `images/${product.brand}/${product.name.se}/main_imagez`; // Fallback path
       const storageRef = ref(storage, filePath);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -131,7 +131,7 @@ const EditImages = ({ product, setProduct }) => {
       for (let i = 0; i < newGalleryImages.length; i++) {
         const { file } = newGalleryImages[i];
         // Ensure a unique path for each new image
-        const uniqueFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`; // Simple unique name
+        const uniqueFileName = `${Date.now()}-${file.name.se.replace(/[^a-zA-Z0-9.]/g, '')}`; // Simple unique name
         const storageRef = ref(storage, `images/${product.brand}/${product.name}/gallery/${uniqueFileName}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 

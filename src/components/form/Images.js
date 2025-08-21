@@ -70,7 +70,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
 
       const storageRef = ref(
         storage,
-        `images/${product.brand}/${product.name}/${file.name}`
+        `images/${product.brand}/${product.name.se}/${file.name}`
       );
 
       const uploadTask = uploadBytesResumable(storageRef, file);
@@ -110,7 +110,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
 
         const storageRef = ref(
           storage,
-          `images/${product.brand}/${product.name}/gallery/${file.name}`
+          `images/${product.brand}/${product.name.se}/gallery/${file.name}`
         );
 
         const uploadTask = uploadBytesResumable(storageRef, file);
