@@ -124,14 +124,14 @@ const EditImages = ({ product, setProduct }) => {
       console.error('Error: Product brand or name is missing. Cannot upload gallery images.');
       return;
     }
-
+console.log(product)
     try {
       const updatedGallery = [...product.gallery]; // Create a mutable copy of the current gallery
 
       for (let i = 0; i < newGalleryImages.length; i++) {
         const { file } = newGalleryImages[i];
         // Ensure a unique path for each new image
-        const uniqueFileName = `${Date.now()}-${file.name.se.replace(/[^a-zA-Z0-9.]/g, '')}`; // Simple unique name
+        const uniqueFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`; // Simple unique name
         const storageRef = ref(storage, `images/${product.brand}/${product.name.se}/gallery/${uniqueFileName}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
