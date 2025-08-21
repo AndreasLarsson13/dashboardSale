@@ -120,7 +120,7 @@ const EditImages = ({ product, setProduct }) => {
   const handleAddNewGalleryImages = async () => {
     if (newGalleryImages.length === 0) return;
 
-    if (!product.brand || !product.name) {
+    if (!product.brand || !product.name.se) {
       console.error('Error: Product brand or name is missing. Cannot upload gallery images.');
       return;
     }
