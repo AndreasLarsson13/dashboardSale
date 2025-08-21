@@ -11,7 +11,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
   const [isSectionOpen, setIsSectionOpen] = useState(false);
 
   const handleSingleFileSelection = (e) => {
-    if (!product.name || !product.brand) {
+    if (!product.name.se || !product.brand) {
       setWarning('Please fill in the product name and brand before selecting images.');
       return;
     }
@@ -26,7 +26,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
   };
 
   const handleGalleryFileSelection = (e) => {
-    if (!product.name || !product.brand) {
+    if (!product.name.se || !product.brand) {
       setWarning('Please fill in the product name and brand before selecting images.');
       return;
     }
@@ -172,7 +172,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
                 type="file"
                 accept="image/*"
                 onChange={handleSingleFileSelection}
-                disabled={!product.name || !product.brand}
+                disabled={!product.name.se || !product.brand}
                 style={{ marginBottom: '10px' }}
               />
               {singleImagePreview && (
@@ -218,7 +218,7 @@ const Images = ({ product, setProduct, onSingleImageUpload, onGalleryImageAdd })
                 accept="image/*"
                 multiple
                 onChange={handleGalleryFileSelection}
-                disabled={!product.name || !product.brand}
+                disabled={!product.name.se || !product.brand}
               />
               {galleryImagePreviews.length > 0 && (
                 <div>
