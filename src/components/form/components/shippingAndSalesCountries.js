@@ -57,7 +57,7 @@ const ShippingAndSalesCountries = ({
                     <LabeledInput
                       label="Fraktkostnad"
                       name={`shippingCost-${countryCode}-${deliveryType}`}
-                      value={sellInCountries[countryCode][deliveryType]?.shippingCost ?? ''}
+value={sellInCountries[countryCode][deliveryType]?.shippingCost || 0}
                       onChange={(e) => handleShippingCostChange(e, countryCode, deliveryType)}
                       type="number"
                       min="0"

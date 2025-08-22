@@ -1,272 +1,111 @@
-import React, { useState } from 'react';
+// src/pages/AddProductPage.jsx
+import React, { useState, useMemo } from 'react'; // Added useMemo
 import { getAuth } from 'firebase/auth';
-import { storage } from '../components/form/firebaseConfig';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { styles } from '../components/form/styleCart';
-
-import VariationGeneralInfo from '../components/form/VariationGeneralInfo';
-import Description from '../components/form/Description';
-import Meta from '../components/form/Meta';
-import VariationImages from '../components/form/VariationImages';
+import axios from 'axios';
 import VariationGroup from '../components/form/components/variationGroup';
 
+import ProductForm from '../components/form/ProductForm';
 
+const AddProductPage = () => {
+    const [accessory, setAccessory] = useState({
+     
+      color: false,
+      meta: false,
+      type: '',
+     
+    });
+    
+  const auth = getAuth();
+  const user = auth.currentUser;
 
-const colorOptions = [
-  { sv: 'Röd', en: 'red' },
-  { sv: 'Blå', en: 'blue' },
-  { sv: 'Grön', en: 'green' },
-  { sv: 'Gul', en: 'yellow' },
-  { sv: 'Svart', en: 'black' },
-  { sv: 'Vit', en: 'white' },
-  { sv: 'Orange', en: 'orange' },
-  { sv: 'Lila', en: 'purple' },
-  { sv: 'Brun', en: 'brown' },
-  { sv: 'Grå', en: 'gray' },
-];
-
-const AddAccessoryPage = () => {
-  const [accessory, setAccessory] = useState({
-   
-    color: false,
-    meta: false,
-    type: '',
-   
-  });
-
-
-
-
-const [product, setProduct] = useState({
-    name: '',
-    sku: '',
-    price: {},
-    supplierArticleNumber: '',
-      buying_price: {},
-      sale_price: {},
-    quantity: 0,
-    description: { se: '' },
-    specialProductData: false,
-    meta: [],
-    image: { thumbnail: '', original: '' },
-    brand: '',
-    featured: false,
-    weightPack: 0,
-    widthPack: 0,
-    heightPack: 0,
-    lengthPack: 0,
-    vat: 0.255,
-    produktvariation: true,
+  const defaultProductStructure = useMemo(() => ({
+     name: {
+        se: '',
+        en: '',
+        fi: ''
+    }, sku: '', supplierArticleNumber: '', commoditycode: '',
+    price: { value: 0, currency: 'SEK', dateChanged: '' },
+    buying_price: { value: 0, currency: 'SEK', dateChanged: '' },
+    sale_price: { value: 0, currency: 'SEK', dateChanged: '' },
+    quantity: 0, description: { se: '' },
+    /* variations: [], options: [], */ meta: [],
+    image: { thumbnail: '', original: '' }, gallery: [],
+    brand: '', featured: false, category: [], categoryPaths: [],
+    productCountryOfOrigin: 'AX',
+    packaging: { weightPack: 0, lengthPack: 0, widthPack: 0, heightPack: 0, enable: false },
+    vat: { "SV" : 0.25, "AX" : 0.255, "FI" : 0.255 },
+     produktvariation: true,
     variationGroup: {
       se: accessory.type},
     colorAndOtherVariationData: {"color": accessory.color, "meta": accessory.meta},
     createdDate: new Date().toISOString(),
-     isProductOption: false,
-    name_parrent: ""
-      
+    isProductOption: false, relatedProducts: [],
+    createdDate: new Date().toISOString(), priceUpdateDate: new Date().toISOString(),
+    searchKeywords: [], compadibleWithProduct: [], shippingCosts: { },
+    currency: "", hideProductFromView: false, shippingCurrency: 'EUR', campaigns: [],
+      name_parrent: ""
+  }), []);
 
-  });
-
-
-
-
- const [isSingleImageUploaded, setIsSingleImageUploaded] = useState(false);
-
-  const handleSingleImageUpload = (image) => {
-    setProduct((prev) => ({
-      ...prev,
-      image,
-    }));
-    setIsSingleImageUploaded(true);
-  };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [product, setProduct] = useState(defaultProductStructure);
   const [message, setMessage] = useState('');
-  const [uploadStatus, setUploadStatus] = useState('');
-
 const handleInputChange = (e) => {
   const { name, value } = e.target;
 
-  setAccessory((prev) => ({
+  setProduct((prev) => ({
     ...prev,
-    [name]: value,
+    colorAndOtherVariationData: {
+      ...prev.colorAndOtherVariationData,
+      [name]: value,
+    },
+    variationGroup: {
+      ...prev.variationGroup,
+      se: name === "type" ? value : prev.variationGroup.se,
+    }
   }));
 };
 
-console.log(accessory)
 
-
-  /* const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploadStatus('Uploading...');
-    try {
-      const accessorySlug = accessory.namn.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      
-      const storageRef = ref(storage, `tillbehor/${accessorySlug}/${accessorySlug}.webp`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      await new Promise((resolve, reject) => {
-        uploadTask.on('state_changed', null, reject, resolve);
-      });
-      const imageUrl = await getDownloadURL(storageRef);
-      setAccessory((prevAccessory) => ({
-        ...prevAccessory,
-        img: { url: imageUrl },
-        value: true,
-      }));
-      setUploadStatus('Upload successful.');
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      setUploadStatus('Failed to upload image.');
-    }
-  }; */
-
-  /* const handleSubmit = async (e) => {
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
-    const auth = getAuth();
-    const user = auth.currentUser;
+    if (!user) { alert('User is not logged in'); return; }
+    const productToSubmit = { ...product, uid: user.uid, email: user.email };
+    if (!productToSubmit.name || !productToSubmit.brand) { alert('Please fill in the name and brand before submitting.'); return; }
 
-    const accessoryToSubmit = { ...accessory };
-    delete accessoryToSubmit.type;
-    if (accessory.type !== 'image') {
-      delete accessoryToSubmit.img;
-    }
-    if (accessory.type !== 'color') {
-      delete accessoryToSubmit.meta;
-    }
-    delete accessoryToSubmit.color;
-
-    accessoryToSubmit.uid = user.uid;
-    accessoryToSubmit.email = user.email;
-
-"companyName": "Hus & Fritidscenter Åland AB",
-"uid": "4Q9eLR64gsbB76TvJCCOJxFp7783",
-  "email": "info@hfc.ax",
-
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('https://serverkundportal-dot-natbutiken.lm.r.appspot.com/addOptions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(accessoryToSubmit),
-      });
-      if (response.ok) {
-        setMessage('Accessory added successfully!');
-        setAccessory({
-          value: '',
-          img: { url: '' },
-          attribute: { name: '', slug: '' },
-          price: 0,
-          color: '',
-          meta: '',
-          type: '',
-          namn: ''
-        });
-      } else {
-        setMessage('Failed to add accessory.');
-      }
-    } catch (error) {
-      console.error('Error adding accessory:', error);
-      setMessage('Error adding accessory.');
-    }
-    setIsSubmitting(false);
-  }; */
-
-  const handleSubmitDetailed = async (e) => {
-
-      const auth = getAuth();
-        const user = auth.currentUser;
-    e.preventDefault();
-
-const updatedProduct = {
-    ...product,
-    variationGroup:{se: accessory.type},
-    colorAndOtherVariationData: {
-      color: accessory.color,
-      meta: accessory.meta,
-    },
-    uid: user.uid, 
-    email: user.email
-  };
-
-
-   /*  if (!user) {
-      alert('User is not logged in');
-      return;
-    } */
-
- /*    product.uid = user.uid;
-    product.email = user.email; */
-
-    if (!product.name || !product.brand) {
-      alert('Please fill in the name and brand before submitting.');
-      return;
-    }
- 
+    // Kolla om sku eller supplierArticleNumber saknas
+if (!productToSubmit.sku || !productToSubmit.supplierArticleNumber) {
+  const proceed = window.confirm('Du har inte fyllt i SKU eller leverantörens artikelnummer. Vill du skicka in produkten ändå?');
+  if (!proceed) return;
+}
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/UnderReviewVariation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedProduct), // Submit product data including countries and related products
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productToSubmit),
       });
       if (response.ok) {
-        alert('Produkten las till utan problem, väntar på granskning!');
+        alert('Produkten lades till utan problem!');
+        setProduct(defaultProductStructure);
       } else {
-        console.error('Failed to add product:', await response.text());
+        const errorText = await response.text(); console.error('Failed to add product:', errorText);
+        alert(`Kunde inte lägga till produkten. Fel: ${response.status} ${errorText || 'Okänt fel'}`);
       }
-    } catch (error) {
-      console.error('Error adding product:', error);
-    }
+    } catch (error) { console.error('Error adding product:', error); alert('Error adding product.'); }
   };
 
+  if (!user) { return <div>Please log in to add products.</div>; }
+
   return (
-    <div>
-      <h2>Lägg till variation</h2>
-      {message && <p>{message}</p>}
-     
-        <VariationGroup
+    <>   <VariationGroup
   accessory={accessory}
   onChange={handleInputChange}
   message={message}
 />
-       
-        {accessory.type === 'details' && (
-            <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-              
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <label htmlFor="attributeName">Gruppnamn:</label>
-                <input
-                  type="text"
-                  name="attributeName"
-                  id="attributeName"
-                  value={accessory.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-          )}
-   
-      <form onSubmit={handleSubmitDetailed} className='form'>
-     
-          <VariationGeneralInfo product={product} setProduct={setProduct} accessory={accessory} />
-          <Description product={product} setProduct={setProduct} />
-          <VariationImages
-            product={product}
-            setProduct={setProduct}
-            onSingleImageUpload={handleSingleImageUpload}
-            
-          />
-        
-          <Meta product={product} setProduct={setProduct} />
-        
-          <button type="submit">Lägg till Variation Detalj</button>
-        </form>
-    </div>
+    <ProductForm
+      product={product}
+      setProduct={setProduct}
+      onSubmit={handleSubmitAdd}
+      isEditing={false}
+      mode = 'variation'
+    /></>
   );
 };
 
-export default AddAccessoryPage;
+export default AddProductPage;

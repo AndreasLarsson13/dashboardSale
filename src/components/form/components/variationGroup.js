@@ -20,7 +20,7 @@ const VariationSelector = ({ accessory, onChange, message }) => {
       <div style={{ display: 'flex', gap: '80px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ display: 'flex', gap: '40px', justifyContent: 'space-between' }}>
-            <label htmlFor="type">Välj tillbehör (Grupspnamn för kunden):</label>
+            <label htmlFor="type">Välj tillbehör (Gruppnamn för kunden):</label>
             <select
               name="type"
               id="type"

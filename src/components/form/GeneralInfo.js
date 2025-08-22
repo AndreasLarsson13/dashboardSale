@@ -449,6 +449,8 @@ const handleLanguageInputChange = useCallback((e, lang) => {
   }, []);
 
   const isFormCompleted =
+      (mode !== 'variation' || (mode === 'variation' && product?.name_parrent && product.name_parrent.trim() !== '')) &&
+
     (categoryPaths.length > 0 && categoryPaths.some(path => path.length > 0 && path[0] !== '')) &&
     currency &&
     product.name.se && product.name.se.trim() !== '' &&
@@ -555,6 +557,16 @@ const handleLanguageInputChange = useCallback((e, lang) => {
             <LabeledInput label="Namn" name="name" value={product.name.se || ''} onChange={handleInputChange} required />
             <LabeledInput label="Namn" name="name" value={product.name.fi || ''} onChange={handleInputChange} required />
  */}
+
+  {mode === 'variation' && (
+                <LabeledInput
+                    label="Huvudproduktens namn"
+                    name="name_parrent"
+                    value={product?.name_parrent || ''}
+                    onChange={handleInputChange}
+                    required={mode === 'variation'}
+                />
+            )}
             <LabeledSelect
               label="Original valuta på produkt"
               name="currency"
@@ -617,7 +629,7 @@ const handleLanguageInputChange = useCallback((e, lang) => {
             />
 
             <div style={{ display: 'flex', gap: '10px' }}>
-              <label>Vill enbart säljas som ett tillbehör (inte enskild):</label>
+              <label>Vill enbart säljas som ett tillbehör (inte):</label>
               <input
                 type="checkbox"
                 name="hideProductFromView"

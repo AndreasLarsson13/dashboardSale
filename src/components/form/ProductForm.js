@@ -233,7 +233,7 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
   return (
     <form onSubmit={onSubmit} className="form-container">
       {/* <--- Here's the change for the header ---> */}
-      <h2>{isEditing ? `Redigera Produkt: ${product.name.se}` : 'Lägg till ny produkt'}</h2>
+      <h2>{isEditing ? `Redigera Produkt: ${product.name.se}` : `Lägg till ny ${mode === "variation" ? 'variation' : 'produkt'}`}</h2>
 
       <GeneralInfo product={product} setProduct={setProduct} mode={mode} />
       <Description
@@ -246,7 +246,7 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
       <EditImages product={product} setProduct={setProduct} />
 
       {/* SelectableItemList for Variations */}
-      <SelectableItemList
+      {mode !== "variation" && <SelectableItemList
         headerText="Produktvariationer"
         fetchDataFunction={(filters, userData, signal) => fetchItemsData(filters, userData, signal, 'variation')}
         initialSelectedItems={product.variations || []}
@@ -263,10 +263,10 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
         itemParentLabelExtractor={(item) => item.name_parrent}
 /*         renderAdditionalFields={renderVariationsFields}
  */        onImageLinkAdd={handleImageLinkAdd}
-      />
+      />}
 
       {/* SelectableItemList for Options */}
-      <SelectableItemList
+      {mode !== "variation" && <SelectableItemList
         headerText="Tillbehör"
         fetchDataFunction={(filters, userData, signal) => fetchItemsData(filters, userData, signal, 'options')}
         initialSelectedItems={product.options || []}
@@ -281,12 +281,12 @@ const ProductForm = ({ product, setProduct, onSubmit, isEditing, mode }) => { //
         itemDisplayLabelExtractor={(item) => item.name || item.title}
         itemParentLabelExtractor={(item) => null}
 /*         renderAdditionalFields={renderOptionsFields}
- */      />
+ */      />}
 
       <Meta product={product} setProduct={setProduct} mode={mode} />
 
       <button type="submit" className="submit-button">
-        {isEditing ? 'Uppdatera Produkt' : 'Lägg till Produkt'} {/* <--- Update button text */}
+        {isEditing ? 'Uppdatera Produkt' : `Lägg till ${mode === "variation" ? 'variation' : 'produkt'}`} {/* <--- Update button text */}
       </button>
     </form>
   );
